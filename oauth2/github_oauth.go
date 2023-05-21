@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 )
 
 func githubLogin() {
@@ -14,9 +15,9 @@ func githubLogin() {
 	// We will be using httpclient to make external HTTTP requests later in our code
 	httpclient := http.Client{}
 
-	const (
-		clientID     = "09f284058a21a54ac468"
-		clientSecret = "ef23cf7f2371e32436ba6247d0191eb31592e8c1"
+	var (
+		clientID     = os.Getenv("GITHUB_CLIENT_ID")
+		clientSecret = os.Getenv("GITHUB_SECRET")
 	)
 
 	// Adding a Redirect Route
@@ -62,4 +63,8 @@ func githubLogin() {
 	})
 
 	http.ListenAndServe(":8080", nil)
+}
+
+type oauthAccessResponse struct {
+	AccessToken string `json:"access_token"`
 }
