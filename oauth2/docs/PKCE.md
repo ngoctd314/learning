@@ -10,7 +10,7 @@ In this attack, the attacker intercepts the authorization code returned from the
 
 Once the attacker has gained access to the authorization code, it can use it to obtain the access token.
 
-[malicious](../assets/malicious.png)
+<div style="text-align:center"><img src="../assets/malicious.png" /></div>
 
 In step (1), the native application running on the end device, such as smartphone, issues an OAuth 2.0 Authorization Request via the browser/operating system. Step (1) happens through a secure API that cannot be intercepted, though it may potentially be observed in advanced attack scenarios. The request then gets forward to the OAuth 2.0 authorization server in step (2). Because OAuth requires the use of TLS, this communication is protected by TLS and cannot be intercepted. The authorization server returns the authorization code in step (3). In step (4), the Authorization Code is returned to the requester via the Redirect Endpoint URI that was provided in the step(1).
 
@@ -20,7 +20,7 @@ To mitigate this attack, this extension utilizes a dynamically created cryptogra
 
 ### 1.1. Protocol Flow
 
-[](../assets/pkce1.png)
+<div style="text-align:center"><img src="../assets/pkce1.png" /></div>
 
 A. The client creates and records a secret named the "code_verifier" and derives a transformed version "t(code_verifier)" (referred to as the "code_challenge"), which is sent in the OAuth 2.0 Authorization Request along with the transformation method "t_m".
 B. The Authorization Endpoint responds as usual but records "t(code_verifier)" and then transformation method.
@@ -73,12 +73,6 @@ code_challenge_method
 When the server issues the authorization code in the authorization response, it MUST associate the "code_challenge" and "code_challenge_method" values with the authorization code so it can be verified later.
 
 Typically the "code_challenge" and "code_challenge_method" values are stored in encrypted form in the "code" itself but could alternatively be store on the server associated with the code. The server MUST NOT include the "code_challenge" value in client requests in a form that other entities can extract. 
-
-code_code_challenge_code_challenge_method
-xyz
-123_asdf41_sha
-
-=> 123_asdf41_sha, xyz: sha(xyz) = adsf41 => matched
 
 #### 4.4.1. Error Response
 
