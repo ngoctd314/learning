@@ -41,8 +41,13 @@ func pubSub() {
 	// or block until one is available. An error is returned if the subscription is invalid (ErrBadSubscription)
 	// the connection is closed (ErrConnectionClosed), the timeout is reached (ErrTimeout),
 	// or if there were no responders (ErrNoResponders) when used in the context of a request/reply.
-	msg, _ := sub.NextMsg(time.Second)
-	if msg != nil {
-		log.Println("receive msg", string(msg.Data))
+	for {
+		msg, err := sub.NextMsg(time.Second * 5)
+		if err != nil {
+			log.Println("sub error", err)
+		}
+		if msg != nil {
+			log.Println("receive msg", string(msg.Data))
+		}
 	}
 }
