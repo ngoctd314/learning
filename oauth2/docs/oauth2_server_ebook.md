@@ -154,3 +154,129 @@ https://example-app.com/cb?code=YasdferNDfew&state=5ca75bd30
 ### User Experience Considerations
 
 ## Single-Page Apps
+
+Single-page apps ruun entirely in the browser after loading the JS and HTMl source code from a web page. Since the entire source is available to the browser, they cannot maintain the confidentiality of a client secret, so a secret is not used for these apps. Because they can't use a client secret, the best option is to use the PKCE extension to protect the authorization code in the redirect. This is similar to the solution for mobile apps which also can't use a client secret.
+
+**Deprecation Notice**
+
+A common historical pattern for single-page apps was to use the Implicit flow to receive an access token in the redirect without the intermediate authorization code exchange step. This has a number of security issues and should no longer be used.
+
+### Implicit Flow
+
+Some services use the alternative Implicit Flow for single-page apps, rather than allow the app to use the Authorization Code flow with no secret.
+
+The Implicit Flow bypasses the code exchange step, and instead the access token is returned in the query string fragement to the client immediately.
+
+In order for a single-page up to  use the Authorization Code flow, is must be able to make a POST request to the authorization server. This means if the authorization server is on a different domain, the server will need to support the appropriate CORS headers. It supporting CORS headers is not an option, then the service may use the Implicit Flow instead.
+
+In any case, with both the Implicit Flow as well as the Authorization Code Flow with no secret, the server must require registration of the redirect URL in order to maintain the security of the flow.
+
+### Security Considerations
+
+The only way the authorization code grant with no client secret can be secure is by using the "state" parameter and restricting the redirect URL to trusted clients. Since the secret is not used, there is no way to verify the identity of the client other than by using a registered redirect URL. This is why you need to pre-register your redirect URL with the OAuth 2.0 service.
+
+### Implicit Flow for Single-Page Apps
+
+### Security Considerations for Single-Page Apps
+
+**Refresh Tokens**
+
+If the authorization server wishes to allow JavaScript apps to use refresh tokens, then they must also follow the best practices. Specially, refresh tokens must be valid for only one use, and the authorization server must issue a new refresh token each time a new access token is issued in response to a refresh token grant. This provides the authorization server a way to detect if a refresh token has been copied and used by an attacker
+
+**Storing Tokens**
+
+There are currently no general-purpose secure storage mechanism in browsers.
+
+Generally, the browser's LocalStorage API is the best place to store this data as it provides the easiest API to store and retrieve data and is about as secure as you can get in a browser. The downside is that any scripts on the page, even from different domains such as your analytics or ad network, will be able to access the LocalStorage. This means anything you store in LocalStorage is potentially visible to thirf-party scripts on your page.
+
+## Mobile and Native apps
+
+Like single-page apps, mobiles apps also cannot maintain the confidentially of a client secret. Mobile app must also use an OAuth flow that does not require a client secret. The current best practice is to use the Authorization Flow with PKCE.
+
+## Making Authenticated Requests
+
+Regardless of which grant type you used or whether you used a client secret, you now have an OAuth 2.0 Bearer Token you can use with the API.
+
+The access token is sent to the service in the HTTP Authorization header prefixed by the text Bearer.
+
+```txt
+POST /resource/1/update HTTP/1.1
+Authorization: Bearer RsT5OjbzRn430zqMLgV3Ia
+```
+
+Your app only use it to make API requests.
+
+Server makes no guarantees that access tokens will always continue to be in the same format. It's entirely possible that the next time you get an access token from the service, it will be in a different format. Access tokens are opaque to the client, and should only be used to make API requests and not interpreted themselves.
+
+## Refresh Tokens 
+
+## Registering a New Application
+
+When a developer comes to your website, they will need a way to create a new application and obtain credentials.
+
+### The Client ID and Secret
+
+The client_id is a public identifier for apps. If the clientID is guessable, it makes slightly easier to craft phishing attacks against arbitrary applications.
+
+If the developer is creating a "public" app (a mobile or single-page app), then you should not issue a client_secret to the app at all. If it doesn't exist, it can't be leaked.
+
+The client_secret is a secret known only to the application and the authorization server. It is essential the application's own password. It must be sufficiently random to not be guessable.
+
+### Storing and Displaying the client ID and secret
+
+client_id and client_secret equivalent to a username and password.
+
+### Deleting Applications and Revoking Secrets
+
+## Authorization
+
+### The Authorization Request
+
+### Requiring User Login
+
+### The Authorization Interface
+
+### The Authorization Response
+
+Once the user has finished logging in and approving the request, the authorization server is ready to redirect the user back to the application. 
+
+### Security Considerations
+
+**1. Phishing Attacks**
+
+**2. Clickjacking**
+
+In a clickjacking attack, the attacker creates a malicious website in which it loads the authorization server URL in a transparent iframe above the attacker's web page. The attacker's web page is stacked below the iframe, and has some innocuous-looking buttons or links, placed very carefully to be directly under the authorization server's confirmation button. When the user clicks the misleading visible button, they are actually clicking the invisible button on the authorization page, there by granting access to the attacker's application. This allows the attacker to trick the user into granting access without their knowledge.
+
+**3. Redirect URL Manipulation**
+
+An attacker can construct an authorization URL using a client ID that belongs to a known good application, but set the redirect URL to a URL under the control of the attacker. If the authorization server does not validate redirect URLs, and the attacker uses the token response type, the user will be returned to the attacker's application with the access token in the URL. If the client is a public client, and the attacker intercepts the authorization code, then the attacker can also exchange the code for an access token.
+
+## Scope
+
+Scope is a way to limit an app's access to a user's data. A way to request a more limited scope of what they are allowed to do on behalf of a user. Scope is a way to control access and help the user identify the permissions they are granting to the application.
+
+### Defining Scopes
+
+The challenge when defining scopes for you service is to not get carried away with defining too many scopes. Users need to be able to understand what level of access they are granting to the application.
+
+**Read vs. Write**
+
+Read access to a user's private profile information is treated with separate access control from apps wanting to update the profile information.
+
+## Redirect URLs
+
+Redirect URLs are a critical part of the OAuth flow. Because the redirect URL will contain sensitive information, it is critical that the service doesn't redirect the user to arbitrary locations.
+
+### Redirect URL Registration
+### Redirect URLs for Native Apps
+
+### Redirect URL Validation
+
+## Access Token
+
+Access tokens are the thing that applications use to make API requests on behalf of a user.
+
+With client, the access token is an opaque string, and it will take whatever the string is and use it in HTTP request. The resource server will need to understand what the access token means and how to validate it.
+
+### Authorization Code Request
