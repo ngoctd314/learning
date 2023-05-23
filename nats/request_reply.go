@@ -28,7 +28,7 @@ func requestReply() {
 	sub, _ := nc.Subscribe("greet.*", func(msg *nats.Msg) {
 		name := msg.Subject[6:]
 		// Respond allows a convenient way to respond to requests in service based subscriptions.
-		fmt.Println("receive", string(msg.Data))
+		fmt.Println("receive", string(msg.Data), msg.Reply, msg)
 		msg.Respond([]byte("hello, " + name))
 	})
 
@@ -37,10 +37,10 @@ func requestReply() {
 	// we need to specify a timeout since with a request we are waiting for the reply
 	// and we likely don't want to wait forever.
 	req, _ := nc.Request("greet.joe", []byte("i am joe"), time.Second)
-	fmt.Println(string(req.Data))
+	fmt.Println(string(req.Data), req.Subject)
 
 	req, _ = nc.Request("greet.bob", nil, time.Second)
-	fmt.Println(string(req.Data))
+	fmt.Println(string(req.Data), req.Reply)
 
 	sub.Unsubscribe()
 

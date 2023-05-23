@@ -63,7 +63,7 @@ The increased complexity of modern systems necessitates features like location t
 
 ## Queue Groups 
 
-When subscribers register themselves to receive messages from a publisher, the 1:N fan-out pattern of messaging ensures that any message sent by a publisher, reaches all subscribers that have registered. NATS provides an additional feature named "queue", which allows subscribers to register themeselves as part of a queue. Subscribers that are part of a queue, from the "queue group"
+When subscribers register themselves to receive messages from a publisher, the 1:N fan-out pattern of messaging ensures that any message sent by a publisher, reaches all subscribers that have registered. NATS provides an additional feature named "queue", which allows subscribers to register themeselves as part of a queue. Subscribers that are part of a queue, form the "queue group"
 
 ### How queue groups function
 
