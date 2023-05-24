@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"fmt"
 )
 
 type gender int8
@@ -58,23 +58,6 @@ func withPersonFilterByLocation(location int) filterPersonFunc {
 }
 
 func main() {
-	people := []person{
-		{
-			age:      23,
-			name:     "NgocTD",
-			location: 18,
-			gender:   MALE,
-		},
-		{
-			age:      18,
-			name:     "Her",
-			location: 18,
-			gender:   FEMALE,
-		},
-	}
-
-	log.Println(filterPeople(people, withPersonFilterByEqualAge(18)))
-	log.Println(filterPeople(people, withPersonFilterByGreaterThanAge(18)))
-	log.Println(filterPeople(people, withPersonFilterByLocation(18)))
-	log.Println(filterPeople(people, withPersonFilterByEqualAge(18), withPersonFilterByLocation(18)))
+	aString := "Ngoctd"
+	fmt.Sprintf("%p", &aString)
 }
