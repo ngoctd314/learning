@@ -280,3 +280,5 @@ Access tokens are the thing that applications use to make API requests on behalf
 With client, the access token is an opaque string, and it will take whatever the string is and use it in HTTP request. The resource server will need to understand what the access token means and how to validate it.
 
 ### Authorization Code Request
+
+## Token Introspection Endpoint
