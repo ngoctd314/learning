@@ -282,3 +282,79 @@ With client, the access token is an opaque string, and it will take whatever the
 ### Authorization Code Request
 
 ## Token Introspection Endpoint
+
+## 13. Listing Authorizations
+
+Once uses have begun to authorize multiple applications, giving many apps acces to their account, it becomes necessary to provide a way to allow the user to manage the apps that have access. 
+
+## 14. The Resource Server
+
+The resource server is the OAuth 2.0 term for your API server. The resource server handles authenticated requested after the application has obtained an access token.
+Large scale developments may have more than one resource server. Each of these resource servers are distinctly separate but they all share the same authorization server.
+
+**1. Verifying Access Tokens**
+
+The resource server will be getting requests from applications with an HTTP Authorization header containing an access token. The resource server needs to verify the access token. If your tokens are stored in a database, then verifying the token is simply a database lookup on the token table.
+
+Another option is to use the Token Introspection spec to build an API to verify access tokens (use can encapsulate all of the logic of access tokens in a single server, exposing the information via an API to other parts of the system). The token instropection endpoint is intended to be used only internally, so you will want to protect it with some internal authorization, or only enable it on a server with the firewall of the system.
+
+**2. Verify Scope**
+
+The resource server needs to know the list of scopes that are associated with the access token.
+
+**3. Expired Tokens**
+
+If your service uses short-lived access tokens with long-lived refresh tokens, then you'll need to make sure to return the proper error response when an application makes a request with an expired token.
+
+```json
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Bearer error="invalid_token"
+                  error_description="The access token expired"
+
+Content-type: application/json
+
+{
+    "error": "invalid_token",
+    "error_description": "The access token expired"
+}
+```
+
+**4. OAuth for Native Apps**
+
+Browser-based apps, native apps can't use a client secret, as that would require that the developer ship the secret in their binary distribution of the application. It has been proven to be relatively easy to decompile and extract the secret. As such, native apps must use and OAuth flow that does not require a preregistered client secret.
+
+The current industry best practice is to use the Authorization Flow along with the PKCE extension, omitting the client secret from the request, and to use an external user agent to complete the flow.
+
+## 22. OpenID Connect
+
+The OAuth 2.0 framework explicitly does not provide and information about the user that has authorized an application. OAuth 2.0 is delegation framework, allowing third-party applications to act on behalf of a user, without the application needing to know the identify of the user.
+
+OIDC takes the OAuth 2.0 framework and adds an identity layer on top. It provides information about the user, as well as anables clients to establish login sessions. While this chater is not meant to be a complete guide to OpenID Connect.
+
+**1. Authorization vs Authentication**
+
+OAuth 2.0 is called an authorization "framework" rather than a "protocol".  OAuth 2.0 does not provide a mechanism to say who a user is or how they authenticated, it just says that a user delegated and application to act on their behalf. The OAuth 2.0 framework provides this delegation in the form of the user.
+
+When you check in to a hotel, you get a key card which you can use to enter your assigned room. You can think of the key card as an access token. The key card says nothing about who you are or how you were authenticated at the front desk, but you can use th card to access your hottel room for the duration of your stay.
+
+**2. Building an Authentication Framework**
+
+It is quite possible to use the OAuth 2.0 framework as the basic for building an authentication and identity protocol.
+
+To use OAuth 2.0 as the basis of an authenticatino protocol, you will need to do at least a few things.
+
+- Define an endpoint to return attributes about a user
+
+```sh
+GET /api/v1/me
+```
+
+- Define one or more scopes that the third-party applications can use to request identity information from the user
+
+```sh
+GET /api/v1/scopes
+```
+
+**3. ID Tokens**
+
+The core of OpenID Connect is based on a concept called "ID Tokens." This is a new token that the authorization server will return which encodes the user's authentication information. In contrast to access tokens, which are only intended to be understood by the resource server, ID tokens are intended to be understood by the OAuth client. When the client makes an OpenID Connect request, it can request an ID token along with an access token.
