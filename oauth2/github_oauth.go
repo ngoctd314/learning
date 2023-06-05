@@ -7,6 +7,8 @@ import (
 	"os"
 )
 
+func Hello() {}
+
 func githubLogin() {
 	// https://www.sohamkamani.com/golang/oauth/
 	fs := http.FileServer(http.Dir("public"))
