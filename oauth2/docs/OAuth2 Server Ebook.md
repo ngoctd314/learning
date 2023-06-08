@@ -358,3 +358,27 @@ GET /api/v1/scopes
 **3. ID Tokens**
 
 The core of OpenID Connect is based on a concept called "ID Tokens." This is a new token that the authorization server will return which encodes the user's authentication information. In contrast to access tokens, which are only intended to be understood by the resource server, ID tokens are intended to be understood by the OAuth client. When the client makes an OpenID Connect request, it can request an ID token along with an access token.
+
+OpenID Connect's ID Tokens take the form of a JWT (JSON Web Token), which is a JSON payload that is signed with the private key of the issuer, and can be parsed and verified by the application.
+
+Inside the JWT are a handful or defined property names that provide information to the application.
+
+- sub short for subject (a unique identifier for the user) 
+- iss the identifier for the server that issued the token (issue)
+- aud the identifier for the client that requested this token (audience)
+
+```json
+{
+    "iss": "https://server.example.com",
+    "sub": "24400320",
+    "aud": "s6BhdRkqt3",
+    "nonce": "n-0S6_WzA2Mj",
+    "exp": 1311281970,
+    "iat": 1311280970,
+    "auth_time": 1311280969
+}
+```
+
+## IndieAuth
+
+IndieAuth is decentralized identity protocol built on OAuth 2.0, which works using URLs to identify users and applications. It allows people to use a domain under their control as their identity while signing in and authorizing applications using that identity.

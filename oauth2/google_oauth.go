@@ -12,6 +12,10 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
+type Person struct {
+	Name string
+}
+
 func googleLogin() {
 	var oauthConf = &oauth2.Config{
 		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
