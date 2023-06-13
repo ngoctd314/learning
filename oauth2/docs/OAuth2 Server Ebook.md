@@ -22,7 +22,7 @@ Some apps may have multiple places they want to start the OAuth process from, su
 
 The "state" parameter can be used to encode application state. The state parameter is a string that is opaque to the OAuth 2.0 service
 
-## Accessing Data in an OAuth Server
+## 2. Accessing Data in an OAuth Server
 
 Steps
 
@@ -32,7 +32,7 @@ Steps
 4. Obtaining an Access Token
 5. Making API requests
 
-## Singing in with Google
+## 3. Singing in with Google
 
 Despite OAuth being an authorization protocol rather than an authentication protocol, it is often used as the basis for authentication workflows anyway.
 

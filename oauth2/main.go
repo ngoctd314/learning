@@ -1,11 +1,27 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/joho/godotenv"
 )
+
+func main() {
+	str := "asrweqrpiqweurpqwoieruqpwoerqwebkjsadfqlwehrqwehrqwerqwerqwlkasdfasasdfsda"
+	h := sha256.New()
+	h.Write([]byte(str))
+	codeChanlenge := base64.StdEncoding.EncodeToString(h.Sum(nil))
+	fmt.Println(codeChanlenge)
+	// http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	// 	fmt.Println("run", r.URL.Query(), r.URL.RawQuery, r.ParseForm())
+	// 	w.Write([]byte("OK"))
+	// })
+	// http.ListenAndServe(":8081", nil)
+}
 
 func init() {
 	err := godotenv.Load()
