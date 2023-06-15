@@ -1,19 +1,21 @@
 package main
 
-type AnyByteSlice  interface {
-	~[]byte
-}
+import "fmt"
+
 
 type p interface{
-	name()
+	setName(name string)
 } 
 
 type person struct {
-
+	name string
 }
-func (p person) name() {}
+func (p person) setName(name string) {
+	p.name = name
+}
 func main() {
 	var a p = person{}
-	a.name()
+	a.setName("abc")
+	fmt.Println(a)
 }
 
