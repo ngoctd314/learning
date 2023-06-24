@@ -308,5 +308,9 @@ ORDER BY department_name
 - To include multiple columns, separate them with commas 
 - The join must be an equijoin, which means that the equals operator is used to compare the two columns
 
+**How to join tables using the NATURAL keyword**
+
+
+
 ## How to insert, update and delete data
 
