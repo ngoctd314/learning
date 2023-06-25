@@ -151,6 +151,22 @@ func specifyORCondition(ctx context.Context, coll *mongo.Collection) {
 	log.Println(rs)
 }
 
+func matchAnEmbeddedNestedDocument(ctx context.Context, coll *mongo.Collection) {
+	cur, err := coll.Find(ctx, bson.D{
+		{"size", bson.D{
+			{"h", 14},
+			{"w", 21},
+			{"uom", "cm"},
+		}},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	rs := []any{}
+	cur.All(ctx, &rs)
+	log.Println(rs)
+}
+
 func coll(ctx context.Context) *mongo.Collection {
 	clientOpt := options.Client()
 	clientOpt.ApplyURI("mongodb://192.168.49.2:30100")
