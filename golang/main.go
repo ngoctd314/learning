@@ -1,21 +1,42 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"reflect"
+)
 
 
-type p interface{
-	setName(name string)
-} 
-
-type person struct {
-	name string
+type Person struct {
+	Name string
+	Age int
 }
-func (p person) setName(name string) {
-	p.name = name
+
+func (p Person) PrintName() {
+	fmt.Println("name:", p.Name)
 }
+func (p *Person) SetAge(age int) {
+	p.Age = age
+}
+
+type Singer struct {
+	Person
+	works []string
+}
+
 func main() {
-	var a p = person{}
-	a.setName("abc")
-	fmt.Println(a)
-}
+	t := reflect.TypeOf(Singer{})
+	fmt.Println(t, "has", t.NumField(), "fields:")
+	for i := 0; i < t.NumField(); i++ {
+		fmt.Print(" field#", i, ": ", t.Field(i).Name, "\n")
+	}
+	fmt.Println(t, "has", t.NumMethod(), "methods:")
+	for i := 0; i < t.NumMethod(); i++ {
+		fmt.Print(" method#", i, ": ", t.Method(i).Name, "\n")
+	}
 
+	pt := reflect.TypeOf(&Singer{})
+	fmt.Println(pt, "has", pt.NumMethod(), "methods:")
+	for i := 0 ; i < pt.NumMethod(); i ++ {
+		fmt.Print(" method#", i, ": ", pt.Method(i).Name, "\n")
+	}
+}
