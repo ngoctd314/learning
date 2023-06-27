@@ -2,19 +2,22 @@
 
 OAuth 2.0 enables a third-party application to obtain limited access to an HTTP service.
 
-## Introduction
+## 1. Introduction
 
 The traditional client-server authentication model
 
-<div style="text-align:left"><img src="../assets/without_oauth2.png" width=500 /></div>
+<div style="text-align:left"><img src="../assets/traditional_flow.png" width=500 /></div>
 
-OAuth2 come to a rescure.
+**This creates several problems and limitations:**
 
-<div style="text-align:left"><img src="../assets/oauth2_rescure.png" width=500 /></div>
+- Third-party applications are required to store the resource owner's credentials for future use, typically a password in clear-text.
+- Servers are required to support password authentication, despite the security weakness inherent in passwords.
+- Third-party applications gain overly broad access to the resource ownner's protected resources, leaving resource owners without any ability to restrict duration or access to a limited subset of resources.
+- Resource owners cannot revoke access to an individual third party without revoking access to all third parties, and must do so by chaning the third party's password.
 
-### Roles
+### 1.1. Roles
 
-OAuth2 defines four roles
+OAuth2 defines four roles:
 
 |Roles|Description|
 |-|-|
@@ -23,9 +26,11 @@ OAuth2 defines four roles
 |Client|An application making protected resource requests on behalf of the resource owner and with its authorization.|
 |Authorization server|The server issuing access tokens to the client after successfully authenticating the resource owner and obtaining authorization|
 
-### Protocol Flow
+The authorization server may be the same server as the resource server or a separate entity. A single authorization server may issue access tokens accepted by multiple resource servers.
 
-<div style="text-align:left"><img src="../assets/oauth2_protocol.png" width=500 /></div>
+### 1.2. Protocol Flow
+
+<div style="text-align:left"><img src="../assets/protocol_flow.png" width=500 /></div>
 
 |Step|Action|
 |-|-|
@@ -36,7 +41,7 @@ OAuth2 defines four roles
 |5|Client requests the protected resource from the resource server and authenticates by presenting the access token|
 |6|The resource server validates the access token, and serves the request|
 
-### Authorization Grant
+### 1.3. Authorization Grant
 
 An authorization grant is a credential representing the resource owner's authorization (to access its protected resources) used by the client to obtain an access token.
 
