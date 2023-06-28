@@ -98,6 +98,17 @@ For reads to replica sets and replica set shards, read concern allow clients to 
 
 ## 2. Query on Embedded/Nested Documents
 
+**Specify Equality Match on a Nested Field**
+
+```go
+cur, err := coll.Find(
+	context.TODO(),
+	bson.D{{"size.uom", "in"}}
+)
+```
+
+**Specify Match using Query Operator**
+
 ## 3. Query an array
 
 ### 3.1. Match an array
@@ -176,7 +187,7 @@ Use `$elemMatch` operator to specify multiple criteria on the element of an arra
 cur, err := coll.Find(ctx, bson.D{
 	{"dim_cm", bson.D{
 		{"$elemMatch", bson.D{
-			{}
+			{"$gt": 22, "$lt": 30}
 		}}
 	}}
 })
@@ -184,4 +195,64 @@ cur, err := coll.Find(ctx, bson.D{
 
 **Query for an Element by the Array index position**
 
+```go
+cur, _ := coll.Find(ctx, bson.D{{
+	"dim_cm", bson.D{{"$gt", 25}},
+}})
+```
+
 **Query an Array by Array length**
+
+Use the $size operator to query an arrays by number of elements. For example, the following selects documents where the array tags has 3 elements.
+
+```go
+db.inventory.find({"tags": {"$size": 3}})
+```
+
+## 4. Query an array of embedded document
+
+## 5. Projection Fields to Return from Query
+
+By default, queries in MongoDB return all fields in matching documents. To limit the amount of data that MongoDB sends to applications, you can include a projection documents to specify or restrict fields to return.
+
+```go
+projection := bson.D{
+	{"item", 1},
+	{"status", 1},
+}
+opts := options.Find().SetProjection(projection)
+
+cur, _ := coll.Find(ctx, bson.D{{"status", "A"}}, opts)
+rs := []any{}
+cur.All(ctx, &rs)
+log.Println(rs)go
+```
+
+**Return All But the Excluded Fields**
+
+```go
+projection := bson.D{
+	{"status", 0},
+	{"instock", 0},
+}
+opts := options.Find().SetProjection(projection)
+
+cur, _ := coll.Find(ctx, bson.D{{"status", "A"}}, opts)
+```
+
+## 6. Query for Null or Missing Fields
+
+**Equality Filter**
+
+**Type Check**
+
+**Existence Check**
+
+```go
+cur, err := coll.Find(ctx, bson.D{{"item", bson.D{{"$exists", false}}}})
+if err != nil {
+	log.Println(err)
+}
+```
+
+## 7. Perform Long-Running Snapshot Queries 
