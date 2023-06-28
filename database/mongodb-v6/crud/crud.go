@@ -19,7 +19,12 @@ func main() {
 	// selectEqualityCond(ctx, coll)
 	// selectEqualityCond(ctx, coll)
 	// specifyAndCondition(ctx, coll)
-	specifyORCondition(ctx, coll)
+	// specifyORCondition(ctx, coll)
+	// insert(ctx, coll)
+	// matchAnArray(ctx, coll)
+	// matchAnArrayAll(ctx, coll)
+	// queryAllDocumentsContainsKey(ctx, coll)
+	useQueryOperatorOnArray(ctx, coll)
 }
 
 func insertASingleDocument(ctx context.Context, coll *mongo.Collection) {
@@ -162,6 +167,91 @@ func matchAnEmbeddedNestedDocument(ctx context.Context, coll *mongo.Collection) 
 	if err != nil {
 		log.Fatal(err)
 	}
+	rs := []any{}
+	cur.All(ctx, &rs)
+	log.Println(rs)
+}
+
+func insert(ctx context.Context, coll *mongo.Collection) {
+	docs := []interface{}{
+		bson.D{
+			{"item", "journal"},
+			{"qty", 25},
+			{"tags", bson.A{"blank", "red"}},
+			{"dim_cm", bson.A{14, 21}},
+		},
+		bson.D{
+			{"item", "notebook"},
+			{"qty", 50},
+			{"tags", bson.A{"red", "blank"}},
+			{"dim_cm", bson.A{14, 21}},
+		},
+		bson.D{
+			{"item", "paper"},
+			{"qty", 100},
+			{"tags", bson.A{"red", "blank", "plain"}},
+			{"dim_cm", bson.A{14, 21}},
+		},
+		bson.D{
+			{"item", "planner"},
+			{"qty", 75},
+			{"tags", bson.A{"blank", "red"}},
+			{"dim_cm", bson.A{22.85, 30}},
+		},
+		bson.D{
+			{"item", "postcard"},
+			{"qty", 45},
+			{"tags", bson.A{"blue"}},
+			{"dim_cm", bson.A{10, 15.25}},
+		},
+	}
+
+	result, err := coll.InsertMany(ctx, docs)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(result.InsertedIDs...)
+}
+
+func matchAnArray(ctx context.Context, coll *mongo.Collection) {
+	cur, err := coll.Find(ctx, bson.D{{"tags", bson.A{"red", "blank"}}})
+	if err != nil {
+		log.Fatal(err)
+	}
+	rs := []any{}
+	err = cur.All(ctx, &rs)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(rs)
+}
+
+func matchAnArrayAll(ctx context.Context, coll *mongo.Collection) {
+	cur, err := coll.Find(ctx, bson.D{{"tags", bson.D{{"$all", bson.A{"red", "blank"}}}}})
+	if err != nil {
+		log.Fatal(err)
+	}
+	rs := []any{}
+	err = cur.All(ctx, &rs)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(rs)
+}
+
+func queryAllDocumentsContainsKey(ctx context.Context, coll *mongo.Collection) {
+	cur, _ := coll.Find(ctx, bson.D{
+		{"tags", "red"}, // like {"tags", bson.D{{"$all", bson.A{"red"}}}}
+	})
+	rs := []any{}
+	cur.All(ctx, &rs)
+	log.Println(rs)
+}
+
+func useQueryOperatorOnArray(ctx context.Context, coll *mongo.Collection) {
+	cur, _ := coll.Find(ctx, bson.D{{
+		"dim_cm", bson.D{{"$gt", 25}},
+	}})
 	rs := []any{}
 	cur.All(ctx, &rs)
 	log.Println(rs)
