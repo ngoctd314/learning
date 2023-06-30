@@ -342,8 +342,153 @@ grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Asaml2-bearer&assertion=PEF
 ```
 ## 5. Issuing an Access Token
 
+If is valid request, the authorization server issues an access token and optional refresh token.
+
 ### 5.1. Successful Response
 
+The authorization server issues an access token and option refresh token, and constructs the response
+
+```txt
+access_token
+    REQUIRED. The access token issued by the authorization
+
+token_type
+    REQUIRED. The type of the access token issued
+
+expires_in
+    RECOMMENDED. The lifetime in seconds of the access token.
+
+refresh_token
+    OPTIONAL. The refresh token, which can be used to obtain new access tokens using the same authorization grant.
+
+scope
+    OPTIONAL, if identical to the scope requested by the client;
+```
+
+The authorization server MUST include the HTTP "Cache-Control" response header field with a value of "no-store" in any response containing tokens, credentials, or other sensitive information 
 ### 5.2. Error Response
 
+The authorization server responds with an HTTP 400 (Bad Request) status code and includes
+
+```txt
+error
+    REQUIRED. A single ASCII error code from the following:
+    invalid_request
+        The request is missing a required parameter, includes an unsupported parameter value (other than grant type)
+    invalid_client
+        Client authentication failed (e.g unknown client, no client authentication included, or unsupported authentication method)
+    invalid_grant
+        The provided authorization grant (authorization_code, resource owner credentials) or refresh token is invalid, expired, revoked,
+        does not match the redirection URI used in authorization request, or was issued to another client.
+    unauthorized_client
+        The authenticated client is not authorized to use this authorization grant type.
+    unsupported_grant_type
+        The authorization grant type is not supported by the authorization server
+    invalid_scope
+        The requested scope is invalid, unknown, malformed, or exceeds the scope granted by the resource owner.
+
+
+error_description
+    OPTIONAL
+
+error_uri
+    OPTIONAL
+```
+
 ## 6. Refreshing an Access Token
+
+If the authorization server issued a refresh token to the client, the client makes a refresh request to the token endpoint
+
+```txt
+grant_type
+    REQUIRED. Value MUST be set to "refresh_token"
+
+refresh_token
+    REQUIRED. The refresh token issued to the client
+
+scope
+    OPTIONAL.
+```
+Because refresh tokens are typically long-lasting credentials used to request additional access tokens, the refresh token is bound to the client to which it was issued. If the client type is confidential or the client was issued client credentials (or assigned other authentication requirements).
+
+The authorization server MAY issue a new refresh token, in which case the client MUST discard the old refresh and replace it with the new refresh token. The authorization server MAY revoke the old refresh token after issuing a new refresh token to the client. If a new refresh token is issued, the refresh token scope MUST be identical to that of the refresh included by the client in the request.
+
+## 7. Accessing Protected Resources
+
+The client accesss protected resources by presenting the access token to the resource server. The resource server MUST validate the access token and ensure that it has expired and that its scope covers the requested resource. The methods used by the resource server to validate the access token (as well as any error responses) are beyond the scope of this specification but generally involve an interaction or coordination between the resource server and the authorization server. 
+
+### 7.1. Access Token Types
+
+The access token type provides the client with the information required to successfully utilize the access token to make a protected resource request. The client MUST NOT use an access token if it does not understand the token type.
+
+The "bearer" token type is utilized by simply including the access token string in the request 
+
+While th "mac" token type is utilized by  issuing a Message Authentication Code (MAC) key together with the access token that is used to sign certain components of the HTTP requests.
+
+### 7.2. Error Response
+
+## 8. Extensibility
+
+### 8.1. Defining Access Token Types
+
+Access token types can be defined in one of two ways: registered in the Access Token Types registry 
+
+### 8.2. Defining New Endpoint Parameters
+
+### 8.3. Defining New Authorization Grant Types
+
+### 8.4. Defining New Authorization Endpoint Response Types
+
+### 8.5. Defining Additional Error Codes 
+
+## 9. Native Applications **
+
+Native applications are clients installed and executed on the device used by the resource owner (desktop application, native mobile application). Native applications require special consideration related to security, platform capabilities, and overall end-user experience.
+
+The authorization endpoint requires interaction between the client and the resource owner's user-agent. Native applications can invoke an external user-agent or embed a user-agent within the application. Native applications can invoke an external user-agent or embed a user-agent within the application.
+
+- External user-agent - the native application can capture the response from the authorization server using a redirection URI 
+
+## 10. Security Considerations
+
+Security guidelines focused on the three client profiles: web application, user-agent-based application, and native application.
+
+### 10.1. Client Authentication
+
+The authorization server establishes client credentials with web application clients for the purpose of client authentication. Web application clients MUST ensure confidentiality of client passwords and other client credentials.
+
+The authorization server MUST NOT issue client passwords or other client credentials to native application or user-agent based application clients for the purpose of client authentication. The authorization server MAY issue a client password or other credentials for a specific installation a native application client on a specific device.
+
+When client authentication is not possible, the authorization server SHOLD employ other means to validate the client's identity.
+
+### 10.2. Client Impersonation
+
+A malicious client can impersonate another client and obtain access to protected resources if the impersonated client fails to, or is unable to, keep its client credentials confidential.
+
+The authorization server MUST authenticate the client whenever possible. If the authorization server cannot authenticate the client due to the client's nature, the authorization server MUST require the registration of any redirection URI used for receiving authorization responses and SHOULD utilize other means to protect resource owners from such potentially malicious clients.
+
+### 10.3. Access Tokens
+
+Access Token credentials (as well as any confidential access token attributes) MUST be kept confidential in transit and storage.
+
+The client SHOULD request access tokens with the minimal scope necessary. The authorization server SHOULD take the client identity into account whenc  choosing how to honor the requested scope and MAY issue an access token with less rights that requested.
+
+### 10.4. Refresh Tokens
+
+Refresh tokens MUST be kept confidential in transit and storage, and shared only among the authorization server and the client to who the refresh tokens were issued.
+
+The authorization server could employ refresh token rotation in which a new refresh token is issued with every access token refresh response.
+
+### 10.5. Authorization Codes 
+
+The transmission of authorization codes SHOULD be made over a secure channel, and the client SHOULD require the use of TLS with its redirection URI if the URI identifies a network resource.
+
+Authorization codes MUST be short lived and single-use. If the authorization server observes multiple attempts to exchange an authorization code for an access token, the authorization server SHOULD attempt to revoke all access tokens already granted based on the compromised authorization code.
+
+### 10.6. Authorization Code Redirection URI Manipulation
+
+When requesting authorization using the authorization code grant type, the client can specify a redirection URI via the "redirect_uri" parameter. If an attacker can manipulate the value of the redirection URI, it can cause the authorization server to redirect the resource owner user-agent to a URI under the control of the attacker with the authorization code.
+
+### 10.7. Resource Owner Password Credentials
+
+### 10.8. Request Confidentiality
