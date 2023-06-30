@@ -2,18 +2,38 @@ package main
 
 import (
 	"fmt"
-	"reflect"
 )
 
+// type person struct{}
+
+// func (*person) Name() {}
+
+// type embedding struct {
+// 	person
+// }
+
+// func main() {
+// 	rt := reflect.TypeOf(&embedding{})
+// 	fmt.Println(rt.NumMethod())
+// 	for i := 0; i < rt.NumMethod(); i++ {
+// 		fmt.Println(rt.Method(i).Name)
+// 	}
+// 	rt = reflect.TypeOf(person{})
+// 	fmt.Println(rt.NumMethod())
+// 	for i := 0; i < rt.NumMethod(); i++ {
+// 		fmt.Println(rt.Method(i).Name)
+// 	}
+// }
 
 type Person struct {
 	Name string
-	Age int
+	Age  int
 }
 
 func (p Person) PrintName() {
-	fmt.Println("name:", p.Name)
+	fmt.Println("Name:", p.Name)
 }
+
 func (p *Person) SetAge(age int) {
 	p.Age = age
 }
@@ -24,19 +44,19 @@ type Singer struct {
 }
 
 func main() {
-	t := reflect.TypeOf(Singer{})
-	fmt.Println(t, "has", t.NumField(), "fields:")
-	for i := 0; i < t.NumField(); i++ {
-		fmt.Print(" field#", i, ": ", t.Field(i).Name, "\n")
-	}
-	fmt.Println(t, "has", t.NumMethod(), "methods:")
-	for i := 0; i < t.NumMethod(); i++ {
-		fmt.Print(" method#", i, ": ", t.Method(i).Name, "\n")
-	}
+	gaga := Singer{Person: Person{"Gaga", 30}}
+	gaga.SetAge(10)
+	fmt.Println(gaga)
+	// rt := reflect.TypeOf(&gaga)
+	// for i := 0; i < rt.NumMethod(); i++ {
+	// 	log.Println(rt.Method(i).Name)
+	// }
+}
 
-	pt := reflect.TypeOf(&Singer{})
-	fmt.Println(pt, "has", pt.NumMethod(), "methods:")
-	for i := 0 ; i < pt.NumMethod(); i ++ {
-		fmt.Print(" method#", i, ": ", pt.Method(i).Name, "\n")
-	}
+type I interface {
+	m()
+}
+
+type T struct {
+	I
 }

@@ -256,3 +256,28 @@ if err != nil {
 ```
 
 ## 7. Perform Long-Running Snapshot Queries 
+
+## 8. Iterate a Cursor in mongosh
+
+The db.collection.find() method returns a cursor. To access the documents you need to iterate the cursor.
+
+### Cursor behaviors
+
+**Cursors Opened Within a Session**
+
+Starting in MongoDB 5.0 (and 4.4.8) cursors created within a client session close when the corresponding server session ends with the killSessions command, if the session times out, or if the client has exhausted the cursor.
+
+By default, server sessions have an expiration timeout of 30 minutes. To change the value, set the logcalLogicalSessionTimeoutMinutes.
+
+**Cursors Opened Outside of a Session**
+
+Cursors that aren't opened under a session automatically close after 10 mins of in activity, or if client has exhausted the cursor. To override this behavior, you can use the cursor.noCursorTimeout().
+
+**Cursor Batches**
+
+The MongoDB server returns the query results in batches. The amount of data in the batch will not exceed the maximum BSON document size.
+
+Operations of type find(), aggregate(), listIndexes, and listCollections return a maximum of 16 megabytes per batch. batchSize() can enforce a smaller limit, but not a larger one.
+
+
+

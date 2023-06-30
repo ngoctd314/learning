@@ -25,4 +25,5 @@ func exampleClient() {
 	log.Println(rdb.HGetAll(ctx, key))
 }
 
+// https://www.jajaldoang.com/post/redis-hash-in-go-with-hset-hget/
 const key = "user_online"
