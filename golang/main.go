@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"unsafe"
 )
 
 // type person struct{}
@@ -44,19 +45,9 @@ type Singer struct {
 }
 
 func main() {
-	gaga := Singer{Person: Person{"Gaga", 30}}
-	gaga.SetAge(10)
-	fmt.Println(gaga)
-	// rt := reflect.TypeOf(&gaga)
-	// for i := 0; i < rt.NumMethod(); i++ {
-	// 	log.Println(rt.Method(i).Name)
-	// }
-}
-
-type I interface {
-	m()
-}
-
-type T struct {
-	I
+	p := Person{}
+	ua := unsafe.Alignof(p)
+	fmt.Println(ua)
+	uo := unsafe.Offsetof(p.Age)
+	fmt.Println(uo)
 }
