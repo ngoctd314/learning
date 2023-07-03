@@ -1,9 +1,6 @@
 package main
 
 import (
-	"crypto/sha256"
-	"encoding/base64"
-	"fmt"
 	"log"
 	"time"
 
@@ -11,16 +8,7 @@ import (
 )
 
 func main() {
-	str := "asrweqrpiqweurpqwoieruqpwoerqwebkjsadfqlwehrqwehrqwerqwerqwlkasdfasasdfsda"
-	h := sha256.New()
-	h.Write([]byte(str))
-	codeChanlenge := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
-	fmt.Println(codeChanlenge)
-	// http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-	// 	fmt.Println("run", r.URL.Query(), r.URL.RawQuery, r.ParseForm())
-	// 	w.Write([]byte("OK"))
-	// })
-	// http.ListenAndServe(":8081", nil)
+	githubLogin()
 }
 
 func init() {
@@ -29,6 +17,7 @@ func init() {
 		log.Fatal("Error loading .env file")
 	}
 }
+
 func process(from, to int64) []int {
 	// githubLogin()
 	// mockPKCE()
