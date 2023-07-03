@@ -1,28 +1,30 @@
 # OAuth 2 servers ebook
 
-References: https://www.oauth.com/
+Reference: https://www.oauth.com/
 
-## Getting Ready
+## 1. Getting Ready
 
 Things you need to know when building an app that talks to an existing OAuth 2.0 API.
 
-### Creating an Application
+### 1.1. Creating an Application
 
-- given a client_id (client_secret in some cases)
+The registration process typically involves creating a developer account on the service's website, then entering basic information about the application such as the name, website, logo. After registering the application, you'll be given a client_id and a client_secret that you'll use when your app interacts with the service.
 
 Important things: register one or more redirect URLs the application will use. Redirect URLs are where the OAuth 2.0 service will return the user to after they have authorized the application.
 
-### Redirect URLs and State
+### 1.2. Redirect URLs and State
 
 To prevent redirection attacks where an authorization code or access token can be intercepted by an attacker. Some services may allow you to register multiple redirect URLs, which can help when your web app may be running on serveral different subdomains.
 
-Redirect URL must be an https endpoint to prevent the authorization code from ebing intercepted during the authorization process. 
+Redirect URL must be an https endpoint to prevent the authorization code from being intercepted during the authorization process. If your redirect URL is not https, then an attacker may be able to intercept the authorization code and use it to hijack a session.
 
-Some apps may have multiple places they want to start the OAuth process from, such as a login link on a home page as well as a login link when viewing some public item. Try to register multiple redirect URls. OAuth 2.0 provides a mechanism for this, the "state" parameter.
+Some application may have multiple places they want to start the OAuth process from, such as a login link on a home page as well as a login link when viewing public item. For these applications, it may be tempting to try to register multiple redirect URLs, or you may think you need to be able to vary the redirect URL per request. Instead, OAuth2 2.0 provides a mechnism for this, the "state" parameter.
 
-The "state" parameter can be used to encode application state. The state parameter is a string that is opaque to the OAuth 2.0 service
+The "state" parameter can be used to encode application state, but it must also include some amount of random data if you're not also including PKCE parameters in the request. The state parameter is a string that is opaque to the OAuth 2.0 service, so whatever state value you pass in during the initial authorization request will be returned after the user authorizes the application.
 
 ## 2. Accessing Data in an OAuth Server
+
+How to access your data at an existing OAuth 2.0 server.
 
 Steps
 
@@ -70,11 +72,14 @@ When the user is redirected back to our app, there will be a code and state para
 
 5. Verifying the User Info
 
-## Server-Side Apps
+## 4. Server-Side Apps
 
 Server-side apps are the most common type of application encountered when dealing with OAuth servers. These apps run on a web server when the source code of the app is not available to the public, so they can maintain the confidentiality of their client secret.
 
-### Authorization Code Grant
+<div style="text-align:left"><img src="../assets/oauth_server_app.png" width=500 /></div>
+The app's server communicates with the API
+
+### 4.1. Authorization Code Grant
 
 The authorization code is a temporary code that the client will exchange for an access token.
 
@@ -86,7 +91,7 @@ You most need to register your redirect URL at the service before it will be acc
 
 The user clicks "approve" the server will redirect back to the app, with a "code" and the same "state" parameter you provided in the query string parameter. It is important to note that this is not an access token. The only thing you can do with the authorizatino code is to make a request to get an access token.
 
-### Authorizationi Request Parameters
+### 4.2. Authorizationi Request Parameters
 
 - reponse_type = code
 response_type is set to code indicating that you want an authorization code as the response
@@ -107,7 +112,7 @@ The state parameter serves two functions. When the user is redirected back to yo
 
 The state parameter also serves as a CSRF protection mechnism if it contains a random value per request.
 
-### Exchange the authorization code for an access token
+### 4.3. Exchange the authorization code for an access token
 
 To exchange the authorization code for an access token, the app makes a POST request to the service's token endpoint.
 
@@ -123,11 +128,13 @@ This parameter is for the authorization code received from the authorization ser
 
 client_id, client_secret
 
-### PKCE Verifier
+The service will require the client authentication itself when making the request for an access token. Typically services support client authentication via HTTP Basic Auth with the client's client_id and client_secret. However, some services support authentication by accepting the client_id and client_secret as POST body parameters.
+
+### 4.4. PKCE Verifier
 
 If the service supports PKCE for web server apps, then the client will need to inlucde the followup PKCE parameter when exchanging the authorization code as well.
 
-### Example Flow
+### 4.5. Example Flow
 
 Using the authorization code flow with PKCE
 
@@ -149,19 +156,30 @@ https://example-app.com/cb?code=YasdferNDfew&state=5ca75bd30
 
 **The app initiates the authorization request**
 
-### Possible Errors
+### 4.6. Possible Errors
 
-### User Experience Considerations
+### 4.7. User Experience Considerations
 
-## Single-Page Apps
+In order for the authorization code grant to be secure, the authorization page must appear in a web browser the user is familar with, and must not be embedded in an iframe popup or an embedded browser in a mobile app. If it could be embedded in another website, the user would have no way of verifying it is the legitimate service and is not a phishing attempt.
 
-Single-page apps ruun entirely in the browser after loading the JS and HTMl source code from a web page. Since the entire source is available to the browser, they cannot maintain the confidentiality of a client secret, so a secret is not used for these apps. Because they can't use a client secret, the best option is to use the PKCE extension to protect the authorization code in the redirect. This is similar to the solution for mobile apps which also can't use a client secret.
+If an app wants to use the authorization code grant but can't protect its secret (native mobile app or single-page app), then the client secret is not required when making a request to exchange the auth code for an access token, and PKCE must be used as well. However, some services still do not support PKCE, so it may not be possbile to perform and authorization flow from the single-page app itself, and the client-side JS code may need to have a companion sever-side component that performs the OAuth flow instead.
 
-**Deprecation Notice**
+## 5. Single-Page Apps
 
-A common historical pattern for single-page apps was to use the Implicit flow to receive an access token in the redirect without the intermediate authorization code exchange step. This has a number of security issues and should no longer be used.
+<div style="text-align:left"><img src="../assets/user_browser_server.png" width=500 /></div>
 
-### Implicit Flow
+Single-page apps run entirely in the browser after loading the JS and HTML source code from a web page. Since the entire source is available to the browser, they cannot maintain the confidentiality of a client secret, so a secret is not used for these apps. Because they can't use a client secret, the best option is to use the PKCE extension to protect the authorization code in the redirect. This is similar to the solution for mobile apps which also can't use a client secret.
+
+### 5.1. Authorization
+
+The authorization code is a temporary code that the client will exchange for an access token. After the user visits the authorization page, the service shows the user an explanation of the request, including application name, scope, etc. If the user clicks approve the server will redirect back to the website, with an authorization code and the state value in the URL query string. 
+
+### 5.2. Authorization Grant Parameters
+
+### 5.3. Security Considerations for Single-Page Apps **
+
+
+### 5.4. Implicit Flow
 
 Some services use the alternative Implicit Flow for single-page apps, rather than allow the app to use the Authorization Code flow with no secret.
 
@@ -171,13 +189,13 @@ In order for a single-page up to  use the Authorization Code flow, is must be ab
 
 In any case, with both the Implicit Flow as well as the Authorization Code Flow with no secret, the server must require registration of the redirect URL in order to maintain the security of the flow.
 
-### Security Considerations
+### 5.5. Security Considerations
 
 The only way the authorization code grant with no client secret can be secure is by using the "state" parameter and restricting the redirect URL to trusted clients. Since the secret is not used, there is no way to verify the identity of the client other than by using a registered redirect URL. This is why you need to pre-register your redirect URL with the OAuth 2.0 service.
 
-### Implicit Flow for Single-Page Apps
+### 5.6. Implicit Flow for Single-Page Apps
 
-### Security Considerations for Single-Page Apps
+### 5.7. Security Considerations for Single-Page Apps
 
 **Refresh Tokens**
 
@@ -189,11 +207,42 @@ There are currently no general-purpose secure storage mechanism in browsers.
 
 Generally, the browser's LocalStorage API is the best place to store this data as it provides the easiest API to store and retrieve data and is about as secure as you can get in a browser. The downside is that any scripts on the page, even from different domains such as your analytics or ad network, will be able to access the LocalStorage. This means anything you store in LocalStorage is potentially visible to thirf-party scripts on your page.
 
-## Mobile and Native apps
+Because of the risks of data leakage from 3rd scripts, it is extremely important to have a good Content-Security Policy configured for your app so that you can more confident that arbitrary scripts aren't able to run in the application.
+
+## 6. Mobile and Native apps
 
 Like single-page apps, mobiles apps also cannot maintain the confidentially of a client secret. Mobile app must also use an OAuth flow that does not require a client secret. The current best practice is to use the Authorization Flow with PKCE.
 
-## Making Authenticated Requests
+### 6.1. Authorization
+
+**Initiate the authorization request**
+
+To begin the authorization process, the app should have a "sign in button. The link should be constructed as a full URL to the service's authorization endpoint.
+
+The client first creates that is known as  a PKCE "code verifier".
+
+Once the app has generated the code verifier, it used that to create the code challenge. The code challenge is a Base64-URL encoded string of the SHA256 hash of the code verifier. This hashed value is sent in the authorization request. So that the original random string is never exposed to anything outside the app. So that the original random string is never exposed to anything outside the app.
+
+**The user approves the request**
+
+**The service redirects the user back to the app**
+
+**Exchange the authorization code for an access token**
+To exchange the authorization code for an access token, the app makes a POST request to the service's token endpoint.
+
+|Parameter|Description|
+|-|-|
+|grant_type(required)|must be set to authorization_code|
+|code(required)|authorization code received from the authorization server|
+|redirect_uri(possibly required)||
+|code_verifier(required)||
+|client_id(required)||
+
+### 6.2. Security Considerations
+
+Always use the secure embedded browser APIs or launch a native browser
+
+## 7. Making Authenticated Requests
 
 Regardless of which grant type you used or whether you used a client secret, you now have an OAuth 2.0 Bearer Token you can use with the API.
 
@@ -203,14 +252,59 @@ The access token is sent to the service in the HTTP Authorization header prefixe
 POST /resource/1/update HTTP/1.1
 Authorization: Bearer RsT5OjbzRn430zqMLgV3Ia
 ```
-
 Your app only use it to make API requests.
+
+The access token is not indended to be parsed or understood by your application. The only thing your application should do with it is used it to make API requests. Some services will use structured tokens like JWTs as their access tokens, but the client does not need to worry about decoding the token in this case.
 
 Server makes no guarantees that access tokens will always continue to be in the same format. It's entirely possible that the next time you get an access token from the service, it will be in a different format. Access tokens are opaque to the client, and should only be used to make API requests and not interpreted themselves.
 
-## Refresh Tokens 
+If you are trying to find out whether your access token has expired, you can either store the expiration lifetime that was returned when you first got the access token, or just try to make the request anyway, and get a new access token if the current one has expired. While preemptively refreshing the access token can save an HTTP request, you still need to handle the case when an API call reports an expired token you were expecting it to expire, since the access tokens can expire for many reasons beyond just their expected lifetime.
 
-## Registering a New Application
+### 7.1. Refresh Tokens 
+
+```json
+{
+    "access_token": "AYjcyMzY3ZDhiNmJkNTY",
+    "refresh_token": "RjY2NjM5NzA2OWJjuE7c",
+    "token_type": "Bearer",
+    "expires": 3600 // second
+}
+```
+You can use expires time to preemptively refresh your access tokens instead of waiting for a request with an expired token to fail. Some people like to get a new access token shortly before the current one will expire in order to save an HTTP request of an API call falling. Access tokens can expire for many reasons, such as the user revoking an app, or if the authorization server expires all tokens when a user changes their password.
+
+Access token request
+
+```json
+{
+    "grant_type": "refresh_token",
+    "refresh_token": "",
+    "client_id": "",
+    "client_secret": ""
+}
+```
+
+Access token response
+
+```json
+{
+    "access_token": "AYjcyMzY3ZDhiNmJkNTY",
+    "refresh_token": "RjY2NjM5NzA2OWJjuE7c",
+    "token_type": "Bearer",
+    "expires": 3600 // second
+}
+```
+
+If you do not get back a new refresh token, then it means your existing refresh token will continue to work when the new access token expires.
+
+**When the refresh token changes after each use, if the authorization server ever detects a refresh token was used twice, it means it has likely been copied and is being used by an attacker, and the authorization server can revoke all access tokens and refresh tokens associated with it immediately.**
+
+Keep in mind that at any point the user can revoke an application, so your application needs to be able to handle the case when using the refresh token also fails. At that point, you will need to prompt the user for authorization again, beginning a new OAuth flow from scratch.
+
+expires_in property refers to the access token, not the refresh token. The expiration time of the refresh token is intentionally never communicated to the client.
+
+If a refresh token expires for any reason, then the only action the application can take is to ask the user to log in again, starting a new OAuth flow from scratch, which will issue a new access token and refresh token to the application.
+
+## 8. Registering a New Application
 
 When a developer comes to your website, they will need a way to create a new application and obtain credentials.
 

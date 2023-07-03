@@ -1,5 +1,7 @@
 # The OAuth 2.0 Authorization Framework
 
+Reference: https://datatracker.ietf.org/doc/html/rfc6749
+
 OAuth 2.0 enables a third-party application to obtain limited access to an HTTP service.
 
 ## 1. Introduction
