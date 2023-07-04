@@ -310,7 +310,87 @@ ORDER BY department_name
 
 **How to join tables using the NATURAL keyword**
 
+When you code a natural join you don't specify the column that's used to join the two tables. Instead, the database automatically joins the two tables based on all columns in the two tables that have the same name.
 
+```sql
+SELECT select_list
+FROM table_1
+    NATURAL JOIN table_2
+    [NATURAL JOIN table_3]...
+```
 
-## How to insert, update and delete data
+- You can use the NATURAL keyword to create a natural join that joins two tables based on all columns in the two tables that have the same name.
+- Although the code for a natural join is shorter than the code for joins that use the ON or USING clause, a natural join only works correctly for certain types of database structures.
 
+**How to use cross joins**
+
+A cross join joins each row from the first table with each row from the second table.
+
+**How to work with unions**
+
+Like a join, a union combines data from two or more tables. Instead of combining columns from base tables, however a union combines rows from two or more result sets.
+
+- A union combines the result sets of two or more SELECT statements into one result set.
+- Each result set must return the same number of columns, and the corresponding columns in each result set must have compatible data types.
+- By default, a union eliminates duplicate rows. If you want to include duplicate rows, code the ALL keyword
+- The column names in the final result set are taken from the first SELECT clause. Column aliases assigned by the other SELECT clauses have no effect on the final result.
+- To sort the rows in the final result set, code an ORDER BY clause after the last SELECT statement. This clause must refer to the column names assigned in the first SELECT clause.
+
+**A union that simulates a full outer join**
+
+A full outer join returns unmatched rows from both the left and righ tables. Although MySQL doesn't provide language for coding a full outer join, you can simlate a full outer join by coding a union that combines the result sets for a left outer join and a right outer join.
+
+```sql
+SELECT name
+FROM a
+    LEFT JOIN b
+    ON a.id = b.id
+UNION
+SELECT name
+FROM a
+    RIGHT JOIN b
+    ON a.id = b.id
+ORDER BY name
+```
+- When you use a full outer join, the result set includes all the rows from both tables
+- MySQL doesn't provide language keywords for full outer joins, but you can simulate a full outer join by using the UNION keyword to combine the result sets from a left outer join and a right outer join.
+
+## 5. How to insert, update and delete data
+
+### 5.1. How to create a copy of a table
+
+```sql
+CREATE TABLE invoices_copy AS
+SELECT id
+FROM invoices
+```
+When you use this technique to create tables, MySQL only copies the column definitions and data. In other words, MySQL doesn't retain other parts of the column definitions such as pk, fk and indexes.
+
+**Description**
+
+- You can use the CREATE TABLE AS statement to create a new table based on the result set defined by a SELECT statement
+- Each column name in the SELECT clause must be unique. If you use caculated values in the select list, you must name the column
+- You can code the other clauses of the SELECT statement just as you would for any other SELECT statement, including grouping, aggregates, joins, and subqueries.
+- When you use the CREATE TABLE AS statement to create a table, only the column definitions and data are copied. Definitions of primary keys, foreign keys, indexes, and so on are not included in the new table.
+
+### 5.2. How to insert new rows
+
+**Description**
+
+- You use the INSERT statement to add one or more rows to a table
+- To insert a null value into a column, you can use the NULL keyword. To insert a default value or to have MySQL generate a value for an auto increment column you can use DEFAULT keyword.
+- If you include a column list, you can omit columns with default values and null values. Then, the default value or null value is assigned automatically. You can also omit an auto increment column.
+
+### 5.3. How to use a subquery in an INSERT statement
+
+```sql
+INSERT INTO invoice_archive
+SELECT *
+FROM invoices
+WHERE invoice_total - payment_total - credit_total = 0
+```
+
+**Description**
+
+- A subquery is a SELECT statement that's coded within another SQL statement
+- To insert rows selected from one or more tables into another table, you can code a subquery in place of the VALUES clause. Then MySQL inserts the rows returned by the subquery into the target table. For this to work, the target table must already exist.
