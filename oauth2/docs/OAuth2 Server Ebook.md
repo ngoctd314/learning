@@ -424,7 +424,6 @@ Another option is to use the Token Introspection spec to build an API to verify 
 
 The resource server needs to know the list of scopes that are associated with the access token. The server is responsible for denying the request if the scopes in the access token do not include the required scope to perform the designed action.
 
-
 ### 14.3. Expired Tokens
 
 If your service uses short-lived access tokens with long-lived refresh tokens, then you'll need to make sure to return the proper error response when an application makes a request with an expired token.
@@ -441,12 +440,51 @@ Content-type: application/json
     "error_description": "The access token expired"
 }
 ```
+Thống kê lượng sms theo client_id, template_id (slow query)
 
-**4. OAuth for Native Apps**
+
+## 15. OAuth for Native Apps
 
 Browser-based apps, native apps can't use a client secret, as that would require that the developer ship the secret in their binary distribution of the application. It has been proven to be relatively easy to decompile and extract the secret. As such, native apps must use and OAuth flow that does not require a preregistered client secret.
 
 The current industry best practice is to use the Authorization Flow along with the PKCE extension, omitting the client secret from the request, and to use an external user agent to complete the flow.
+
+## 18. Token Introspection Endpoint
+
+When an OAuth 2.0 client makes a request to the resource server, the resource server needs some way to verify the access token.
+
+The OAuth2 Token Introspection extension defines a protocol that returns information about an access token, intended to be used by resource servers or other internal servers.
+
+An alternative to token introspection is to use a structured token format that is recognized by both the authorization server and resource server. The JWT Profile for OAuth 2.0 Access Token is a recent RFC that describes a standardized format for access tokens using JWTs. This enables a resource server to validate access tokens without a newwork call, by validating the signature and parsing the claims within the structured token itself.
+
+### 18.1. Introspection Endpoint
+
+### 18.2. Token Information Request
+
+The request will be a POST request containing just a parameter named "token". It is expected that this endpoint is not made publicly available to developers. Applications should not be allowed to use this endpoint since the response may contain privileged information that developers should not have access to. One way to protect endpoint is to put it on an internal server that is not accessible from the outside world, or it could be protected with HTTP basic auth.
+
+```sh
+POST /token_info HTTP/1.1
+Host: authorization-server.com
+Authorization: Basic Y4NmE4MzFhZGFkNzU2YWRhN
+
+token=c1MGYwNDJiYmYxNDFkZjVkOGI0MSAgLQ
+```
+
+### 18.3. Token Information Response 
+
+```txt
+active
+    Requried.
+scope
+client_id
+username
+exp
+```
+
+## 20. Terminology Reference
+
+Roles
 
 ## 22. OpenID Connect
 
