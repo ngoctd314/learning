@@ -484,25 +484,43 @@ exp
 
 ## 20. Terminology Reference
 
-Roles
+OAuth 2.0 is a complete rewrite of OAuth 1.0. 
+
+## 21. Differences Between OAuth 1 and 2
+
+### 21.1. Authetication and Signatures
+
+### 21.2. User Experience and Alternative Token issuance Options
+
+### 21.3. Performance at Scale
+
+### 21.4. Bearer Tokens
+
+### 21.5. Short-lived tokens with Long-lived authorizations
+
+### 21.6. Separation of Roles
 
 ## 22. OpenID Connect
 
 The OAuth 2.0 framework explicitly does not provide and information about the user that has authorized an application. OAuth 2.0 is delegation framework, allowing third-party applications to act on behalf of a user, without the application needing to know the identify of the user.
 
-OIDC takes the OAuth 2.0 framework and adds an identity layer on top. It provides information about the user, as well as anables clients to establish login sessions. While this chater is not meant to be a complete guide to OpenID Connect.
+OIDC takes the OAuth 2.0 framework and adds an identity layer on top. It provides information about the user, as well as anables clients to establish login sessions. While this chapter is not meant to be a complete guide to OpenID Connect.
 
-**1. Authorization vs Authentication**
+### 22.1. Authorization vs Authentication
 
 OAuth 2.0 is called an authorization "framework" rather than a "protocol".  OAuth 2.0 does not provide a mechanism to say who a user is or how they authenticated, it just says that a user delegated and application to act on their behalf. The OAuth 2.0 framework provides this delegation in the form of the user.
 
+OAuth 2.0 does not provide a mechanism to say who a user is or how they authenticated, it just says that a user delegated an application to act on their behalf.
+
 When you check in to a hotel, you get a key card which you can use to enter your assigned room. You can think of the key card as an access token. The key card says nothing about who you are or how you were authenticated at the front desk, but you can use th card to access your hottel room for the duration of your stay.
 
-**2. Building an Authentication Framework**
+OAuth 2.0 was intentionally designed to provide authorization without providing user identity and authentication, as those problems have very different security considerations that don't necessarily overlap with those of an authorization protocol. Treating authentication and identity separately allows the OAuth 2.0 framework to be used as part of building an authentication protocol.
+
+### 22.2 Building an Authentication Framework
 
 It is quite possible to use the OAuth 2.0 framework as the basic for building an authentication and identity protocol.
 
-To use OAuth 2.0 as the basis of an authenticatino protocol, you will need to do at least a few things.
+To use OAuth 2.0 as the basis of an authentication protocol, you will need to do at least a few things.
 
 - Define an endpoint to return attributes about a user
 
@@ -516,7 +534,7 @@ GET /api/v1/me
 GET /api/v1/scopes
 ```
 
-**3. ID Tokens**
+### 22.3. ID Tokens
 
 The core of OpenID Connect is based on a concept called "ID Tokens." This is a new token that the authorization server will return which encodes the user's authentication information. In contrast to access tokens, which are only intended to be understood by the resource server, ID tokens are intended to be understood by the OAuth client. When the client makes an OpenID Connect request, it can request an ID token along with an access token.
 
