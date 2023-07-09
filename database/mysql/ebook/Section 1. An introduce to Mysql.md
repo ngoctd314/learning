@@ -394,3 +394,4 @@ WHERE invoice_total - payment_total - credit_total = 0
 
 - A subquery is a SELECT statement that's coded within another SQL statement
 - To insert rows selected from one or more tables into another table, you can code a subquery in place of the VALUES clause. Then MySQL inserts the rows returned by the subquery into the target table. For this to work, the target table must already exist.
+
