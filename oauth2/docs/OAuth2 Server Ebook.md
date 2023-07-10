@@ -306,35 +306,35 @@ If a refresh token expires for any reason, then the only action the application 
 
 ## 8. Registering a New Application
 
-When a developer comes to your website, they will need a way to create a new application and obtain credentials.
+When a developer comes to your website, they will need a way to create a new application and obtain credentials. 
 
-### The Client ID and Secret
+### 8.1. The Client ID and Secret
 
 The client_id is a public identifier for apps. If the clientID is guessable, it makes slightly easier to craft phishing attacks against arbitrary applications.
 
-If the developer is creating a "public" app (a mobile or single-page app), then you should not issue a client_secret to the app at all. If it doesn't exist, it can't be leaked.
+If the developer is creating a "public" app (a mobile or single-page app), then you should not issue a client_secret to the app at all. **If it doesn't exist, it can't be leaked.**
 
 The client_secret is a secret known only to the application and the authorization server. It is essential the application's own password. It must be sufficiently random to not be guessable.
 
-### Storing and Displaying the client ID and secret
+### 8.2. Storing and Displaying the client ID and secret
 
 client_id and client_secret equivalent to a username and password.
 
-### Deleting Applications and Revoking Secrets
+### 8.3. Deleting Applications and Revoking Secrets
 
-## Authorization
+## 9. Authorization
 
-### The Authorization Request
+Clients may use either the authorization code grant type or the implicit grant. Along with the type of grant specified by the response_type parameter, the request will use a number of other parameters to indicate the specifics of the request.
 
-### Requiring User Login
+### 9.1. The Authorization Request
 
-### The Authorization Interface
+### 9.2. Requiring User Login
 
-### The Authorization Response
+### 9.3. The Authorization Interface
 
-Once the user has finished logging in and approving the request, the authorization server is ready to redirect the user back to the application. 
+### 9.4. The Authorization Response
 
-### Security Considerations
+### 9.5. Security Considerations  
 
 **1. Phishing Attacks**
 
@@ -346,11 +346,15 @@ In a clickjacking attack, the attacker creates a malicious website in which it l
 
 An attacker can construct an authorization URL using a client ID that belongs to a known good application, but set the redirect URL to a URL under the control of the attacker. If the authorization server does not validate redirect URLs, and the attacker uses the token response type, the user will be returned to the attacker's application with the access token in the URL. If the client is a public client, and the attacker intercepts the authorization code, then the attacker can also exchange the code for an access token.
 
-## Scope
+## 10. Scope
 
 Scope is a way to limit an app's access to a user's data. A way to request a more limited scope of what they are allowed to do on behalf of a user. Scope is a way to control access and help the user identify the permissions they are granting to the application.
 
-### Defining Scopes
+Scope is a way to limit what an application can do within the context of what a user can do. For example, if you have a user in the customer group and the application is requesting the admin scope, the OAuth server is not going to create an access token with the "admin" scope, because that user is not allowed to use that scope themselves.
+
+Scope should be thought of as the application requesting permission from the user who's using th app.
+
+### 10.1. Defining Scopes
 
 The challenge when defining scopes for you service is to not get carried away with defining too many scopes. Users need to be able to understand what level of access they are granting to the application.
 
@@ -358,24 +362,43 @@ The challenge when defining scopes for you service is to not get carried away wi
 
 Read access to a user's private profile information is treated with separate access control from apps wanting to update the profile information.
 
-## Redirect URLs
+## 11. Redirect URLs
 
 Redirect URLs are a critical part of the OAuth flow. Because the redirect URL will contain sensitive information, it is critical that the service doesn't redirect the user to arbitrary locations.
 
-### Redirect URL Registration
-### Redirect URLs for Native Apps
+### 11.1. Redirect URL Registration
 
-### Redirect URL Validation
+In order to avoid exposing users to open redirector attacks, you must require developers register one or more redirect URL for the application. The authorization server must never redirect to any other location. 
 
-## Access Token
+If an attacker can manipulate the redirect URL before the user reaches the authorization server, they could cause the server to redirect the user to a malicious server which would send the authorization code to the attacker. This is one way attackers can try to intercept an OAuth exchange and steal access tokens. If the authorization endpoint does not limit the URLs that it will redirect to, then it's considered an "open redirector" and can be use in combination with other things to launch attacks.
 
-Access tokens are the thing that applications use to make API requests on behalf of a user.
+Registered redirect URLs may contain query string parameters, but must not contain anything in the fragment. The registration server should reject the request if the developer tries to register a redirect URL that contains a fragment.
+
+### 11.2. Redirect URLs for Native Apps
+
+For example, an iOS application may register a custom protocol such as myapp:// and the use a redirect_uri of myapp://callback
+
+**App-Claimed hgttps URL Redirection**
+
+Some platforms, (Android, and iOS as of iOS 9), allow the app to override specific URL patterns to launch the native application instead of a web browser. For example, an application could register https://app.example.com/auth and whenever the web browser attempts to reidrect to that URL, the operating system launches the native app instead.
+
+### 11.3. Redirect URL Validation
+
+There are three cases when you'll need to validate redirect URLs
+
+- When the developer registers the redirect URL as part of creating an application
+- In the authorization request (both authorization code and implicit grant types)
+- When the application exchanges an authorization code for an access token
+
+## 12. Access Token
+
+Access tokens are the thing that applications use to make API requests on behalf of a user. The access token represents the authorization of a specific application to access specific parts of a user's data.
 
 With client, the access token is an opaque string, and it will take whatever the string is and use it in HTTP request. The resource server will need to understand what the access token means and how to validate it.
 
-### Authorization Code Request
+### 12.1. Authorization Code Request
 
-## Token Introspection Endpoint
+The authorization code grant is used when an application exchanges an authorization code for an access token.
 
 ## 13. Listing Authorizations
 
@@ -384,19 +407,24 @@ Once uses have begun to authorize multiple applications, giving many apps acces 
 ## 14. The Resource Server
 
 The resource server is the OAuth 2.0 term for your API server. The resource server handles authenticated requested after the application has obtained an access token.
+
 Large scale developments may have more than one resource server. Each of these resource servers are distinctly separate but they all share the same authorization server.
 
-**1. Verifying Access Tokens**
+### 14.1. Verifying Access Tokens
 
-The resource server will be getting requests from applications with an HTTP Authorization header containing an access token. The resource server needs to verify the access token. If your tokens are stored in a database, then verifying the token is simply a database lookup on the token table.
+The resource server will be getting requests from applications with an HTTP Authorization header containing an access token. The resource server needs to verify the access token.
+
+If you're using self-encoded access tokens, then verifying the tokens can be done entirely.
+
+If your tokens are stored in a database, then verifying the token is simply a database lookup on the token table.
 
 Another option is to use the Token Introspection spec to build an API to verify access tokens (use can encapsulate all of the logic of access tokens in a single server, exposing the information via an API to other parts of the system). The token instropection endpoint is intended to be used only internally, so you will want to protect it with some internal authorization, or only enable it on a server with the firewall of the system.
 
-**2. Verify Scope**
+### 14.2. Verify Scope
 
-The resource server needs to know the list of scopes that are associated with the access token.
+The resource server needs to know the list of scopes that are associated with the access token. The server is responsible for denying the request if the scopes in the access token do not include the required scope to perform the designed action.
 
-**3. Expired Tokens**
+### 14.3. Expired Tokens
 
 If your service uses short-lived access tokens with long-lived refresh tokens, then you'll need to make sure to return the proper error response when an application makes a request with an expired token.
 
@@ -412,30 +440,87 @@ Content-type: application/json
     "error_description": "The access token expired"
 }
 ```
+Thống kê lượng sms theo client_id, template_id (slow query)
 
-**4. OAuth for Native Apps**
+
+## 15. OAuth for Native Apps
 
 Browser-based apps, native apps can't use a client secret, as that would require that the developer ship the secret in their binary distribution of the application. It has been proven to be relatively easy to decompile and extract the secret. As such, native apps must use and OAuth flow that does not require a preregistered client secret.
 
 The current industry best practice is to use the Authorization Flow along with the PKCE extension, omitting the client secret from the request, and to use an external user agent to complete the flow.
 
+## 18. Token Introspection Endpoint
+
+When an OAuth 2.0 client makes a request to the resource server, the resource server needs some way to verify the access token.
+
+The OAuth2 Token Introspection extension defines a protocol that returns information about an access token, intended to be used by resource servers or other internal servers.
+
+An alternative to token introspection is to use a structured token format that is recognized by both the authorization server and resource server. The JWT Profile for OAuth 2.0 Access Token is a recent RFC that describes a standardized format for access tokens using JWTs. This enables a resource server to validate access tokens without a newwork call, by validating the signature and parsing the claims within the structured token itself.
+
+### 18.1. Introspection Endpoint
+
+### 18.2. Token Information Request
+
+The request will be a POST request containing just a parameter named "token". It is expected that this endpoint is not made publicly available to developers. Applications should not be allowed to use this endpoint since the response may contain privileged information that developers should not have access to. One way to protect endpoint is to put it on an internal server that is not accessible from the outside world, or it could be protected with HTTP basic auth.
+
+```sh
+POST /token_info HTTP/1.1
+Host: authorization-server.com
+Authorization: Basic Y4NmE4MzFhZGFkNzU2YWRhN
+
+token=c1MGYwNDJiYmYxNDFkZjVkOGI0MSAgLQ
+```
+
+### 18.3. Token Information Response 
+
+```txt
+active
+    Requried.
+scope
+client_id
+username
+exp
+```
+
+## 20. Terminology Reference
+
+OAuth 2.0 is a complete rewrite of OAuth 1.0. 
+
+## 21. Differences Between OAuth 1 and 2
+
+### 21.1. Authetication and Signatures
+
+### 21.2. User Experience and Alternative Token issuance Options
+
+### 21.3. Performance at Scale
+
+### 21.4. Bearer Tokens
+
+### 21.5. Short-lived tokens with Long-lived authorizations
+
+### 21.6. Separation of Roles
+
 ## 22. OpenID Connect
 
 The OAuth 2.0 framework explicitly does not provide and information about the user that has authorized an application. OAuth 2.0 is delegation framework, allowing third-party applications to act on behalf of a user, without the application needing to know the identify of the user.
 
-OIDC takes the OAuth 2.0 framework and adds an identity layer on top. It provides information about the user, as well as anables clients to establish login sessions. While this chater is not meant to be a complete guide to OpenID Connect.
+OIDC takes the OAuth 2.0 framework and adds an identity layer on top. It provides information about the user, as well as anables clients to establish login sessions. While this chapter is not meant to be a complete guide to OpenID Connect.
 
-**1. Authorization vs Authentication**
+### 22.1. Authorization vs Authentication
 
 OAuth 2.0 is called an authorization "framework" rather than a "protocol".  OAuth 2.0 does not provide a mechanism to say who a user is or how they authenticated, it just says that a user delegated and application to act on their behalf. The OAuth 2.0 framework provides this delegation in the form of the user.
 
+OAuth 2.0 does not provide a mechanism to say who a user is or how they authenticated, it just says that a user delegated an application to act on their behalf.
+
 When you check in to a hotel, you get a key card which you can use to enter your assigned room. You can think of the key card as an access token. The key card says nothing about who you are or how you were authenticated at the front desk, but you can use th card to access your hottel room for the duration of your stay.
 
-**2. Building an Authentication Framework**
+OAuth 2.0 was intentionally designed to provide authorization without providing user identity and authentication, as those problems have very different security considerations that don't necessarily overlap with those of an authorization protocol. Treating authentication and identity separately allows the OAuth 2.0 framework to be used as part of building an authentication protocol.
+
+### 22.2 Building an Authentication Framework
 
 It is quite possible to use the OAuth 2.0 framework as the basic for building an authentication and identity protocol.
 
-To use OAuth 2.0 as the basis of an authenticatino protocol, you will need to do at least a few things.
+To use OAuth 2.0 as the basis of an authentication protocol, you will need to do at least a few things.
 
 - Define an endpoint to return attributes about a user
 
@@ -449,7 +534,7 @@ GET /api/v1/me
 GET /api/v1/scopes
 ```
 
-**3. ID Tokens**
+### 22.3. ID Tokens
 
 The core of OpenID Connect is based on a concept called "ID Tokens." This is a new token that the authorization server will return which encodes the user's authentication information. In contrast to access tokens, which are only intended to be understood by the resource server, ID tokens are intended to be understood by the OAuth client. When the client makes an OpenID Connect request, it can request an ID token along with an access token.
 
