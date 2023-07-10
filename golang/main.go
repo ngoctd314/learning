@@ -2,52 +2,32 @@ package main
 
 import (
 	"fmt"
-	"unsafe"
+	"reflect"
 )
 
-// type person struct{}
+type F func(string, int) bool
 
-// func (*person) Name() {}
-
-// type embedding struct {
-// 	person
-// }
-
-// func main() {
-// 	rt := reflect.TypeOf(&embedding{})
-// 	fmt.Println(rt.NumMethod())
-// 	for i := 0; i < rt.NumMethod(); i++ {
-// 		fmt.Println(rt.Method(i).Name)
-// 	}
-// 	rt = reflect.TypeOf(person{})
-// 	fmt.Println(rt.NumMethod())
-// 	for i := 0; i < rt.NumMethod(); i++ {
-// 		fmt.Println(rt.Method(i).Name)
-// 	}
-// }
-
-type Person struct {
-	Name string
-	Age  int
+func (f F) m(s string) bool {
+	return f(s, 32)
 }
+func (f F) M() {}
 
-func (p Person) PrintName() {
-	fmt.Println("Name:", p.Name)
-}
-
-func (p *Person) SetAge(age int) {
-	p.Age = age
-}
-
-type Singer struct {
-	Person
-	works []string
+type I interface {
+	m(s string) bool
+	M()
 }
 
 func main() {
-	p := Person{}
-	ua := unsafe.Alignof(p)
-	fmt.Println(ua)
-	uo := unsafe.Offsetof(p.Age)
-	fmt.Println(uo)
+	var x struct {
+		F F
+		i I
+	}
+	tx := reflect.TypeOf(x)
+	if tx.Kind() == reflect.Struct {
+		fmt.Println(tx.NumField())
+		for i := 0; i < tx.NumField(); i++ {
+			fmt.Println(tx.Field(i).Name)
+			fmt.Println(tx.Field(i).PkgPath)
+		}
+	}
 }
