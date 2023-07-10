@@ -1,33 +1,18 @@
 package main
 
-import (
-	"fmt"
-	"reflect"
-)
+import "fmt"
 
-type F func(string, int) bool
-
-func (f F) m(s string) bool {
-	return f(s, 32)
-}
-func (f F) M() {}
-
-type I interface {
-	m(s string) bool
-	M()
-}
+var p *int
 
 func main() {
-	var x struct {
-		F F
-		i I
-	}
-	tx := reflect.TypeOf(x)
-	if tx.Kind() == reflect.Struct {
-		fmt.Println(tx.NumField())
-		for i := 0; i < tx.NumField(); i++ {
-			fmt.Println(tx.Field(i).Name)
-			fmt.Println(tx.Field(i).PkgPath)
-		}
-	}
+	// Assume the length of the slice is so large
+	// that its elements must be allocated on heap.
+	bs := make([]byte, 1<<31)
+
+	// A smart compiler can detect that the
+	// underlying part of the slice bs will never be
+	// used later, so that the underlying part of the
+	// slice bs can be garbage collected safely now.
+
+	fmt.Println(len(bs))
 }
