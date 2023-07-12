@@ -42,4 +42,26 @@ Prior to MySQL 5.5, the MyISAM engine was the default storage engine. This engin
 
 As you've seen thoughout this book, SELECT queries can be complicated, particularly if they use multiple joins, subqueries, or complex functions. Because of that, you may want to save the queries you use regularly. One way to do that is to store the statement in a script. Another way is to create a view.
 
+Unlike scripts, which are stored in files, views are stored as part of the database. As a result, they can be used by SQL programmers and by custom applications that have access to the database.
 
+### 12.1. An introduction to Views
+
+A view is a SELECT statement that's stored in the database as a database object. To create a view, you can use a CREATE VIEW statement. You can think of a view as virtual table that consits only of the rows and columns specified in its CREATE VIEW statement.
+
+**Description**
+
+- A view consits of a SELECT statement that's stored as an object in the database.
+- Although a view behaves like a virtual table, it doesn't store any data. Instead, a view always refers back to its base tables.
+- A view can also be referred to as a viewed table because it provides a view to the underlying base tables.
+
+**Benefits of using views**
+
+You can use views to limit the exposure of the tables in your database to external users and applications. 
+
+You can also use views to restrict access to database. To do that, you include just the columns and rows you want a user or an application to have access to in the views. Then, you let the user or application access the data 
+
+You can use views to hide the complexity of a SELECT statement.
+
+Finally, when you create a view, you can allow data in the base table to be updated through the view. To do that, you use INSERT, UPDATE or DELETE statements to work with the view.
+
+### 12.2. How to work with Views
