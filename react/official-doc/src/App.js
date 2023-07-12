@@ -1,15 +1,11 @@
 import "./App.css";
-import { Form } from "./Form";
-import { TrafficLight } from "./TrafficLight";
-import { Snapshot } from "./UpdateSnapshot";
+import { Accordion } from "./LiftingStateUp";
 
 // App root
 function App() {
 	return (
 		<>
-			<Snapshot />
-			<Form />
-			<TrafficLight />
+			<Accordion />
 		</>
 	);
 }
