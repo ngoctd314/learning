@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"time"
+	"sync"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -27,68 +27,77 @@ func main() {
 	}
 	db = conn
 	db.Exec("DELETE FROM users")
+	db.Exec("INSERT INTO users VALUES(?, ?)", "ngoctd", 0)
 
 	ctx := context.Background()
 	_ = ctx
 
-	trigger := make(chan struct{}, 1)
-	commitInsert := make(chan struct{}, 1)
+	wg := sync.WaitGroup{}
+	updateUser := make(chan struct{}, 1)
 
 	go func() {
-		<-trigger
+		wg.Add(1)
 		tx, err := db.BeginTxx(ctx, &sql.TxOptions{
-			Isolation: sql.LevelReadCommitted,
+			Isolation: sql.LevelSerializable,
 		})
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		query := `SELECT * FROM users`
-		listUser := []User{}
-		if err := tx.Select(&listUser, query); err != nil {
-			log.Println("select error", err)
+		user := User{}
+		err = tx.Get(&user, "SELECT * FROM users WHERE name = ?", "ngoctd")
+		if err != nil {
+			fmt.Println("SELECT user error", err)
 			if err := tx.Rollback(); err != nil {
-				log.Println("rollback error", err)
+				fmt.Println("rollback error", err)
 			}
 			return
 		}
-
-		commitInsert <- struct{}{}
-		log.Println("list user read commited", listUser)
+		fmt.Println(user)
+		// block to update user
+		<-updateUser
+		err = tx.Get(&user, "SELECT * FROM users WHERE name = ?", "ngoctd")
+		if err != nil {
+			fmt.Println("SELECT user error", err)
+			if err := tx.Rollback(); err != nil {
+				fmt.Println("rollback error", err)
+			}
+			return
+		}
+		fmt.Println(user)
 
 		if err := tx.Commit(); err != nil {
-			log.Println("commit error", err)
+			fmt.Println("commit error", err)
 		}
 
-		log.Println(listUser)
 	}()
 
 	go func() {
-		listUser := []User{{Name: fmt.Sprintf("name_%s", time.Now().Format(time.DateTime)), Age: 2023}}
+		wg.Add(1)
+
 		tx, err := db.BeginTxx(ctx, &sql.TxOptions{
-			Isolation: sql.LevelReadUncommitted,
-			ReadOnly:  false,
+			Isolation: sql.LevelSerializable,
 		})
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		query := `INSERT INTO users VALUES (:name, :age)`
-		if _, err := tx.NamedExec(query, listUser); err != nil {
-			log.Println("insert error", err)
+		if _, err := tx.Exec("UPDATE users SET age = 18 WHERE name = ?", "ngoctd"); err != nil {
+			fmt.Println("UPDATE error", err)
 			if err := tx.Rollback(); err != nil {
-				log.Println("rollback error", err)
+				fmt.Println("rollback error", err)
 			}
 			return
 		}
-		trigger <- struct{}{}
 
-		log.Println("insert success")
-		<-commitInsert
 		if err := tx.Commit(); err != nil {
-			log.Println("commit error", err)
+			fmt.Println("commit error", err)
 		}
+		updateUser <- struct{}{}
+
 	}()
+
+	wg.Wait()
 
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt)
@@ -97,5 +106,4 @@ func main() {
 	case <-sig:
 		log.Println("Bye")
 	}
-
 }
