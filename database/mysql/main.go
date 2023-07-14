@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"sync"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -15,6 +16,7 @@ import (
 
 var db *sqlx.DB
 
+// User ...
 type User struct {
 	Name string `db:"name"`
 	Age  int    `db:"age"`
@@ -27,13 +29,16 @@ func main() {
 	}
 	db = conn
 	db.Exec("DELETE FROM users")
-	db.Exec("INSERT INTO users VALUES(?, ?)", "ngoctd", 0)
+	for i := 0; i < 10; i++ {
+		db.Exec("INSERT INTO users VALUES(?, ?)", "ngoctd", i)
+	}
 
 	ctx := context.Background()
 	_ = ctx
 
 	wg := sync.WaitGroup{}
 	updateUser := make(chan struct{}, 1)
+	_ = updateUser
 
 	go func() {
 		wg.Add(1)
@@ -44,45 +49,23 @@ func main() {
 			log.Fatal(err)
 		}
 
-		user := User{}
-		err = tx.Get(&user, "SELECT * FROM users WHERE name = ?", "ngoctd")
-		if err != nil {
-			fmt.Println("SELECT user error", err)
+		query := ""
+		now := time.Now()
+		fmt.Println("INSERT users1")
+		query = "INSERT INTO users VALUES (?, ?)"
+		if _, err := tx.Exec(query, "ngoctd", 0); err != nil {
+			fmt.Println("UPDATE error", err)
 			if err := tx.Rollback(); err != nil {
 				fmt.Println("rollback error", err)
 			}
 			return
 		}
-		fmt.Println(user)
-		// block to update user
-		<-updateUser
-		err = tx.Get(&user, "SELECT * FROM users WHERE name = ?", "ngoctd")
-		if err != nil {
-			fmt.Println("SELECT user error", err)
-			if err := tx.Rollback(); err != nil {
-				fmt.Println("rollback error", err)
-			}
-			return
-		}
-		fmt.Println(user)
+		time.Sleep(time.Second)
 
-		if err := tx.Commit(); err != nil {
-			fmt.Println("commit error", err)
-		}
-
-	}()
-
-	go func() {
-		wg.Add(1)
-
-		tx, err := db.BeginTxx(ctx, &sql.TxOptions{
-			Isolation: sql.LevelSerializable,
-		})
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if _, err := tx.Exec("UPDATE users SET age = 18 WHERE name = ?", "ngoctd"); err != nil {
+		fmt.Println("INSERT user_tests1 after", time.Since(now).Seconds())
+		query = "INSERT INTO users VALUES (?, ?)"
+		query = "INSERT INTO user_tests VALUES (?, ?)"
+		if _, err := tx.Exec(query, "ngoctd", 0); err != nil {
 			fmt.Println("UPDATE error", err)
 			if err := tx.Rollback(); err != nil {
 				fmt.Println("rollback error", err)
@@ -90,11 +73,50 @@ func main() {
 			return
 		}
 
+		fmt.Println("commit insert user")
 		if err := tx.Commit(); err != nil {
 			fmt.Println("commit error", err)
 		}
-		updateUser <- struct{}{}
+		// updateUser <- struct{}{}
+	}()
 
+	go func() {
+		wg.Add(1)
+		tx, err := db.BeginTxx(ctx, &sql.TxOptions{
+			Isolation: sql.LevelSerializable,
+		})
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		query := ""
+
+		fmt.Println("INSERT user_tests2")
+		query = "INSERT INTO user_tests VALUES (?, ?)"
+		if _, err := tx.Exec(query, "ngoctd", 0); err != nil {
+			fmt.Println("UPDATE error", err)
+			if err := tx.Rollback(); err != nil {
+				fmt.Println("rollback error", err)
+			}
+			return
+		}
+
+		time.Sleep(time.Second * 2)
+		fmt.Println("INSERT users2")
+		query = "INSERT INTO users VALUES (?, ?)"
+		if _, err := tx.Exec(query, "ngoctd", 0); err != nil {
+			fmt.Println("UPDATE error", err)
+			if err := tx.Rollback(); err != nil {
+				fmt.Println("rollback error", err)
+			}
+			return
+		}
+
+		fmt.Println("commit insert user")
+		if err := tx.Commit(); err != nil {
+			fmt.Println("commit error", err)
+		}
+		// updateUser <- struct{}{}
 	}()
 
 	wg.Wait()

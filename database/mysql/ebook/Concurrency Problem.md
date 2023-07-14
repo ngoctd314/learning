@@ -406,11 +406,98 @@ wg.Wait()
 
 Occur when you perform an update or delete on set of rows at the same time that another transaction if performing an insert or delete that affects one or more rows in that same set of rows. For example, transaction a updates the payment total for each invoice that has a balance due, but transaction B inserts a new, unpaid, invoice while transaction A is still running. After transaction A finishes, there is still an invoice with a balance due.
 
+When a transaction retrieves a set of rows based on a specified condition, but during a subsequent read, the result set changes due to concurrent inserts or deletes by other transactions. This can lead to unexpected and inconsistent query results.
+
+Here's a detailed explanation of phantom reads
+
+1. Start Transaction: Transaction A begins and executes a query to retrieve a set of rows based on a certain condition.
+2. Concurrent Insert: Meanwhile, Transaction B starts and inserts new rows into the table that satisfy the condition used by Transaction A.
+3. Read Operation: Transaction A executes another query using the same condition as before to retrieve the rows. However, the result set now includes the newly inserted rows by Transaction B, causing additional "phantom" rows to appear.
+
+The occurrence of phantom reads can be problematic, especially in scenarios where transaction consistency is crucial. Is can lead to unexpected to incorrect calaculations or decisions based on the data retrieved.
+
+To mitigate phantom reads, database systems offer different isolation levels, each with varying degrees of data consistency guarantees.
+
+```go
+wg := sync.WaitGroup{}
+updateUser := make(chan struct{}, 1)
+_ = updateUser
+
+go func() {
+    wg.Add(1)
+    <-updateUser
+    tx, err := db.BeginTxx(ctx, &sql.TxOptions{
+        Isolation: sql.LevelSerializable,
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    listUser := []User{}
+    err = tx.Select(&listUser, "SELECT * FROM users WHERE name = ?", "ngoctd")
+    if err != nil {
+        fmt.Println("SELECT user error", err)
+        if err := tx.Rollback(); err != nil {
+            fmt.Println("rollback error", err)
+        }
+        return
+    }
+    fmt.Println(listUser)
+    // block to update user
+    // <-updateUser
+    err = tx.Select(&listUser, "SELECT * FROM users WHERE name = ?", "ngoctd")
+    if err != nil {
+        fmt.Println("SELECT user error", err)
+        if err := tx.Rollback(); err != nil {
+            fmt.Println("rollback error", err)
+        }
+        return
+    }
+    fmt.Println(listUser)
+
+    if err := tx.Commit(); err != nil {
+        fmt.Println("commit error", err)
+    }
+
+}()
+
+go func() {
+    wg.Add(1)
+    updateUser <- struct{}{}
+    tx, err := db.BeginTxx(ctx, &sql.TxOptions{
+        Isolation: sql.LevelSerializable,
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    query := ""
+    query = "INSERT INTO users VALUES (?, ?)"
+    query = "DELETE FROM users WHERE name = ? AND age = 9"
+    if _, err := tx.Exec(query, "ngoctd"); err != nil {
+        fmt.Println("UPDATE error", err)
+        if err := tx.Rollback(); err != nil {
+            fmt.Println("rollback error", err)
+        }
+        return
+    }
+
+    if err := tx.Commit(); err != nil {
+        fmt.Println("commit error", err)
+    }
+    fmt.Println("commit insert user")
+    // updateUser <- struct{}{}
+}()
+
+wg.Wait()
+```
+
 **The concurrency problems prevented by each transaction isolation level**
 
 |Isolation level|Dirty reads|Lost updateds|Nonrepeatable reads|Phantom reads|
 |-|-|-|-|-|
 |READ UNCOMMITTED|Allows|Allows|Allows|Allows|
-|READ COMMITTED|Prevents|Allows|||
-|REPEATABLE READ|Prevents|Prevents|||
-|SERIALIZABLE|Prevents|Prevents|||
+|READ COMMITTED|Prevents|Allows|Allows|Allows|
+|REPEATABLE READ|Prevents|Prevents|Allows|Allows|
+|SERIALIZABLE|Prevents|Prevents|Prevents|Prevents|
+
