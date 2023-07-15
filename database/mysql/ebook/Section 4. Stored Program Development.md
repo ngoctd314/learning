@@ -144,6 +144,27 @@ COMMIT; -- doesn't commit any changes to the database.
 
 #### 14.2.2. The four concurrency problems that locks can prevent
 
+|Problem|Description|
+|-|-|
+|Lost updates|Occur when two transactions select the same row and then update the row based on the values originally selected. Since each transaction is unaware of the other, the later update overwrites the earilier update.|
+|Dirty reads|Occur when a transaction selects data that hasn't ben commited by another transaction. For example, transaction A changes a row. Transaction B then selects the changed row before transaction. A commits the change. If transaction A then rolls back the change, transaction B has selected data that doesn't exist in the database|
+|Nonrepeatable reads|Occur when two SELECT statements that try to get the same data get different values because another transaction has updated the data in the time between the two statements. For example, transaction A selects a row, transaction B then updates the row. When transaction A selects the same row again, the data is different.|
+|Phantom reads|Occur when you perform an update or delete on a set of rows at the same time that another transaction is performing an insert or delete that affects one or more rows in that same set of rows.|
+
+**Description**
+
+- In a large system with many users, you should expect for these kinds of problems to occur.
+
+#### 14.2.3. How to set the transaction isolation level
+
+The simplest way to prevent concurrency problems is to change the default locking behavior. To do that, you use the SET TRANSACTION ISOLATION LEVEL statement to set the transaction isolation level.
+
+If you use the SERIALIZABLE option all four concurrency problems will be prevented.
+
+When you set the isolation level to SERIALIZABLE, each transaction is completely isolated from every other transaction an concurrency is severely restricted. The server does this by locking each resource, preventing other transactinos from accessing it. Since each transaction must wait for the previous transactino to commit, the transactions are executed serially, one after another.
+
+Since the SERIALIZABLE level eliminates all concurrency problems, you may think this is always the best option. However, this option requires more overhead to manage all of the locks, so the access time for each transaction is increased. For some systems, this may cause significant performance problems. As a result, you typically want to use the SERIALIZABLE isolation level only for situations in which phantom reads aren't acceptable.
+
 
 ## 15. How to create stored procedures and functions
 
