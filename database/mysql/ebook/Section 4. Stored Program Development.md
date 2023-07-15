@@ -232,3 +232,4 @@ An event, or scheduled event, is a named block of code that executes, or fires, 
 **Description**
 
 - An event, or scheduled event, is a named block of code that executes, or fires according to the event scheduler.
+- Before you begin working with events, you need to be sure that the event scheduler is on. By default, it's off.
