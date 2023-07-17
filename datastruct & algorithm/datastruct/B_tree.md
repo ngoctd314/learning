@@ -1,0 +1,16 @@
+# B-Tree
+
+B-Tree handles massive amounts of data with ease. When it comes to storing and searching large amounts of data, traditional binary search trees can be impractical due to their poor performance and high memory usage.
+
+B-Tree are characterized by the large number of keys that they can store in a single node, which is why they are also known as "large key" trees. Each node in a B-Tree can contain multiple keys, which allows the tree to have a larger branching factor and thus a shallower height. This shallow hight leads to less disk I/O, which results in faster search and insertion operations. B-Tree are particularly well suited for storage sytems that have slow.
+
+B-Tree maintain balance by ensuring that each node has a minimum number of keys, so the tree is always balanced. This balance guarantees that the time complexity for operations such as insertion, deletion, and searching is always O(logn).
+
+## Properties of B-Tree
+
+- All leaves are at the same level
+- B-Tree is defined by the term minimum degree 't'. The value of 't' depends upon disk block size.
+- Every node except the roto must contain at least t-1 keys. The root may contain a minimum of 1 key.
+- All nodes (including root) may contain at most (2*t-1) keys.
+- Number of children of a node is equal to the number of keys in it plus 1.
+- All keys of a node are sorted in increasing order. The child between two keys k1 and k2 contains all keys in the range from k1 and k2.

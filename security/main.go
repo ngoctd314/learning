@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"security/sqlinjection"
+	"security/csrf"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -28,11 +28,10 @@ func init() {
 }
 
 func main() {
-	go sqlinjection.APIServer(db)
+	// go sqlinjection.APIServer(db)
+	go csrf.Run(db)
 
-	seed()
-	// time.Sleep(time.Second)
-	// sqlinjection.APICaller()
+	// seed()
 
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt)

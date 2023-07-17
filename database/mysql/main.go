@@ -23,7 +23,7 @@ func init() {
 		log.Fatal(err)
 	}
 	db = conn
-	// seed()
+	seed()
 }
 
 func main() {
@@ -31,11 +31,10 @@ func main() {
 
 // Test ...
 type Test struct {
-	ID      int    `db:"id,omitempty"`
-	Name    string `db:"name"`
-	Email   string `db:"email"`
-	Age     int    `db:"age"`
-	Address string `db:"address"`
+	ID          int    `db:"id,omitempty"`
+	Name        string `db:"name"`
+	NameNoIndex string `db:"name_no_index"`
+	Age         int    `db:"age"`
 }
 
 func seed() {
@@ -44,17 +43,16 @@ func seed() {
 		var tmp []Test
 		for j := 0; j < 1_000; j++ {
 			tmp = append(tmp, Test{
-				Name:    fmt.Sprintf("name_%d", i*1000+j),
-				Email:   fmt.Sprintf("email_%d", i*1000+j),
-				Age:     rand.Intn(30) + 10,
-				Address: fmt.Sprintf("address_%d", i*1000+j),
+				Name:        fmt.Sprintf("name_%d", i*1000+j),
+				NameNoIndex: fmt.Sprintf("name_%d", i*1000+j),
+				Age:         rand.Intn(30) + 10,
 			})
 		}
 		batches = append(batches, tmp)
 	}
 
 	for _, v := range batches {
-		if _, err := db.NamedExec("INSERT INTO tests (id, name, email, age, address) VALUES (:id, :name, :email, :age, :address)", v); err != nil {
+		if _, err := db.NamedExec("INSERT INTO tests (id, name, name_no_index, age) VALUES (:id, :name, :name_no_index, :age)", v); err != nil {
 			log.Fatal(err)
 		} else {
 			log.Println("seed success")
