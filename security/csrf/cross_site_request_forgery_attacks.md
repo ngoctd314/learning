@@ -41,3 +41,7 @@ To protect your users against CSRF attacks, make sure that your GET requests don
 Protecting your GET requests doesn't mean that there aren't vulerabilities in other types of requests, as you'll see with our second mitigation.
 
 ### Mitigation 2: Implement Anti-CSRF Cookies
+
+### Mitigation 3: use the SameSite Cookie Attribute
+
+The final protection against CSRF attacks you must implement is to specify a SameSite attribute when you set cookies. By default, when a browser generates a request to your website, it will attach to the request the last known cookies that the site set. This means that malicious cross-site requests will arrive at your web server with any security cookies you previously set.
