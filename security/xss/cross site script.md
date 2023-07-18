@@ -6,3 +6,19 @@ JavaScript can read or modify any part of a web page, so there's a lot of attack
 
 ## Stored Cross-Site Scripting Attacks
 
+Websites routinely generate and render HTML using information stored in a database. Retail websites will store product information in a database, and social media sites will store user conversations. Websites will take content from the database according to the URL user has navigated to, and interpolate it into the page to produce the finished HTML.
+
+Any page content coming from the database is a potential attack vector for hackers. Attackers will attempt to inject Javascript code into the database so that the web server will write out the JavaScript when it render HTML. We call this type of attack a stored cross-site scripting attack: the Javascript is written to the database, but executed in the browser when an unsuspecting victim views a particular page on the site.
+
+Malicious JavaScript can be planted in a database by using the SQL injection method, but attackers will more common insert malicious code through legitimate avenues. For instance, if a website allows users to post comments, the site will store the comment text in a database and display it back to other users who view the same comment thread. In this scenario, an easy way for a hacker to perform a cross-site scripting attack is to write a comment containing a `<script>` tag to the database. If the website fails to construct HTML securely, the `<script>` tag will get written out whenever the page is rendered to other users, and the JS will be executed in the victim's browser.
+
+### Mitigation 1: Escape HTML Characters
+
+### Mitigation 2: Implement a Content Security Policy
+
+## Reflect Cross-Site Scripting Attacks
+
+### Mitigation: Escape Dynamic Content from HTTP Requests
+
+## DOM-Based Cross-Site Scripting Attacks
+

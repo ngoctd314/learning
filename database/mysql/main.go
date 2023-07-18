@@ -1,14 +1,9 @@
 package main
 
 import (
-	"context"
-	"database/sql"
 	"fmt"
 	"log"
-	"os"
-	"os/signal"
-	"sync"
-	"time"
+	"math/rand"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -22,110 +17,45 @@ type User struct {
 	Age  int    `db:"age"`
 }
 
-func main() {
+func init() {
 	conn, err := sqlx.Connect("mysql", "admin:secret@(192.168.49.2:30300)/db")
 	if err != nil {
 		log.Fatal(err)
 	}
 	db = conn
-	db.Exec("DELETE FROM users")
-	for i := 0; i < 10; i++ {
-		db.Exec("INSERT INTO users VALUES(?, ?)", "ngoctd", i)
+	seed()
+}
+
+func main() {
+}
+
+// Test ...
+type Test struct {
+	ID          int    `db:"id,omitempty"`
+	Name        string `db:"name"`
+	NameNoIndex string `db:"name_no_index"`
+	Age         int    `db:"age"`
+}
+
+func seed() {
+	var batches [][]Test
+	for i := 0; i < 1_000; i++ {
+		var tmp []Test
+		for j := 0; j < 1_000; j++ {
+			tmp = append(tmp, Test{
+				Name:        fmt.Sprintf("name_%d", i*1000+j),
+				NameNoIndex: fmt.Sprintf("name_%d", i*1000+j),
+				Age:         rand.Intn(30) + 10,
+			})
+		}
+		batches = append(batches, tmp)
 	}
 
-	ctx := context.Background()
-	_ = ctx
-
-	wg := sync.WaitGroup{}
-	updateUser := make(chan struct{}, 1)
-	_ = updateUser
-
-	go func() {
-		wg.Add(1)
-		tx, err := db.BeginTxx(ctx, &sql.TxOptions{
-			Isolation: sql.LevelSerializable,
-		})
-		if err != nil {
+	for _, v := range batches {
+		if _, err := db.NamedExec("INSERT INTO tests (id, name, name_no_index, age) VALUES (:id, :name, :name_no_index, :age)", v); err != nil {
 			log.Fatal(err)
+		} else {
+			log.Println("seed success")
 		}
-
-		query := ""
-		now := time.Now()
-		fmt.Println("INSERT users1")
-		query = "INSERT INTO users VALUES (?, ?)"
-		if _, err := tx.Exec(query, "ngoctd", 0); err != nil {
-			fmt.Println("UPDATE error", err)
-			if err := tx.Rollback(); err != nil {
-				fmt.Println("rollback error", err)
-			}
-			return
-		}
-		time.Sleep(time.Second)
-
-		fmt.Println("INSERT user_tests1 after", time.Since(now).Seconds())
-		query = "INSERT INTO users VALUES (?, ?)"
-		query = "INSERT INTO user_tests VALUES (?, ?)"
-		if _, err := tx.Exec(query, "ngoctd", 0); err != nil {
-			fmt.Println("UPDATE error", err)
-			if err := tx.Rollback(); err != nil {
-				fmt.Println("rollback error", err)
-			}
-			return
-		}
-
-		fmt.Println("commit insert user")
-		if err := tx.Commit(); err != nil {
-			fmt.Println("commit error", err)
-		}
-		// updateUser <- struct{}{}
-	}()
-
-	go func() {
-		wg.Add(1)
-		tx, err := db.BeginTxx(ctx, &sql.TxOptions{
-			Isolation: sql.LevelSerializable,
-		})
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		query := ""
-
-		fmt.Println("INSERT user_tests2")
-		query = "INSERT INTO user_tests VALUES (?, ?)"
-		if _, err := tx.Exec(query, "ngoctd", 0); err != nil {
-			fmt.Println("UPDATE error", err)
-			if err := tx.Rollback(); err != nil {
-				fmt.Println("rollback error", err)
-			}
-			return
-		}
-
-		time.Sleep(time.Second * 2)
-		fmt.Println("INSERT users2")
-		query = "INSERT INTO users VALUES (?, ?)"
-		if _, err := tx.Exec(query, "ngoctd", 0); err != nil {
-			fmt.Println("UPDATE error", err)
-			if err := tx.Rollback(); err != nil {
-				fmt.Println("rollback error", err)
-			}
-			return
-		}
-
-		fmt.Println("commit insert user")
-		if err := tx.Commit(); err != nil {
-			fmt.Println("commit error", err)
-		}
-		// updateUser <- struct{}{}
-	}()
-
-	wg.Wait()
-
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, os.Interrupt)
-
-	select {
-	case <-sig:
-		log.Println("Bye")
 	}
 }

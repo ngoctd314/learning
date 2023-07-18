@@ -168,4 +168,68 @@ Since the SERIALIZABLE level eliminates all concurrency problems, you may think 
 
 ## 15. How to create stored procedures and functions
 
-### 
+## 16. How to create triggers and events
+
+Triggers can be executed before or after and INSERT, UPDATE, or DELETE (write operator) statment is executed on a table. As a result, they provide a powerful way to enforce data consistency, log changes to the database, and implement business rules. Events can be executed at a scheduled time. As a result, they provide a convenient way to automatically perform any task that needs to be run regularly such as scheduled maintenance of tables.
+
+### 16.1. How to work with triggers
+
+A trigger is named block of code that is executed, or fired, automatically when a particular type of SQL statement is executed. When using MySQL, a trigger is fired when an INSERT, UPDATE, or DELETE statement is executed on a table.
+
+
+#### 16.1.1. How to create a Before trigger
+
+```sql
+CREATE TRIGGER trigger_name
+    {BEFORE|AFTER} {INSERT|UPDATE|DELETE} ON trigger_name
+    FOR EACH ROW 
+    sql_block
+```
+
+```sql
+DELIMITER //
+CREATE TRIGGER vendors_before_update
+    BEFORE UPDATE ON vendors
+    FOR EACH ROW
+BEGIN
+    SET NEW.vendor_state = UPPER(NEW.vendor_state);
+END//
+```
+
+**Description**
+- A trigger is named block of code that executes, or fires, in response to an INSERT, UPDATE, or DELETE statement.
+- You can fire a trigger before or after an INSERT, UPDATE, or DELETE statement is executed on a table.
+- You must specify a FOR EACH ROW clause. This creates a row-level trigger that fires once for each row that's modified
+- You can use the OLD and NEW keywords to get and set the values for the columns that are stored in the old row and the new row
+
+#### 16.1.1.2. How to use a trigger to enforce data consistency
+
+Triggers are commonly used to enforce data consistency.
+
+```sql
+DELIMITER //
+CREATE TABLE invoices_before_uppdate
+    BEFORE UPDATE ON invoices
+    FOR EACH ROW
+BEGIN
+    DECLARE sum_line_item_amount DECIMAL(9,2);
+    SELECT SUM(line_item_amount)
+    INTO sum_line_item_amount
+    FROM invoice_line_items
+    WHERE invoice_id = NEW.invoice_id;
+
+    IF sum_line_item_amount != NEW.invoice_total THEN
+        SIGNAL SQLSTATE 'HY000'
+        SET MESSAGE_TEXT = 'Line item total must match invoice total.';
+    END IF;
+END //
+```
+
+### 16.2. How to work with events
+
+An event, or scheduled event, is a named block of code that executes, or fires, according to the event scheduler. By default, the event scheduler is off.
+
+**Description**
+
+- An event, or scheduled event, is a named block of code that executes, or fires according to the event scheduler.
+- Before you begin working with events, you need to be sure that the event scheduler is on. By default, it's off.
