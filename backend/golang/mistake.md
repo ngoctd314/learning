@@ -1,9 +1,4 @@
-package main
-
-import (
-	"reflect"
-)
-
+```go
 type T int
 
 func (t T) M() { print(t) }
@@ -22,5 +17,4 @@ func main() {
 	g()
 	h()
 }
-
-// https://cuonglm.xyz/post/go_issue_47863/
+```
