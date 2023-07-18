@@ -1,28 +1,24 @@
 package main
 
 import (
-	"fmt"
-	"unsafe"
+	"reflect"
 )
 
-type sample struct {
-	a int
-	b string
-}
-type t1 struct {
-	a int8
-	b int64
-	c int64
-}
+type T int
 
-type t2 struct {
-	a int8
-	c int16
-	b int64
-}
+func (t T) M() { print(t) }
+
+type S struct{ *T }
+
+var t = new(T)
+var s = S{T: t}
 
 func main() {
-	s := &sample{a: 1, b: "test"}
-	startAddress := uintptr(unsafe.Pointer(s))
-	fmt.Printf("Start address of s: %d\n", startAddress)
+	f := t.M
+	g := s.M
+	h := reflect.ValueOf(s).MethodByName("M").Interface().(func())
+	*t = 5
+	f()
+	g()
+	h()
 }
