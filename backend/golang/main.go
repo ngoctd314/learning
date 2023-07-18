@@ -24,6 +24,3 @@ func main() {
 	g()
 	h()
 }
-
-// https://cuonglm.xyz/post/go_issue_47863/
-// https://research.swtch.com/
