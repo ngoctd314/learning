@@ -1,15 +1,15 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"log"
-	"math/rand"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 )
 
 var db *sqlx.DB
+var ctx = context.Background()
 
 // User ...
 type User struct {
@@ -23,10 +23,10 @@ func init() {
 		log.Fatal(err)
 	}
 	db = conn
-	seed()
 }
 
 func main() {
+	execPhantomRead()
 }
 
 // Test ...
@@ -37,25 +37,43 @@ type Test struct {
 	Age         int    `db:"age"`
 }
 
-func seed() {
-	var batches [][]Test
-	for i := 0; i < 1_000; i++ {
-		var tmp []Test
-		for j := 0; j < 1_000; j++ {
-			tmp = append(tmp, Test{
-				Name:        fmt.Sprintf("name_%d", i*1000+j),
-				NameNoIndex: fmt.Sprintf("name_%d", i*1000+j),
-				Age:         rand.Intn(30) + 10,
-			})
-		}
-		batches = append(batches, tmp)
-	}
+type User1 struct {
+	Name string `db:"name"`
+	Age  int    `db:"age"`
+}
 
-	for _, v := range batches {
-		if _, err := db.NamedExec("INSERT INTO tests (id, name, name_no_index, age) VALUES (:id, :name, :name_no_index, :age)", v); err != nil {
-			log.Fatal(err)
-		} else {
-			log.Println("seed success")
-		}
-	}
+func (User1) Table() string {
+	return "user1"
+}
+
+type User2 struct {
+	Name string `db:"name"`
+	Age  int    `db:"age"`
+}
+
+func (User2) Table() string {
+	return "user2"
+}
+
+type User3 struct {
+	Name string `db:"name"`
+	Age  int    `db:"age"`
+}
+
+func (User3) Table() string {
+	return "user3"
+}
+
+func seed() {
+	db.Exec("DROP TABLE IF EXISTS user1")
+	db.Exec("DROP TABLE IF EXISTS user2")
+	db.Exec("DROP TABLE IF EXISTS user3")
+
+	db.Exec("CREATE TABLE user1 (name VARCHAR(255), age INT)")
+	db.Exec("CREATE TABLE user2 (name VARCHAR(255), age INT)")
+	db.Exec("CREATE TABLE user3 (name VARCHAR(255), age INT)")
+
+	db.Exec("INSERT INTO user1 VALUES ('admin', 18)")
+	db.Exec("INSERT INTO user2 VALUES ('admin', 18)")
+	db.Exec("INSERT INTO user3 VALUES ('admin', 18)")
 }
