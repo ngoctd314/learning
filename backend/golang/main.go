@@ -10,8 +10,10 @@ func (t T) M() { print(t) }
 
 type S struct{ *T }
 
-var t = new(T)
-var s = S{T: t}
+var (
+	t = new(T)
+	s = S{T: t}
+)
 
 func main() {
 	f := t.M
@@ -22,6 +24,3 @@ func main() {
 	g()
 	h()
 }
-
-// https://cuonglm.xyz/post/go_issue_47863/
-// https://research.swtch.com/
