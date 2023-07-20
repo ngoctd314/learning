@@ -1,26 +1,44 @@
 package main
 
 import (
-	"reflect"
-)
-
-type T int
-
-func (t T) M() { print(t) }
-
-type S struct{ *T }
-
-var (
-	t = new(T)
-	s = S{T: t}
+	"fmt"
+	"math/rand"
+	"sync"
+	"time"
 )
 
 func main() {
-	f := t.M
-	g := s.M
-	h := reflect.ValueOf(s).MethodByName("M").Interface().(func())
-	*t = 5
-	f()
-	g()
-	h()
+	rand.Seed(time.Now().UnixNano())
+
+	const N = 10
+	var values [N]string
+
+	cond := sync.NewCond(&sync.Mutex{})
+	for i := 0; i < N; i++ {
+		d := time.Second * time.Duration(rand.Intn(10)) / 10
+		go func(i int) {
+			time.Sleep(d) // simulate a workload
+			cond.L.Lock()
+			values[i] = string('a' + i)
+			// Notify when cond.L lock is locked
+			cond.Broadcast()
+			cond.L.Unlock()
+		}(i)
+	}
+	checkCondition := func() bool {
+		fmt.Println(values)
+		for i := 0; i < N; i++ {
+			if values[i] == "" {
+				return false
+			}
+		}
+		return true
+	}
+
+	cond.L.Lock()
+	defer cond.L.Unlock()
+	for !checkCondition() {
+		// Must be called when cond.L is locked
+		cond.Wait()
+	}
 }
