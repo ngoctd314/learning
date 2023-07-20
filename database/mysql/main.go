@@ -26,7 +26,9 @@ func init() {
 }
 
 func main() {
-	execPhantomRead()
+	// execPhantomRead()
+	seedDeadlock()
+	execDeadLock()
 }
 
 // Test ...

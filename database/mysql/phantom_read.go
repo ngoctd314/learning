@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"time"
 )
 
 type phantomRead struct {
@@ -15,10 +16,10 @@ type phantomRead struct {
 
 func execPhantomRead() {
 	go func() {
-		fmt.Println("Run before")
 		tx, _ := db.BeginTxx(ctx, &sql.TxOptions{
-			Isolation: sql.LevelRepeatableRead,
+			Isolation: sql.LevelSerializable,
 		})
+		fmt.Println("Run 1")
 		var list1 []phantomRead
 		if err := tx.Select(&list1, "SELECT * FROM phantom_read WHERE age > 5"); err != nil {
 			tx.Rollback()
@@ -29,11 +30,11 @@ func execPhantomRead() {
 	}()
 
 	go func() {
-		fmt.Println("Run after")
+		time.Sleep(time.Second * 2)
 		tx, _ := db.BeginTxx(ctx, &sql.TxOptions{
-			Isolation: sql.LevelRepeatableRead,
+			Isolation: sql.LevelSerializable,
 		})
-		if _, err := db.Exec("INSERT INTO phantom_read VALUES (?, ?)", "name_23", 23); err != nil {
+		if _, err := tx.Exec("INSERT INTO phantom_read VALUES (?, ?)", "name_23", 23); err != nil {
 			tx.Rollback()
 			return
 		}
@@ -58,14 +59,14 @@ func init() {
 }
 
 func seedPhantomRead() {
-	_, err := db.Exec("DROP TABLE IF EXISTS phantom_read")
-	if err != nil {
-		log.Println(err)
-	}
-	_, err = db.Exec("CREATE TABLE phantom_read (name VARCHAR(255), age INT)")
-	if err != nil {
-		log.Println(err)
-	}
+	// _, err := db.Exec("DROP TABLE IF EXISTS phantom_read")
+	// if err != nil {
+	// 	log.Println(err)
+	// }
+	// _, err = db.Exec("CREATE TABLE phantom_read (name VARCHAR(255), age INT)")
+	// if err != nil {
+	// 	log.Println(err)
+	// }
 	var batches [][]phantomRead
 	for i := 0; i < 1_000; i++ {
 		var tmp []phantomRead
