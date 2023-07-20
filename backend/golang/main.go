@@ -2,43 +2,100 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
+	"os"
+	"os/signal"
 	"sync"
 	"time"
 )
 
+var sharedRsc = false
+
 func main() {
-	rand.Seed(time.Now().UnixNano())
-
-	const N = 10
-	var values [N]string
-
-	cond := sync.NewCond(&sync.Mutex{})
-	for i := 0; i < N; i++ {
-		d := time.Second * time.Duration(rand.Intn(10)) / 10
-		go func(i int) {
-			time.Sleep(d) // simulate a workload
-			cond.L.Lock()
-			values[i] = string('a' + i)
-			// Notify when cond.L lock is locked
-			cond.Broadcast()
-			cond.L.Unlock()
-		}(i)
-	}
-	checkCondition := func() bool {
-		fmt.Println(values)
-		for i := 0; i < N; i++ {
-			if values[i] == "" {
-				return false
-			}
+	m := sync.Mutex{}
+	c := sync.NewCond(&m)
+	go func() {
+		// this goroutine wait for changes to the sharedSrc
+		c.L.Lock()
+		for sharedRsc == false {
+			fmt.Println("goroutine1 wait")
+			c.Wait()
 		}
-		return true
-	}
+		fmt.Println("goroutine1", sharedRsc)
+		c.L.Unlock()
+	}()
 
-	cond.L.Lock()
-	defer cond.L.Unlock()
-	for !checkCondition() {
-		// Must be called when cond.L is locked
-		cond.Wait()
+	go func() {
+		c.L.Lock()
+		for sharedRsc == false {
+			fmt.Println("goroutine2 wait")
+			c.Wait()
+		}
+		fmt.Println("goroutine2", sharedRsc)
+		c.L.Unlock()
+	}()
+
+	// this one writes changes to sharedRsc
+	time.Sleep(2 * time.Second)
+	c.L.Lock()
+	fmt.Println("main goroutine ready")
+	sharedRsc = true
+	c.Signal()
+	fmt.Println("main goroutine broadcast")
+	c.L.Unlock()
+
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt)
+	select {
+	case <-sig:
+		fmt.Println("Bye bye")
 	}
 }
+
+func event() {
+	for conditionTrue() == false {
+		// cần 1 function hoặc cách gì đó để goroutine có thể sleep cho đến khi có 1 tín hiệu thực thi
+		time.Sleep(time.Millisecond)
+		fmt.Println("RUN")
+	}
+}
+
+var cnt = 0
+
+func conditionTrue() bool {
+	defer func() {
+		cnt++
+	}()
+
+	return cnt == 10
+}
+
+/*
+	c := sync.NewCond(&sync.Mutex{})
+	queue := make([]int, 0, 10)
+	removeFromQueue := func(delay time.Duration, i int) {
+		time.Sleep(delay)
+		c.L.Lock()
+		fmt.Println("before remove: ", queue)
+		queue = queue[1:]
+		fmt.Println("after remove: ", queue)
+		c.L.Unlock()
+		c.Signal()
+	}
+	for i := 0; i < 10; i++ {
+		fmt.Println("start loop;", i)
+		c.L.Lock()
+		for len(queue) == 2 {
+			fmt.Println("len equal 2, waiting", i)
+			c.Wait()
+		}
+		fmt.Println("adding to queue", i)
+		queue = append(queue, i)
+		go removeFromQueue(time.Second, i)
+		c.L.Unlock()
+		fmt.Println()
+	}
+	fmt.Println("after processing, len queue:", len(queue), queue)
+
+*/
+
+// https://www.sobyte.net/post/2022-07/go-sync-cond/
