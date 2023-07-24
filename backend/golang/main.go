@@ -16,6 +16,7 @@ func main() {
 	go func() {
 		// this goroutine wait for changes to the sharedSrc
 		c.L.Lock()
+		fmt.Println("goroutine1.lock")
 		for sharedRsc == false {
 			fmt.Println("goroutine1 wait")
 			c.Wait()
@@ -26,6 +27,7 @@ func main() {
 
 	go func() {
 		c.L.Lock()
+		fmt.Println("goroutine2.lock")
 		for sharedRsc == false {
 			fmt.Println("goroutine2 wait")
 			c.Wait()
@@ -36,12 +38,10 @@ func main() {
 
 	// this one writes changes to sharedRsc
 	time.Sleep(2 * time.Second)
-	c.L.Lock()
-	fmt.Println("main goroutine ready")
+	fmt.Println("main.lock")
 	sharedRsc = true
 	c.Signal()
-	fmt.Println("main goroutine broadcast")
-	c.L.Unlock()
+	// fmt.Println("main goroutine broadcast")
 
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt)
