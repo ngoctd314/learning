@@ -1,0 +1,57 @@
+## Lession 1: Tổng quan hệ thống gs, nguyên tắc sd, tích hợp, usecase
+
+### Định nghĩa, nhiệm vụ, vai trò
+Thu thập dữ liệu
+
+Metrics: Do
+Traces: Where
+Logs: What
+
+Metrics, Traces, Logs liên quan đến nhau
+
+Phát hiện, cảnh báo sự cố 
+Đo lường chất lượng dịch vụ
+Theo dõi các chỉ số hệ thống
+
+Infra dept: vận hành, quản trị, tích hợp và xây dựng các công cụ, giải pháp giám sát cho toàn bộ hạ tầng
+Quality management: Thực hiện giám sát, đo lường chất lượng dịch vụ điều phôi các bên xử lý, thống kê, báo cáo chất lượng cho toàn bộ dịch vụ
+Product owner: Theo dõi sức khỏe dịch vụ, ứng dụng dựa vào các màn giám sát tập trung, tối ưu và khắc phục các sự cố từ hệ thống giám sát.
+
+Chuẩn hóa loggin đối với ứng dụng
+- Log phải định dạng json
+- Log phải có tối thiểu các trường thông tin quy định theo bộ tài liệu 
+- Bỏ thoogn tin nhạy cảm trừ khi có cơ chế masking.
+- Log level
+- Tiết kiệm
+
+Tiếp nhận và xử lý cảnh báo
+- Xác nhận người tiếp nhận và xử lý cảnh báo
+- Kiểm tra hợp lệ cảnh báo
+- Phân loại và nhận cảnh báo
+- Đưa ra hướng xử lý và giải pháp
+- Theo dõi và đánh giá hiệu qủa
+
+Metrics:
+grafana.ghtk.vn
+pmm.ghtklab.com
+pingcheck2.ghtklab.com
+pingcheck1.ghtklab.com
+
+Logs:
+hwmonitor
+net-
+
+Tracings:
+
+kibana.ghtk.vn
+Hệ thống cho phép tìm kiếm được thông tin logs, metric của ứng dụng, từ đó xác định số lượng API cũng như API nào bị slow URL.
+
+### Quy tắc trong sử dụng và tích hợp
+
+### Tools
+
+### Usecase
+
+## Lession 2: Tools infras, hardware, network
+
+## Lession 3: Tools software
