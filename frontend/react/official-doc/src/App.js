@@ -1,12 +1,19 @@
+import { createContext } from "react";
 import "./App.css";
-import { Accordion } from "./LiftingStateUp";
+import { Heading } from "./Heading";
+import { Section } from "./Section";
+
+export const LevelContext = createContext(1);
 
 // App root
 function App() {
 	return (
-		<>
-			<Accordion />
-		</>
+		<div>
+			<h1>Hello</h1>
+			<Section level={5}>
+				<Heading />
+			</Section>
+		</div>
 	);
 }
 

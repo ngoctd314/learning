@@ -22,3 +22,49 @@ func (r Recursion) PowXN(x float64, n int) float64 {
 
 	return cache * cache * x
 }
+
+func (r Recursion) mergeTwoLists(list1 *ListNode, list2 *ListNode) *ListNode {
+	var rs *ListNode
+	rs = new(ListNode)
+	if list1 == nil {
+		return list2
+	}
+	if list2 == nil {
+		return list1
+	}
+
+	if list1.Val < list2.Val {
+		rs.Val = list1.Val
+		list1 = list1.Next
+	} else {
+		rs.Val = list2.Val
+		list2 = list2.Next
+	}
+
+	var cur *ListNode = rs
+	for list1 != nil && list2 != nil {
+		newTmp := new(ListNode)
+		if list1.Val <= list2.Val {
+			newTmp.Val = list1.Val
+			list1 = list1.Next
+		} else {
+			newTmp.Val = list2.Val
+			list2 = list2.Next
+		}
+		cur.Next = newTmp
+		cur = cur.Next
+	}
+
+	if list1 == nil {
+		cur.Next = list2
+	}
+	if list2 == nil {
+		cur.Next = list1
+	}
+
+	return rs
+}
+
+func (r Recursion) swapPairs(head *ListNode) *ListNode {
+	return nil
+}

@@ -5,11 +5,6 @@ import (
 	"strconv"
 )
 
-type ListNode struct {
-	Val  int
-	Next *ListNode
-}
-
 func addTwoNumbers(l1 *ListNode, l2 *ListNode) *ListNode {
 	s1, s2 := "", ""
 	for l1 != nil || l2 != nil {
