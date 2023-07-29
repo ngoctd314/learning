@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"log"
+	"sync"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -26,9 +28,57 @@ func init() {
 }
 
 func main() {
-	// execPhantomRead()
-	seedDeadlock()
-	execDeadLock()
+	// _, err := db.Exec("INSERT INTO stock_prices (stock_id, date) VALUES(4, '2002-05-01')")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// _, err = db.Exec("INSERT INTO stock_prices (stock_id, date) VALUES(3, '2002-05-02')")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		tx, _ := db.BeginTxx(ctx, &sql.TxOptions{
+			Isolation: sql.LevelSerializable,
+		})
+		_, err := tx.Exec("UPDATE stock_prices SET close = 10 WHERE stock_id = 4 AND date = '2002-05-01'")
+		if err != nil {
+			tx.Rollback()
+			return
+		}
+		_, err = tx.Exec("UPDATE stock_prices SET close = 20 WHERE stock_id = 3 AND date = '2002-05-02'")
+		if err != nil {
+			tx.Rollback()
+			return
+		}
+		tx.Commit()
+	}()
+	go func() {
+		defer wg.Done()
+		tx, _ := db.BeginTxx(ctx, &sql.TxOptions{
+			Isolation: sql.LevelSerializable,
+		})
+		_, err := tx.Exec("UPDATE stock_prices SET close = 21 WHERE stock_id = 3 AND date = '2002-05-02'")
+		if err != nil {
+			tx.Rollback()
+			return
+		}
+		_, err = tx.Exec("UPDATE stock_prices SET close = 11 WHERE stock_id = 4 AND date = '2002-05-01'")
+		if err != nil {
+			tx.Rollback()
+			return
+		}
+		tx.Commit()
+	}()
+	wg.Wait()
+}
+
+type stock struct {
+	StockID int     `db:"stock_id"`
+	Date    int     `db:"date"`
+	Close   float64 `db:"close"`
 }
 
 // Test ...
