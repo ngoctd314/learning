@@ -108,3 +108,181 @@ func TestRecursion_mergeTwoLists(t *testing.T) {
 		})
 	}
 }
+
+func TestRecursion_sumUpN(t *testing.T) {
+	type args struct {
+		n int
+	}
+	tests := []struct {
+		name string
+		r    Recursion
+		args args
+		want int
+	}{
+		{
+			name: "Test1",
+			r:    Recursion{},
+			args: args{
+				n: 5,
+			},
+			want: 15,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := Recursion{}
+			if got := r.sumUpN(tt.args.n); got != tt.want {
+				t.Errorf("Recursion.sumUpN() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestRecursion_uniquePathMatrix(t *testing.T) {
+	type args struct {
+		n int
+		m int
+	}
+	tests := []struct {
+		name string
+		r    Recursion
+		args args
+		want int
+	}{
+		{
+			name: "Test1",
+			r:    Recursion{},
+			args: args{
+				n: 2,
+				m: 4,
+			},
+			want: 4,
+		},
+		{
+			name: "Test2",
+			r:    Recursion{},
+			args: args{
+				n: 3,
+				m: 3,
+			},
+			want: 6,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := Recursion{}
+			if got := r.uniquePathMatrix(tt.args.n, tt.args.m); got != tt.want {
+				t.Errorf("Recursion.uniquePathMatrix() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestRecursion_swapPairs(t *testing.T) {
+	type args struct {
+		head *ListNode
+	}
+	tests := []struct {
+		name string
+		r    Recursion
+		args args
+		want *ListNode
+	}{
+		{
+			name: "Test1",
+			r:    Recursion{},
+			args: args{
+				head: &ListNode{
+					Val: 1,
+					Next: &ListNode{
+						Val: 2,
+						Next: &ListNode{
+							Val: 3,
+							Next: &ListNode{
+								Val:  4,
+								Next: nil,
+							},
+						},
+					},
+				},
+			},
+			want: &ListNode{
+				Val: 2,
+				Next: &ListNode{
+					Val: 1,
+					Next: &ListNode{
+						Val: 4,
+						Next: &ListNode{
+							Val:  3,
+							Next: nil,
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Test2",
+			r:    Recursion{},
+			args: args{
+				head: &ListNode{},
+			},
+			want: &ListNode{},
+		},
+		{
+			name: "Test3",
+			r:    Recursion{},
+			args: args{
+				head: &ListNode{
+					Val: 1,
+				},
+			},
+			want: &ListNode{
+				Val: 1,
+			},
+		},
+		{
+			name: "Test4",
+			r:    Recursion{},
+			args: args{
+				head: &ListNode{
+					Val: 1,
+					Next: &ListNode{
+						Val: 2,
+						Next: &ListNode{
+							Val: 3,
+							Next: &ListNode{
+								Val: 4,
+								Next: &ListNode{
+									Val: 5,
+								},
+							},
+						},
+					},
+				},
+			},
+			want: &ListNode{
+				Val: 2,
+				Next: &ListNode{
+					Val: 1,
+					Next: &ListNode{
+						Val: 4,
+						Next: &ListNode{
+							Val: 3,
+							Next: &ListNode{
+								Val: 5,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := Recursion{}
+			if got := r.swapPairs(tt.args.head); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Recursion.swapPairs() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
