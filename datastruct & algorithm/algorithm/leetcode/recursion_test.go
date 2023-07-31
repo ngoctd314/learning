@@ -280,8 +280,275 @@ func TestRecursion_swapPairs(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := Recursion{}
-			if got := r.swapPairs(tt.args.head); !reflect.DeepEqual(got, tt.want) {
+			if got := r.swapPairsBruteForce(tt.args.head); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Recursion.swapPairs() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestRecursion_swapPairsRecursive(t *testing.T) {
+	type args struct {
+		head *ListNode
+	}
+	tests := []struct {
+		name string
+		r    Recursion
+		args args
+		want *ListNode
+	}{
+		{
+			name: "Test1",
+			r:    Recursion{},
+			args: args{
+				head: &ListNode{
+					Val: 1,
+					Next: &ListNode{
+						Val: 2,
+					},
+				},
+			},
+			want: &ListNode{
+				Val: 2,
+				Next: &ListNode{
+					Val: 1,
+				},
+			},
+		},
+		{
+			name: "Test4",
+			r:    Recursion{},
+			args: args{
+				head: &ListNode{
+					Val: 1,
+					Next: &ListNode{
+						Val: 2,
+						Next: &ListNode{
+							Val: 3,
+							Next: &ListNode{
+								Val: 4,
+								Next: &ListNode{
+									Val: 5,
+								},
+							},
+						},
+					},
+				},
+			},
+			want: &ListNode{
+				Val: 2,
+				Next: &ListNode{
+					Val: 1,
+					Next: &ListNode{
+						Val: 4,
+						Next: &ListNode{
+							Val: 3,
+							Next: &ListNode{
+								Val: 5,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := Recursion{}
+			if got := r.swapPairsRecursive(tt.args.head); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Recursion.swapPairsRecursive() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestRecursion_reverseKGroupRecursive(t *testing.T) {
+	type args struct {
+		head *ListNode
+		k    int
+	}
+	tests := []struct {
+		name string
+		r    Recursion
+		args args
+		want *ListNode
+	}{
+		{
+			name: "Test1",
+			r:    Recursion{},
+			args: args{
+				head: &ListNode{
+					Val: 1,
+					Next: &ListNode{
+						Val: 2,
+						Next: &ListNode{
+							Val: 3,
+							Next: &ListNode{
+								Val: 4,
+								Next: &ListNode{
+									Val: 5,
+								},
+							},
+						},
+					},
+				},
+				k: 2,
+			},
+			want: &ListNode{
+				Val: 2,
+				Next: &ListNode{
+					Val: 1,
+					Next: &ListNode{
+						Val: 4,
+						Next: &ListNode{
+							Val: 3,
+							Next: &ListNode{
+								Val: 5,
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Test2",
+			r:    Recursion{},
+			args: args{
+				head: &ListNode{
+					Val: 1,
+					Next: &ListNode{
+						Val: 2,
+						Next: &ListNode{
+							Val: 3,
+							Next: &ListNode{
+								Val: 4,
+								Next: &ListNode{
+									Val: 5,
+								},
+							},
+						},
+					},
+				},
+				k: 3,
+			},
+			want: &ListNode{
+				Val: 3,
+				Next: &ListNode{
+					Val: 2,
+					Next: &ListNode{
+						Val: 1,
+						Next: &ListNode{
+							Val: 4,
+							Next: &ListNode{
+								Val: 5,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := Recursion{}
+			if got := r.reverseKGroupRecursive(tt.args.head, tt.args.k); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Recursion.reverseKGroupRecursive() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestRecursion_reverseKGroupIter(t *testing.T) {
+	type args struct {
+		head *ListNode
+		k    int
+	}
+	tests := []struct {
+		name string
+		r    Recursion
+		args args
+		want *ListNode
+	}{
+		{
+			name: "Test1",
+			r:    Recursion{},
+			args: args{
+				head: &ListNode{
+					Val: 1,
+					Next: &ListNode{
+						Val: 2,
+						Next: &ListNode{
+							Val: 3,
+							Next: &ListNode{
+								Val: 4,
+								Next: &ListNode{
+									Val: 5,
+								},
+							},
+						},
+					},
+				},
+				k: 2,
+			},
+			want: &ListNode{
+				Val: 2,
+				Next: &ListNode{
+					Val: 1,
+					Next: &ListNode{
+						Val: 4,
+						Next: &ListNode{
+							Val: 3,
+							Next: &ListNode{
+								Val: 5,
+							},
+						},
+					},
+				},
+			},
+		},
+		// {
+		// 	name: "Test2",
+		// 	r:    Recursion{},
+		// 	args: args{
+		// 		head: &ListNode{
+		// 			Val: 1,
+		// 			Next: &ListNode{
+		// 				Val: 2,
+		// 				Next: &ListNode{
+		// 					Val: 3,
+		// 					Next: &ListNode{
+		// 						Val: 4,
+		// 						Next: &ListNode{
+		// 							Val: 5,
+		// 						},
+		// 					},
+		// 				},
+		// 			},
+		// 		},
+		// 		k: 3,
+		// 	},
+		// 	want: &ListNode{
+		// 		Val: 3,
+		// 		Next: &ListNode{
+		// 			Val: 2,
+		// 			Next: &ListNode{
+		// 				Val: 1,
+		// 				Next: &ListNode{
+		// 					Val: 4,
+		// 					Next: &ListNode{
+		// 						Val: 5,
+		// 					},
+		// 				},
+		// 			},
+		// 		},
+		// 	},
+		// },
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := Recursion{}
+			if got := r.reverseKGroupIter(tt.args.head, tt.args.k); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Recursion.reverseKGroupIter() = %v, want %v", got, tt.want)
 			}
 		})
 	}
