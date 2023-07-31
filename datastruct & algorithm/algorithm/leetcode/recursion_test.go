@@ -286,3 +286,98 @@ func TestRecursion_swapPairs(t *testing.T) {
 		})
 	}
 }
+func TestRecursion_reorderListRecursive(t *testing.T) {
+	type args struct {
+		head *ListNode
+	}
+	tests := []struct {
+		name string
+		r    Recursion
+		args args
+	}{
+		{
+			name: "Test1",
+			r:    Recursion{},
+			args: args{
+				head: &ListNode{
+					Val: 1,
+					Next: &ListNode{
+						Val: 2,
+						Next: &ListNode{
+							Val: 3,
+							Next: &ListNode{
+								Val: 4,
+								Next: &ListNode{
+									Val: 5,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		// {
+		// 	name: "Test2",
+		// 	r:    Recursion{},
+		// 	args: args{
+		// 		head: &ListNode{
+		// 			Val: 1,
+		// 		},
+		// 	},
+		// },
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := Recursion{}
+			r.reorderListRecursion(tt.args.head)
+		})
+	}
+}
+
+func TestRecursion_reorderListIter(t *testing.T) {
+	type args struct {
+		head *ListNode
+	}
+	tests := []struct {
+		name string
+		r    Recursion
+		args args
+	}{
+		{
+			name: "Test1",
+			r:    Recursion{},
+			args: args{
+				head: &ListNode{
+					Val: 1,
+					Next: &ListNode{
+						Val: 2,
+						Next: &ListNode{
+							Val: 3,
+							Next: &ListNode{
+								Val: 4,
+								Next: &ListNode{
+									Val: 5,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Test2",
+			r:    Recursion{},
+			args: args{
+				head: &ListNode{
+					Val: 1,
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := Recursion{}
+			r.reorderListIter(tt.args.head)
+		})
+	}
+}

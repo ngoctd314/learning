@@ -138,6 +138,73 @@ func (r Recursion) getPermutationRecursion(n int, k int) string {
 	return ""
 }
 
+func (r Recursion) reorderListRecursion(head *ListNode) {
+	var tail, prevTail *ListNode
+	tail = head
+	if tail == nil || tail.Next == nil || tail.Next.Next == nil {
+		return
+	}
+	for ; tail.Next != nil; tail = tail.Next {
+		prevTail = tail
+	}
+	if prevTail != nil {
+		prevTail.Next = nil
+	}
+
+	chain := head.Next
+	head.Next = tail
+
+	r.reorderListRecursion(chain)
+	head.Next.Next = chain
+}
+
+func (r Recursion) reorderListIter(head *ListNode) {
+	var l []int
+	cur := head
+	for cur.Next != nil {
+		l = append(l, cur.Val)
+		prev := cur
+		cur = cur.Next
+		prev.Next = nil
+		prev = nil
+	}
+	if cur != nil {
+		l = append(l, cur.Val)
+		cur = nil
+	}
+	if len(l) == 1 {
+		return
+	}
+
+	var tmp *ListNode
+	for i := 0; i < len(l)/2; i++ {
+		ft := &ListNode{
+			Val: l[i],
+		}
+		lt := &ListNode{
+			Val: l[len(l)-i-1],
+		}
+		if i == 0 {
+			tmp = ft
+			tmp.Next = lt
+		} else {
+			cur.Next = ft
+			cur.Next.Next = lt
+		}
+		cur = lt
+	}
+
+	if len(l)%2 == 1 {
+		cur.Next = &ListNode{
+			Val: l[len(l)/2],
+		}
+	}
+	data, _ := json.Marshal(tmp)
+	fmt.Println(string(data))
+
+	*head = *tmp
+}
+
 func (r Recursion) numberOfPartitionNObject(n, m int) int {
 	// https://www.youtube.com/watch?v=ngCos392W4w&t=677s
 	return 0
