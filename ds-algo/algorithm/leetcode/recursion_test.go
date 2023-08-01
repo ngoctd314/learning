@@ -280,13 +280,18 @@ func TestRecursion_swapPairs(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := Recursion{}
-			if got := r.swapPairs(tt.args.head); !reflect.DeepEqual(got, tt.want) {
+			if got := r.swapPairsBruteForce(tt.args.head); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Recursion.swapPairs() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
+<<<<<<< HEAD:datastruct & algorithm/algorithm/leetcode/recursion_test.go
+
+func TestRecursion_swapPairsRecursive(t *testing.T) {
+=======
 func TestRecursion_reorderListRecursive(t *testing.T) {
+>>>>>>> a1a3bd399127b5436a1a8833265fad42012b22f8:ds-algo/algorithm/leetcode/recursion_test.go
 	type args struct {
 		head *ListNode
 	}
@@ -294,6 +299,115 @@ func TestRecursion_reorderListRecursive(t *testing.T) {
 		name string
 		r    Recursion
 		args args
+<<<<<<< HEAD:datastruct & algorithm/algorithm/leetcode/recursion_test.go
+		want *ListNode
+=======
+>>>>>>> a1a3bd399127b5436a1a8833265fad42012b22f8:ds-algo/algorithm/leetcode/recursion_test.go
+	}{
+		{
+			name: "Test1",
+			r:    Recursion{},
+			args: args{
+				head: &ListNode{
+					Val: 1,
+					Next: &ListNode{
+						Val: 2,
+<<<<<<< HEAD:datastruct & algorithm/algorithm/leetcode/recursion_test.go
+					},
+				},
+			},
+			want: &ListNode{
+				Val: 2,
+				Next: &ListNode{
+					Val: 1,
+				},
+			},
+		},
+		{
+			name: "Test4",
+			r:    Recursion{},
+			args: args{
+				head: &ListNode{
+					Val: 1,
+					Next: &ListNode{
+						Val: 2,
+=======
+>>>>>>> a1a3bd399127b5436a1a8833265fad42012b22f8:ds-algo/algorithm/leetcode/recursion_test.go
+						Next: &ListNode{
+							Val: 3,
+							Next: &ListNode{
+								Val: 4,
+								Next: &ListNode{
+									Val: 5,
+								},
+							},
+						},
+					},
+				},
+			},
+<<<<<<< HEAD:datastruct & algorithm/algorithm/leetcode/recursion_test.go
+			want: &ListNode{
+				Val: 2,
+				Next: &ListNode{
+					Val: 1,
+					Next: &ListNode{
+						Val: 4,
+						Next: &ListNode{
+							Val: 3,
+							Next: &ListNode{
+								Val: 5,
+							},
+						},
+					},
+				},
+			},
+		},
+=======
+		},
+		// {
+		// 	name: "Test2",
+		// 	r:    Recursion{},
+		// 	args: args{
+		// 		head: &ListNode{
+		// 			Val: 1,
+		// 		},
+		// 	},
+		// },
+>>>>>>> a1a3bd399127b5436a1a8833265fad42012b22f8:ds-algo/algorithm/leetcode/recursion_test.go
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := Recursion{}
+<<<<<<< HEAD:datastruct & algorithm/algorithm/leetcode/recursion_test.go
+			if got := r.swapPairsRecursive(tt.args.head); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Recursion.swapPairsRecursive() = %v, want %v", got, tt.want)
+			}
+=======
+			r.reorderListRecursion(tt.args.head)
+>>>>>>> a1a3bd399127b5436a1a8833265fad42012b22f8:ds-algo/algorithm/leetcode/recursion_test.go
+		})
+	}
+}
+
+<<<<<<< HEAD:datastruct & algorithm/algorithm/leetcode/recursion_test.go
+func TestRecursion_reverseKGroupRecursive(t *testing.T) {
+	type args struct {
+		head *ListNode
+		k    int
+=======
+func TestRecursion_reorderListIter(t *testing.T) {
+	type args struct {
+		head *ListNode
+>>>>>>> a1a3bd399127b5436a1a8833265fad42012b22f8:ds-algo/algorithm/leetcode/recursion_test.go
+	}
+	tests := []struct {
+		name string
+		r    Recursion
+		args args
+<<<<<<< HEAD:datastruct & algorithm/algorithm/leetcode/recursion_test.go
+		want *ListNode
+=======
+>>>>>>> a1a3bd399127b5436a1a8833265fad42012b22f8:ds-algo/algorithm/leetcode/recursion_test.go
 	}{
 		{
 			name: "Test1",
@@ -310,6 +424,122 @@ func TestRecursion_reorderListRecursive(t *testing.T) {
 								Next: &ListNode{
 									Val: 5,
 								},
+							},
+						},
+					},
+				},
+<<<<<<< HEAD:datastruct & algorithm/algorithm/leetcode/recursion_test.go
+				k: 2,
+			},
+			want: &ListNode{
+				Val: 2,
+				Next: &ListNode{
+					Val: 1,
+					Next: &ListNode{
+						Val: 4,
+						Next: &ListNode{
+							Val: 3,
+							Next: &ListNode{
+								Val: 5,
+							},
+						},
+					},
+				},
+=======
+>>>>>>> a1a3bd399127b5436a1a8833265fad42012b22f8:ds-algo/algorithm/leetcode/recursion_test.go
+			},
+		},
+		{
+			name: "Test2",
+			r:    Recursion{},
+			args: args{
+				head: &ListNode{
+					Val: 1,
+<<<<<<< HEAD:datastruct & algorithm/algorithm/leetcode/recursion_test.go
+					Next: &ListNode{
+						Val: 2,
+						Next: &ListNode{
+							Val: 3,
+							Next: &ListNode{
+								Val: 4,
+								Next: &ListNode{
+									Val: 5,
+								},
+							},
+						},
+					},
+				},
+				k: 3,
+			},
+			want: &ListNode{
+				Val: 3,
+				Next: &ListNode{
+					Val: 2,
+					Next: &ListNode{
+						Val: 1,
+						Next: &ListNode{
+							Val: 4,
+							Next: &ListNode{
+								Val: 5,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := Recursion{}
+			if got := r.reverseKGroupRecursive(tt.args.head, tt.args.k); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Recursion.reverseKGroupRecursive() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestRecursion_reverseKGroupIter(t *testing.T) {
+	type args struct {
+		head *ListNode
+		k    int
+	}
+	tests := []struct {
+		name string
+		r    Recursion
+		args args
+		want *ListNode
+	}{
+		{
+			name: "Test1",
+			r:    Recursion{},
+			args: args{
+				head: &ListNode{
+					Val: 1,
+					Next: &ListNode{
+						Val: 2,
+						Next: &ListNode{
+							Val: 3,
+							Next: &ListNode{
+								Val: 4,
+								Next: &ListNode{
+									Val: 5,
+								},
+							},
+						},
+					},
+				},
+				k: 2,
+			},
+			want: &ListNode{
+				Val: 2,
+				Next: &ListNode{
+					Val: 1,
+					Next: &ListNode{
+						Val: 4,
+						Next: &ListNode{
+							Val: 3,
+							Next: &ListNode{
+								Val: 5,
 							},
 						},
 					},
@@ -322,62 +552,53 @@ func TestRecursion_reorderListRecursive(t *testing.T) {
 		// 	args: args{
 		// 		head: &ListNode{
 		// 			Val: 1,
+		// 			Next: &ListNode{
+		// 				Val: 2,
+		// 				Next: &ListNode{
+		// 					Val: 3,
+		// 					Next: &ListNode{
+		// 						Val: 4,
+		// 						Next: &ListNode{
+		// 							Val: 5,
+		// 						},
+		// 					},
+		// 				},
+		// 			},
+		// 		},
+		// 		k: 3,
+		// 	},
+		// 	want: &ListNode{
+		// 		Val: 3,
+		// 		Next: &ListNode{
+		// 			Val: 2,
+		// 			Next: &ListNode{
+		// 				Val: 1,
+		// 				Next: &ListNode{
+		// 					Val: 4,
+		// 					Next: &ListNode{
+		// 						Val: 5,
+		// 					},
+		// 				},
+		// 			},
 		// 		},
 		// 	},
 		// },
+=======
+				},
+			},
+		},
+>>>>>>> a1a3bd399127b5436a1a8833265fad42012b22f8:ds-algo/algorithm/leetcode/recursion_test.go
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := Recursion{}
-			r.reorderListRecursion(tt.args.head)
-		})
-	}
-}
-
-func TestRecursion_reorderListIter(t *testing.T) {
-	type args struct {
-		head *ListNode
-	}
-	tests := []struct {
-		name string
-		r    Recursion
-		args args
-	}{
-		{
-			name: "Test1",
-			r:    Recursion{},
-			args: args{
-				head: &ListNode{
-					Val: 1,
-					Next: &ListNode{
-						Val: 2,
-						Next: &ListNode{
-							Val: 3,
-							Next: &ListNode{
-								Val: 4,
-								Next: &ListNode{
-									Val: 5,
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		{
-			name: "Test2",
-			r:    Recursion{},
-			args: args{
-				head: &ListNode{
-					Val: 1,
-				},
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			r := Recursion{}
+<<<<<<< HEAD:datastruct & algorithm/algorithm/leetcode/recursion_test.go
+			if got := r.reverseKGroupIter(tt.args.head, tt.args.k); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Recursion.reverseKGroupIter() = %v, want %v", got, tt.want)
+			}
+=======
 			r.reorderListIter(tt.args.head)
+>>>>>>> a1a3bd399127b5436a1a8833265fad42012b22f8:ds-algo/algorithm/leetcode/recursion_test.go
 		})
 	}
 }

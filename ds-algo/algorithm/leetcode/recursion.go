@@ -1,10 +1,5 @@
 package main
 
-import (
-	"encoding/json"
-	"fmt"
-)
-
 type Recursion struct{}
 
 // Time complex: O(logn)
@@ -70,7 +65,7 @@ func (r Recursion) mergeTwoLists(list1 *ListNode, list2 *ListNode) *ListNode {
 	return rs
 }
 
-func (r Recursion) swapPairs(head *ListNode) *ListNode {
+func (r Recursion) swapPairsBruteForce(head *ListNode) *ListNode {
 	cur := head
 	prev := head
 	for cur != nil && cur.Next != nil {
@@ -88,8 +83,15 @@ func (r Recursion) swapPairs(head *ListNode) *ListNode {
 		prev = cur
 		cur = prev.Next
 	}
-	data, _ := json.Marshal(head)
-	fmt.Println(string(data))
+
+	return head
+}
+
+func (r Recursion) swapPairsRecursive(head *ListNode) *ListNode {
+	if head == nil || head.Next == nil {
+		return head
+	}
+	head, head.Next.Next, head.Next = head.Next, head, r.swapPairsRecursive(head.Next.Next)
 
 	return head
 }
@@ -134,6 +136,79 @@ func (r Recursion) uniquePathMatrix(n, m int) int {
 	return r.uniquePathMatrix(n-1, m) + r.uniquePathMatrix(n, m-1)
 }
 
+<<<<<<< HEAD:datastruct & algorithm/algorithm/leetcode/recursion.go
+func (r Recursion) reverseKGroupRecursive(head *ListNode, k int) *ListNode {
+	n := k
+	var st []*ListNode
+	cur := head
+	for n > 0 {
+		n--
+		st = append(st, cur)
+		if cur == nil {
+			break
+		}
+		cur = cur.Next
+	}
+	var rev *ListNode
+	for i := len(st) - 1; i >= 0; i-- {
+		if st[i] == nil {
+			return head
+		}
+		newNode := new(ListNode)
+		newNode.Val = st[i].Val
+		if rev == nil {
+			rev = newNode
+		} else {
+			cur.Next = newNode
+		}
+		cur = newNode
+	}
+	cur.Next = r.reverseKGroupRecursive(st[len(st)-1].Next, k)
+
+	return rev
+}
+
+func (r Recursion) reverseKGroupIter(head *ListNode, k int) *ListNode {
+	var ls []*ListNode
+	cur := head
+	for ; cur.Next != nil; cur = cur.Next {
+		ls = append(ls, cur)
+	}
+	ls = append(ls, cur)
+
+	var rs *ListNode
+	i := 0
+	for ; i+k < len(ls); i += k {
+		var rev *ListNode
+		for j := k - 1; j >= 0; j-- {
+			newNode := new(ListNode)
+			newNode.Val = ls[i+j].Val
+
+			if rev == nil {
+				rev = newNode
+			} else {
+				rev.Next = newNode
+			}
+		}
+		if rs == nil {
+			rs = rev
+		} else {
+			cur := rs
+			for ; cur.Next != nil; cur = cur.Next {
+			}
+			cur.Next = rev
+		}
+	}
+	cur = rs
+	for ; cur.Next != nil; cur = cur.Next {
+	}
+	for j := i; j < len(ls); j++ {
+		cur.Next = ls[j]
+		cur = cur.Next
+	}
+
+	return rs
+=======
 func (r Recursion) getPermutationRecursion(n int, k int) string {
 	return ""
 }
@@ -203,6 +278,7 @@ func (r Recursion) reorderListIter(head *ListNode) {
 	fmt.Println(string(data))
 
 	*head = *tmp
+>>>>>>> a1a3bd399127b5436a1a8833265fad42012b22f8:ds-algo/algorithm/leetcode/recursion.go
 }
 
 func (r Recursion) numberOfPartitionNObject(n, m int) int {
