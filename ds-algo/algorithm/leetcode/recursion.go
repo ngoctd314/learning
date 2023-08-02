@@ -1,5 +1,10 @@
 package main
 
+import (
+	"encoding/json"
+	"fmt"
+)
+
 type Recursion struct{}
 
 // Time complex: O(logn)
@@ -136,7 +141,6 @@ func (r Recursion) uniquePathMatrix(n, m int) int {
 	return r.uniquePathMatrix(n-1, m) + r.uniquePathMatrix(n, m-1)
 }
 
-<<<<<<< HEAD:datastruct & algorithm/algorithm/leetcode/recursion.go
 func (r Recursion) reverseKGroupRecursive(head *ListNode, k int) *ListNode {
 	n := k
 	var st []*ListNode
@@ -208,7 +212,8 @@ func (r Recursion) reverseKGroupIter(head *ListNode, k int) *ListNode {
 	}
 
 	return rs
-=======
+}
+
 func (r Recursion) getPermutationRecursion(n int, k int) string {
 	return ""
 }
@@ -278,10 +283,51 @@ func (r Recursion) reorderListIter(head *ListNode) {
 	fmt.Println(string(data))
 
 	*head = *tmp
->>>>>>> a1a3bd399127b5436a1a8833265fad42012b22f8:ds-algo/algorithm/leetcode/recursion.go
+}
+
+func (r Recursion) reverseListRecursion(head *ListNode) *ListNode {
+	if head == nil || head.Next == nil {
+		return head
+	}
+
+	sub := head.Next.Next
+	ft, lt := head, head.Next
+	head = lt
+	head.Next = ft
+	ft.Next = nil
+
+	rs := r.reverseListRecursion(sub)
+	if rs != nil {
+		cur := rs
+		for ; cur.Next != nil; cur = cur.Next {
+		}
+		cur.Next = head
+	} else {
+		rs = head
+	}
+
+	data, _ := json.Marshal(rs)
+	fmt.Println(string(data))
+
+	return rs
+}
+
+func (r Recursion) calculateRecursion(s string) int {
+	return 0
 }
 
 func (r Recursion) numberOfPartitionNObject(n, m int) int {
 	// https://www.youtube.com/watch?v=ngCos392W4w&t=677s
+	return 0
+}
+
+func (r Recursion) removeElements(head *ListNode, val int) *ListNode {
+	return nil
+}
+
+func (r Recursion) countDigitOneBruteForce(n int) int {
+	// 11 101 102 103 134
+	fmt.Println(11 & 10)
+
 	return 0
 }
