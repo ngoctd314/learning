@@ -2,11 +2,9 @@ package main
 
 import (
 	"context"
+	"crypto/md5"
 	"fmt"
 	"log"
-	"os"
-	"os/signal"
-	"security/csrf"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -28,17 +26,10 @@ func init() {
 }
 
 func main() {
-	// go sqlinjection.APIServer(db)
-	go csrf.Run(db)
+	hash := md5.New()
+	rs := hash.Sum([]byte("randomHello World"))
+	fmt.Printf("random_%x", md5.Sum(rs))
 
-	// seed()
-
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, os.Interrupt)
-	select {
-	case <-sig:
-		fmt.Println("Bye")
-	}
 }
 
 // User model
