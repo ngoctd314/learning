@@ -456,3 +456,32 @@ func TestRecursion_reverseListRecursion(t *testing.T) {
 		})
 	}
 }
+
+func TestRecursion_countDigitOne(t *testing.T) {
+	type args struct {
+		n int
+	}
+	tests := []struct {
+		name string
+		r    Recursion
+		args args
+		want int
+	}{
+		{
+			name: "Test1",
+			r:    Recursion{},
+			args: args{
+				n: 13,
+			},
+			want: 6,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := Recursion{}
+			if got := r.countDigitOneBruteForce(tt.args.n); got != tt.want {
+				t.Errorf("Recursion.countDigitOne() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

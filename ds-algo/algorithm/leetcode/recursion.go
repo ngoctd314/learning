@@ -324,3 +324,10 @@ func (r Recursion) numberOfPartitionNObject(n, m int) int {
 func (r Recursion) removeElements(head *ListNode, val int) *ListNode {
 	return nil
 }
+
+func (r Recursion) countDigitOneBruteForce(n int) int {
+	// 11 101 102 103 134
+	fmt.Println(11 & 10)
+
+	return 0
+}
