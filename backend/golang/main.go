@@ -2,100 +2,54 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"os/signal"
-	"sync"
+	"runtime"
 	"time"
 )
 
-var sharedRsc = false
+var empty = struct{}{}
 
 func main() {
-	m := sync.Mutex{}
-	c := sync.NewCond(&m)
+	cnt := 0
 	go func() {
-		// this goroutine wait for changes to the sharedSrc
-		c.L.Lock()
-		fmt.Println("goroutine1.lock")
-		for sharedRsc == false {
-			fmt.Println("goroutine1 wait")
-			c.Wait()
-		}
-		fmt.Println("goroutine1", sharedRsc)
-		c.L.Unlock()
+		runtime.Gosched()
+		cnt = 1
 	}()
-
 	go func() {
-		c.L.Lock()
-		fmt.Println("goroutine2.lock")
-		for sharedRsc == false {
-			fmt.Println("goroutine2 wait")
-			c.Wait()
-		}
-		fmt.Println("goroutine2", sharedRsc)
-		c.L.Unlock()
+		cnt = 2
 	}()
 
-	// this one writes changes to sharedRsc
-	time.Sleep(2 * time.Second)
-	fmt.Println("main.lock")
-	sharedRsc = true
-	c.Signal()
-	// fmt.Println("main goroutine broadcast")
+	runtime.Gosched()
+	fmt.Println(cnt)
+	runtime.GC()
+	ls := []any{}
+	runtime.KeepAlive(ls)
+	runtime.SetFinalizer(nil, nil)
+	runtime.LockOSThread()
 
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, os.Interrupt)
-	select {
-	case <-sig:
-		fmt.Println("Bye bye")
-	}
 }
 
-func event() {
-	for conditionTrue() == false {
-		// cần 1 function hoặc cách gì đó để goroutine có thể sleep cho đến khi có 1 tín hiệu thực thi
-		time.Sleep(time.Millisecond)
-		fmt.Println("RUN")
-	}
-}
-
-var cnt = 0
-
-func conditionTrue() bool {
-	defer func() {
-		cnt++
+func dummy1() {
+	ch := make(chan struct{}, 1)
+	// Main goroutine deadlock after t seconds
+	t := time.Second * 2
+	now := time.Now()
+	go func() {
+		defer func() {
+			fmt.Printf("runtime.Goexit() after %s\n", time.Since(now).String())
+		}()
+		time.Sleep(t)
+		// Goexit terminates the goroutine that calls it. No other goroutine is affected.
+		// Goexit runs all deferred calls before terminating the goroutine. Because Goexit
+		// is not a panic, any recover calls in these deferred functions will return nil.
+		//
+		// Calling Goexit from the main goroutine terminates that goroutine
+		// without function main returning. Since func main has not returned
+		// the program continues execution of other goroutines
+		// If all other goroutines exit, the program crashes
+		runtime.Goexit()
+		ch <- empty
 	}()
 
-	return cnt == 10
+	<-ch
+	fmt.Println("DEADLOCK")
 }
-
-/*
-	c := sync.NewCond(&sync.Mutex{})
-	queue := make([]int, 0, 10)
-	removeFromQueue := func(delay time.Duration, i int) {
-		time.Sleep(delay)
-		c.L.Lock()
-		fmt.Println("before remove: ", queue)
-		queue = queue[1:]
-		fmt.Println("after remove: ", queue)
-		c.L.Unlock()
-		c.Signal()
-	}
-	for i := 0; i < 10; i++ {
-		fmt.Println("start loop;", i)
-		c.L.Lock()
-		for len(queue) == 2 {
-			fmt.Println("len equal 2, waiting", i)
-			c.Wait()
-		}
-		fmt.Println("adding to queue", i)
-		queue = append(queue, i)
-		go removeFromQueue(time.Second, i)
-		c.L.Unlock()
-		fmt.Println()
-	}
-	fmt.Println("after processing, len queue:", len(queue), queue)
-
-*/
-
-// https://www.sobyte.net/post/2022-07/go-sync-cond/
