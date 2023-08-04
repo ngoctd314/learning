@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"runtime"
 	"time"
 )
@@ -9,23 +10,38 @@ import (
 var empty = struct{}{}
 
 func main() {
+	runtime.ReadMemStats(nil)
+}
+
+func sched() int {
 	cnt := 0
 	go func() {
-		runtime.Gosched()
 		cnt = 1
 	}()
-	go func() {
-		cnt = 2
+	for {
+		if cnt == 0 {
+			runtime.Gosched()
+		} else {
+			break
+		}
+	}
+
+	return cnt
+}
+
+type goExit struct{}
+
+func (goExit) GetDeferFunc() {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Fatal(r)
+		}
+	}()
+	defer func() {
+		panic("defer panic")
 	}()
 
-	runtime.Gosched()
-	fmt.Println(cnt)
-	runtime.GC()
-	ls := []any{}
-	runtime.KeepAlive(ls)
-	runtime.SetFinalizer(nil, nil)
-	runtime.LockOSThread()
-
+	runtime.Goexit()
 }
 
 func dummy1() {

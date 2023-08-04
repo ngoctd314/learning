@@ -1,6 +1,6 @@
 # Go runtime
 
-runtime is a useful package that allows a programmer to control the behavior of runtime. It has many useful capabilities. A few of these that might be easily relatable are:
+runtime is a useful package that allows a programmer to control the behavior of runtime. It has many useful capabilities. A few of these that might be easily relatable are.
 
 ## runtime.Goexit()
 
@@ -9,9 +9,98 @@ Goexit runs all deferred calls before terminating the goroutine. Because Goexit 
 
 Calling Goexit from the main goroutine terminates that goroutine without func main returning. Since func main has not returned, the program continues execution of other goroutines. If all other goroutines exit, the program crashes.
 
+```go
+func Goexit() {
+    // Run all deferred functions to the current goroutine
+    // This code is similar to go-panic, see that implementation
+    // for detailed comments
+    gp := getg()
+
+    // Create a panic object for Goexit, so we can recognize when it might be bypassed by a recover()
+    var p _panic
+    p.goexit = true
+    p.link = gp._panic
+    gp._panic = (*_panic)(noescape(unsafe.Pointer(&p)))
+
+    addOneOpenDeferFrame(gp, getcallerpc(), unsafe.Pointer(getcallersp()))
+}
+```
+
 ## runtime.Gosched()
 
 Goscheda yields the processor, allowing other goroutines to run. It does not suspend the current goroutine, so execution resumes automatically.
+
+Without Gosched()
+```go
+func main() {
+	cnt0 := 0
+	cnt1 := 0
+	for i := 0; i < 1_000_000_0; i++ {
+		if sched() == 1 {
+			cnt1++
+		} else {
+			cnt0++
+		}
+	}
+	fmt.Println("cnt0: ", cnt0, " cnt1: ", cnt1)
+    // cnt0:  9999999  cnt1:  1
+}
+
+func sched() int {
+	cnt := 0
+	go func() {
+		cnt = 1
+	}()
+
+	return cnt
+}
+```
+
+With Gosched()
+```go
+func main() {
+	cnt0 := 0
+	cnt1 := 0
+	for i := 0; i < 1_000_000_0; i++ {
+		if sched() == 1 {
+			cnt1++
+		} else {
+			cnt0++
+		}
+	}
+	fmt.Println("cnt0: ", cnt0, " cnt1: ", cnt1)
+    // cnt0:  173946  cnt1:  9826054
+}
+
+func sched() int {
+	cnt := 0
+	go func() {
+		cnt = 1
+	}()
+	runtime.Gosched()
+
+	return cnt
+}
+```
+Another example
+
+```go
+func sched() int {
+	cnt := 0
+	go func() {
+		cnt = 1
+	}()
+	for {
+		if cnt == 0 {
+			runtime.Gosched()
+		} else {
+			break
+		}
+	}
+
+	return cnt
+}
+```
 
 ## runtime.GC()
 
@@ -25,9 +114,23 @@ KeepAlive marks its argument as currently reachable.
 
 ## runtime.LockOSThread()
 
-7. runtime.NumCPU()
+LockOSThread wires the calling goroutine to its current operating system thread. The calling goroutines will always execute in that thread, and no other goroutine will execute in it, until the calling goroutine has made as many calls to UnlockOSThread as to LockOSThread. If the calling goroutine exits without unlocking the thread, the thread will be terminated.
 
-8. runtime.ReadMemStats()
+All init functions are run on the startup thread. Calling LockOSThread from an init function will cause the main function to be invoked on that thread.
 
-Áng chiều phủ lên vai áo
-Anh thanh niên đỏ hoen
+A goroutine should call LockOSThread before calling OS services or non-Go library functions that depend on per-thread state.
+
+```go
+```
+
+## runtime.NumCPU()
+
+NumCPU returns the number of logical CPUs usable by the current process.
+
+The set of available CPUs is checked by querying the operating system at process startup. Changes to operating system CPU allocation after process startup are not reflected.
+
+## runtime.ReadMemStats()
+
+ReadMemStats populates m with memory allocator statistics.
+
+The returned memory allocator statistics are up to date as of the call to ReadMemStats. This is in with a heap profile, which is a snapshot as of the most recently completed garbage collection cycle.
