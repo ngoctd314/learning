@@ -2,11 +2,17 @@ package main
 
 import (
 	"fmt"
+<<<<<<< HEAD
+=======
+	"log"
+	"runtime"
+>>>>>>> 278e4cfe0190664545a0c1ef7e96e2d043759840
 	"time"
 )
 
-var sharedRsc = false
+var empty = struct{}{}
 
+<<<<<<< HEAD
 type Address struct {
 	City string `json:"city,omitempty"`
 }
@@ -30,23 +36,69 @@ func fn1() int {
 func main() {
 	fmt.Println("Hello World")
 }
-
-func event() {
-	for conditionTrue() == false {
-		// cần 1 function hoặc cách gì đó để goroutine có thể sleep cho đến khi có 1 tín hiệu thực thi
-		time.Sleep(time.Millisecond)
-		fmt.Println("RUN")
-	}
+=======
+func main() {
+	runtime.ReadMemStats(nil)
 }
 
-var cnt = 0
+func sched() int {
+	cnt := 0
+	go func() {
+		cnt = 1
+	}()
+	for {
+		if cnt == 0 {
+			runtime.Gosched()
+		} else {
+			break
+		}
+	}
+>>>>>>> 278e4cfe0190664545a0c1ef7e96e2d043759840
 
-func conditionTrue() bool {
+	return cnt
+}
+
+type goExit struct{}
+
+func (goExit) GetDeferFunc() {
 	defer func() {
-		cnt++
+		if r := recover(); r != nil {
+			log.Fatal(r)
+		}
+	}()
+	defer func() {
+		panic("defer panic")
 	}()
 
-	return cnt == 10
+	runtime.Goexit()
 }
 
+<<<<<<< HEAD
 // https://www.sobyte.net/post/2022-07/go-sync-cond/
+=======
+func dummy1() {
+	ch := make(chan struct{}, 1)
+	// Main goroutine deadlock after t seconds
+	t := time.Second * 2
+	now := time.Now()
+	go func() {
+		defer func() {
+			fmt.Printf("runtime.Goexit() after %s\n", time.Since(now).String())
+		}()
+		time.Sleep(t)
+		// Goexit terminates the goroutine that calls it. No other goroutine is affected.
+		// Goexit runs all deferred calls before terminating the goroutine. Because Goexit
+		// is not a panic, any recover calls in these deferred functions will return nil.
+		//
+		// Calling Goexit from the main goroutine terminates that goroutine
+		// without function main returning. Since func main has not returned
+		// the program continues execution of other goroutines
+		// If all other goroutines exit, the program crashes
+		runtime.Goexit()
+		ch <- empty
+	}()
+
+	<-ch
+	fmt.Println("DEADLOCK")
+}
+>>>>>>> 278e4cfe0190664545a0c1ef7e96e2d043759840

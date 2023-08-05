@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"math/rand"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -25,16 +27,12 @@ func init() {
 	db = conn
 }
 
-func main() {
-	// _, err := db.Exec("INSERT INTO stock_prices (stock_id, date) VALUES(4, '2002-05-01')")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// _, err = db.Exec("INSERT INTO stock_prices (stock_id, date) VALUES(3, '2002-05-02')")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+type sales struct {
+	OrderDate string `db:"order_date"`
+}
 
+func main() {
+	seed()
 }
 
 type stock struct {
@@ -79,15 +77,21 @@ func (User3) Table() string {
 }
 
 func seed() {
-	db.Exec("DROP TABLE IF EXISTS user1")
-	db.Exec("DROP TABLE IF EXISTS user2")
-	db.Exec("DROP TABLE IF EXISTS user3")
+	var in [][]sales
+	for i := 0; i < 1000; i++ {
+		var tmp []sales
+		for i := 0; i < 1000; i++ {
+			tmp = append(tmp, sales{
+				OrderDate: fmt.Sprintf("2009-01-%d", rand.Intn(30)+1),
+			})
+		}
+		in = append(in, tmp)
+	}
 
-	db.Exec("CREATE TABLE user1 (name VARCHAR(255), age INT)")
-	db.Exec("CREATE TABLE user2 (name VARCHAR(255), age INT)")
-	db.Exec("CREATE TABLE user3 (name VARCHAR(255), age INT)")
-
-	db.Exec("INSERT INTO user1 VALUES ('admin', 18)")
-	db.Exec("INSERT INTO user2 VALUES ('admin', 18)")
-	db.Exec("INSERT INTO user3 VALUES ('admin', 18)")
+	for _, v := range in {
+		_, err := db.NamedExec("INSERT INTO sales (order_date) VALUES (:order_date) ", v)
+		if err != nil {
+			log.Println(err)
+		}
+	}
 }
