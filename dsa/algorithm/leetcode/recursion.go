@@ -322,6 +322,13 @@ func (r Recursion) numberOfPartitionNObject(n, m int) int {
 }
 
 func (r Recursion) removeElements(head *ListNode, val int) *ListNode {
+	cur := head
+	set := make(map[int]struct{})
+	for ; cur.Next != nil; cur = cur.Next {
+		set[cur.Val] = struct{}{}
+	}
+	set[cur.Val] = struct{}{}
+
 	return nil
 }
 
