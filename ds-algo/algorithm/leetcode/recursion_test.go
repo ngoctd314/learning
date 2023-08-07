@@ -485,3 +485,61 @@ func TestRecursion_countDigitOne(t *testing.T) {
 		})
 	}
 }
+
+func TestRecursion_climbingStairs(t *testing.T) {
+	type args struct {
+		n int
+	}
+	tests := []struct {
+		name string
+		r    Recursion
+		args args
+		want int
+	}{
+		{
+			name: "Test 1",
+			r:    Recursion{},
+			args: args{
+				n: 3,
+			},
+			want: 3,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := Recursion{}
+			if got := r.climbingStairs(tt.args.n); got != tt.want {
+				t.Errorf("Recursion.climbingStairs() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestRecursion_maxProfit(t *testing.T) {
+	type args struct {
+		prices []int
+	}
+	tests := []struct {
+		name string
+		r    Recursion
+		args args
+		want int
+	}{
+		{
+			name: "Test 1",
+			r:    Recursion{},
+			args: args{
+				prices: []int{7, 1, 5, 3, 6, 4},
+			},
+			want: 5,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := Recursion{}
+			if got := r.maxProfit(tt.args.prices); got != tt.want {
+				t.Errorf("Recursion.maxProfit() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
