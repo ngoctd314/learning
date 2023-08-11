@@ -543,3 +543,34 @@ func TestRecursion_maxProfit(t *testing.T) {
 		})
 	}
 }
+
+func TestRecursion_getPermutationRecursion(t *testing.T) {
+	type args struct {
+		n int
+		k int
+	}
+	tests := []struct {
+		name string
+		r    Recursion
+		args args
+		want string
+	}{
+		{
+			name: "Test 1",
+			r:    Recursion{},
+			args: args{
+				n: 3,
+				k: 3,
+			},
+			want: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := Recursion{}
+			if got := r.getPermutationRecursion(tt.args.n, tt.args.k); got != tt.want {
+				t.Errorf("Recursion.getPermutationRecursion() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

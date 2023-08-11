@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 )
 
 type Recursion struct{}
@@ -214,8 +215,67 @@ func (r Recursion) reverseKGroupIter(head *ListNode, k int) *ListNode {
 	return rs
 }
 
+/*
+"123"
+"132"
+"213"
+"231"
+"312"
+"321"
+// 1 - 0*2! => 1
+// 2 - 0*2! => 2
+// 3 - 1*2! => 1
+// 4 - 1*2! => 2
+// 6 - 2*2! => 2
+// 5 - 2*2! => 1
+
+1234
+1243
+1324
+1342
+1423
+1432
+6
+
+Input: n = 3, k = 3
+Output: "213"
+Input: n = 4, k = 9
+Output: "2314"
+Input: n = 3, k = 1
+Output: "123"
+*/
 func (r Recursion) getPermutationRecursion(n int, k int) string {
-	return ""
+	var rs = ""
+	// calc number of permutation
+	numberOfPermutation := make([]int, n+1)
+	numberOfPermutation[0] = 1
+	solved := map[int]struct{}{}
+	for i := 1; i <= n; i++ {
+		numberOfPermutation[i] = numberOfPermutation[i-1] * i
+	}
+	nSub1Factor := numberOfPermutation[n-1]
+
+	for i := 1; ; {
+		if len(solved) > n {
+			break
+		}
+
+		if _, ok := solved[i]; !ok {
+			if k >= numberOfPermutation[i] {
+				solved[i] = struct{}{}
+				rs += strconv.Itoa(i)
+				k -= nSub1Factor * (k / nSub1Factor)
+			}
+		}
+
+		if i == n {
+			i = 1
+		} else {
+			i++
+		}
+	}
+
+	return rs
 }
 
 func (r Recursion) reorderListRecursion(head *ListNode) {

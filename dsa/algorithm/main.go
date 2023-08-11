@@ -24,10 +24,7 @@ func main() {
 	// cnt(n) + (n-1) + cnt(n-1) + cnt(n)*(k-1)
 	// k*cnt(n) + cnt(n-1) + n-k
 	// fmt.Println(cnt(8000))
-
-	n := 8000
-	fmt.Println(quickCalc(n), cnt(n))
-	fmt.Println(iter(n))
+	fmt.Println(5 / 2)
 
 	// fmt.Println(cnt(10000), calc(10000))
 	// fmt.Println(cnt(100000), calc(100000))
