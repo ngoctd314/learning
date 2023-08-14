@@ -1,0 +1,12 @@
+total 24
+drwxrwxr-x  3 ubuntu ubuntu 4096 Aug 14 10:45 .
+drwxrwxr-x 19 ubuntu ubuntu 4096 Aug  7 18:24 ..
+-rw-rw-r--  1 ubuntu ubuntu   12 Aug 14 09:31 filename
+-rw-rw-r--  1 ubuntu ubuntu  211 Jul 10 15:18 Internet and the OSI Model.md
+-rw-rw-r--  1 ubuntu ubuntu    0 Aug 14 10:45 listings
+-rw-rw-r--  1 ubuntu ubuntu    0 Aug 14 09:33 newfilename
+-rw-rw-r--  1 ubuntu ubuntu   86 Jul 10 15:18 references.md
+drwxrwxr-x  2 ubuntu ubuntu 4096 Aug 14 09:28 roadmap
+-rwxr--r--  1 ubuntu ubuntu    0 Aug 14 10:38 tmp.txt
+hello world
+hello world
