@@ -24,3 +24,7 @@ func BenchmarkSortStrings(b *testing.B) {
 		})
 	}
 }
+
+func Test_fibo(t *testing.T) {
+	fibo(5)
+}
