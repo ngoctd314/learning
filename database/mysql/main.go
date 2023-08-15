@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
+	"os/signal"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -20,76 +23,57 @@ type User struct {
 }
 
 func init() {
-	conn, err := sqlx.Connect("mysql", "admin:secret@(192.168.49.2:30300)/db")
+	conn, err := sqlx.Connect("mysql", "root:secret@(192.168.49.2:30300)/learn")
 	if err != nil {
 		log.Fatal(err)
 	}
 	db = conn
 }
 
-type sales struct {
-	OrderDate string `db:"order_date"`
-}
-
 func main() {
-	seed()
+	stmt, _ := db.Preparex("SELECT * FROM persons WHERE name = ?")
+	defer stmt.Close()
+	for i := 0; i < 10; i++ {
+		now := time.Now()
+		var rs []person
+		err := stmt.Select(&rs, "name-0-0")
+		if err != nil {
+			log.Println(err)
+		}
+		fmt.Println(rs, "after: ", time.Since(now).Seconds())
+	}
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt)
+	select {
+	case <-sig:
+		log.Println("exit")
+	}
 }
 
-type stock struct {
-	StockID int     `db:"stock_id"`
-	Date    int     `db:"date"`
-	Close   float64 `db:"close"`
-}
-
-// Test ...
-type Test struct {
-	ID          int    `db:"id,omitempty"`
-	Name        string `db:"name"`
-	NameNoIndex string `db:"name_no_index"`
-	Age         int    `db:"age"`
-}
-
-type User1 struct {
-	Name string `db:"name"`
-	Age  int    `db:"age"`
-}
-
-func (User1) Table() string {
-	return "user1"
-}
-
-type User2 struct {
-	Name string `db:"name"`
-	Age  int    `db:"age"`
-}
-
-func (User2) Table() string {
-	return "user2"
-}
-
-type User3 struct {
-	Name string `db:"name"`
-	Age  int    `db:"age"`
-}
-
-func (User3) Table() string {
-	return "user3"
+type person struct {
+	Name     string `db:"name"`
+	Age      int8   `db:"age"`
+	Address  string `db:"address"`
+	Birthday string `db:"birthday"`
 }
 
 func seed() {
-	var in [][]sales
-	for i := 0; i < 1000; i++ {
-		var tmp []sales
-		for i := 0; i < 1000; i++ {
-			tmp = append(tmp, sales{
-				OrderDate: fmt.Sprintf("2009-01-%d", rand.Intn(30)+1),
+	var in [][]person
+	for i := 0; i < 2000; i++ {
+		var tmp []person
+		for j := 0; j < 2000; j++ {
+			tmp = append(tmp, person{
+				Name:     fmt.Sprintf("name-%d-%d", i, j),
+				Age:      int8(rand.Intn(100)),
+				Address:  fmt.Sprintf("address-%d", rand.Intn(1000)),
+				Birthday: fmt.Sprintf("birthday-%d", rand.Intn(365*100)),
 			})
 		}
 		in = append(in, tmp)
 	}
 
 	for _, v := range in {
-		_, err := db.NamedExec("INSERT INTO sales (order_date) VALUES (:order_date) ", v)
+		_, err := db.NamedExec("INSERT INTO persons (name, age, address, birthday) VALUES (:name, :age, :address, :birthday) ", v)
 		if err != nil {
 			log.Println(err)
 		}

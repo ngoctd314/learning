@@ -1,0 +1,1 @@
+https://university.redis.com/courses/course-v1:redislabs+RU101+2023_08/courseware
