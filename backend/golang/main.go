@@ -1,18 +1,16 @@
 package main
 
-import "fmt"
-
-type persons struct {
-	name string
+type printer interface {
+	Print()
 }
+
+type Person struct {
+	Name string `json:""`
+}
+
+var foo = "abc"
 
 func main() {
-	fmt.Println(fibo(10))
-}
-
-func fibo(n int) int {
-	for i := 0; i < 3; i++ {
-		n += i
-	}
-	return n
+	p := person{}
+	p.print()
 }
