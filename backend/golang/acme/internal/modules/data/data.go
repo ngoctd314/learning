@@ -40,6 +40,10 @@ type Person struct {
 	Price    float64 `json:"price,omitempty"`
 }
 
+const (
+	sqlInsert = "INSERT INTO person (fullname, phone, currency, price) VALUES (?, ?, ?, ?)"
+)
+
 func Save(in *Person) (int, error) {
 	db, err := getDB()
 	if err != nil {
@@ -48,7 +52,7 @@ func Save(in *Person) (int, error) {
 	}
 
 	// perform db insert
-	query := "INSERT INTO person (fullname, phone, currency, price) VALUES (?, ?, ?, ?)"
+	query := sqlInsert
 	result, err := db.Exec(query, in.FullName, in.Phone, in.Currency, in.Price)
 	if err != nil {
 		logging.L.Error("failed to save person into DB. err: %s", err)
