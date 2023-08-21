@@ -31,17 +31,10 @@ func init() {
 }
 
 func main() {
-	stmt, _ := db.Preparex("SELECT * FROM persons WHERE name = ?")
-	defer stmt.Close()
-	for i := 0; i < 10; i++ {
-		now := time.Now()
-		var rs []person
-		err := stmt.Select(&rs, "name-0-0")
-		if err != nil {
-			log.Println(err)
-		}
-		fmt.Println(rs, "after: ", time.Since(now).Seconds())
-	}
+	now := time.Now()
+	_, _ = db.Exec("SELECT count(name) FROM persons")
+	fmt.Printf("since: %s\n", time.Since(now))
+
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt)
 	select {
