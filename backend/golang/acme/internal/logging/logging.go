@@ -2,6 +2,8 @@ package logging
 
 import "fmt"
 
+var L = &LoggerStdOut{}
+
 type LoggerStdOut struct{}
 
 func (l LoggerStdOut) Debug(message string, args ...any) {
