@@ -1,0 +1,3 @@
+package codesignal
+
+func matrixElementsSum() {}

@@ -11,6 +11,12 @@ type Person struct {
 var foo = "abc"
 
 func main() {
-	p := person{}
-	p.print()
+}
+
+type userHandler struct {
+	username string
+}
+
+type passwordHandler struct {
+	password string
 }
