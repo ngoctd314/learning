@@ -14,3 +14,10 @@ func fn() (name1 string, name2 string, name3 string, name4 string, name5 string,
 func Add(a, b int) int {
 	return a + b
 }
+
+func DealCards() (player1 []string, player2 []string) {
+	player1 = append(player1, "name1")
+	player2 = append(player2, "name2")
+
+	return
+}

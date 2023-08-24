@@ -16,7 +16,7 @@ var (
 	ErrNotFound = errors.New("not found")
 )
 
-func getDB() (*sql.DB, error) {
+var getDB = func() (*sql.DB, error) {
 	if db == nil {
 		if config.App == nil {
 			return nil, errors.New("config is not initialized")
@@ -41,7 +41,10 @@ type Person struct {
 }
 
 const (
-	sqlInsert = "INSERT INTO person (fullname, phone, currency, price) VALUES (?, ?, ?, ?)"
+	sqlAllColumns = "id, fullname, phone, currency, price"
+	sqlInsert     = "INSERT INTO person (fullname, phone, currency, price) VALUES (?, ?, ?, ?)"
+	sqlLoadAll    = "SELECT " + sqlAllColumns + " FROM person"
+	sqlLoadByID   = "SELECT " + sqlAllColumns + " FROM person WHERE id = ? LIMIT 1"
 )
 
 func Save(in *Person) (int, error) {
