@@ -1,0 +1,53 @@
+run:
+  modules-download-mode: readonly
+  deadline: 5m
+
+output:
+  format: line-number
+
+linters:
+  enable:
+    - bodyclose
+    - dupl
+    - funlen
+    - goconst
+    - gocyclo
+    - gofmt
+    - revive
+    - goprintffuncname
+    - interfacer
+    - lll
+    - misspell
+    - nolintlint
+    - rowserrcheck
+    - stylecheck
+    - unconvert
+    - unparam
+    - whitespace
+
+linters-settings:
+  funlen:
+    lines: 120
+    statements: 70
+  lll:
+    line-length: 80
+  dupl:
+    threshold: 200
+#  gocyclo:
+#    # Minimal code complexity to report
+#    # Default: 30 (but we recommend 10-20)
+#    min-complexity: 30
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gomnd
+        - errcheck
+    - path: cmd/api/route
+      linters:
+        - funlen
+
+service:
+  golangci-lint-version: 1.27.x # use the fixed version to not introduce new linters unexpectedly
+
