@@ -1,16 +1,16 @@
 package main
 
-type printer interface {
-	Print()
+func main() {
 }
 
 type Person struct {
-	Name string `json:""`
+	HttpStatus int
 }
 
-var foo = "abc"
+func fn() (name1 string, name2 string, name3 string, name4 string, name5 string, name6 string, name7 string, name8 string, name9 string, name10 string) {
+	return "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
+}
 
-func main() {
-	p := person{}
-	p.print()
+func Add(a, b int) int {
+	return a + b
 }
