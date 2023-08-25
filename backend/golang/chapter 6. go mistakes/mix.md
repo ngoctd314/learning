@@ -10,4 +10,6 @@ var fn = func(a, b int) int {}
 func fn(a, b int) int {}
 ```
 
-Function variable can pass as argument, can call as function. But function only can call.
+Function variable can pass as argument, can call as function, can re-assign.
+
+Function declaration can pass as argument, call call as function, but can re-assign. Because function declaration is not addressable.
