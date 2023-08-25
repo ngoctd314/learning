@@ -1,21 +1,19 @@
 package main
 
-import "context"
+type Person struct{}
 
-type Person struct {
-	HttpStatus int
+type DataSource interface {
+	Load(int) (Person, error)
 }
 
-func Do() {
+type MyLoadPersonLogic struct {
+	dataSource DataSource
 }
 
-func (Person) Do() {}
-
-func main() {
+func NewLoadPersonLogic(dataSource DataSource) *MyLoadPersonLogic {
+	return &MyLoadPersonLogic{dataSource: dataSource}
 }
 
-func fn(s string, do func(), err error, err1 error) (context.Context, error, error, error) {
-	_ = s
-	_ = do
-	return nil, nil, nil, nil
+func (m *MyLoadPersonLogic) Load(id int) (Person, error) {
+	return m.dataSource.Load(id)
 }
