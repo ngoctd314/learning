@@ -1,19 +1,40 @@
 package main
 
-type Person struct{}
+import (
+	"context"
+	"errors"
 
-type DataSource interface {
-	Load(int) (Person, error)
+	"github.com/google/wire"
+)
+
+type Foo struct {
+	X int
 }
 
-type MyLoadPersonLogic struct {
-	dataSource DataSource
+func ProvideFoo() Foo {
+	return Foo{X: 42}
 }
 
-func NewLoadPersonLogic(dataSource DataSource) *MyLoadPersonLogic {
-	return &MyLoadPersonLogic{dataSource: dataSource}
+type Bar struct {
+	X int
 }
 
-func (m *MyLoadPersonLogic) Load(id int) (Person, error) {
-	return m.dataSource.Load(id)
+func ProvideBar(foo Foo) Bar {
+	return Bar{X: -foo.X}
 }
+
+type Baz struct {
+	X int
+}
+
+func ProvideBaz(ctx context.Context, bar Bar) (Baz, error) {
+	if bar.X == 0 {
+		return Baz{}, errors.New("cannot provide baz when bar is zero")
+	}
+	return Baz{X: bar.X}, nil
+}
+
+var (
+	SuperSet = wire.NewSet(ProvideFoo, ProvideBar, ProvideBaz)
+	MegaSet  = wire.NewSet(SuperSet)
+)
