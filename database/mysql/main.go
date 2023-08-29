@@ -13,8 +13,10 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-var db *sqlx.DB
-var ctx = context.Background()
+var (
+	db  *sqlx.DB
+	ctx = context.Background()
+)
 
 // User ...
 type User struct {
