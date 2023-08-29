@@ -4,12 +4,16 @@
 package main
 
 import (
-	"context"
-
 	"github.com/google/wire"
 )
 
-func initializeBaz(ctx context.Context) (Baz, error) {
-	wire.Build(MegaSet)
-	return Baz{}, nil
+// func initializeBaz(ctx context.Context) (Baz, error) {
+// 	wire.Build(MegaSet)
+// 	return Baz{}, nil
+// }
+
+// Injectors from wire.go:
+func initializeBar() string {
+	wire.Build(Set)
+	return ""
 }
