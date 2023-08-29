@@ -14,3 +14,32 @@ B-Tree maintain balance by ensuring that each node has a minimum number of keys,
 - All nodes (including root) may contain at most (2*t-1) keys.
 - Number of children of a node is equal to the number of keys in it plus 1.
 - All keys of a node are sorted in increasing order. The child between two keys k1 and k2 contains all keys in the range from k1 and k2.
+- B-Tree grows and shrinks from the root which is unlike Binary Search Tree. Binary Search Trees grow downward and also shrink from download
+- Like other balanced Binary Search Trees, the time complexity to search, insert and delete is O(logn)
+- Insertion of a Node in B-Tree happens only at Leaf Node
+
+## Time Complexity of B-Tree
+
+|Sr. No.|Algorithm|Time Complexity|
+|-|-|-|
+|1|Search|O(logn)|
+|2|Insert|O(logn)|
+|2|Delete|O(logn)|
+
+## Interesting Facts about B-Trees
+
+The minimum height of the B-Tree that exist with n number of nodes and m is the maximum number of children of a node can have is h(min) = [logm(n+1)] - 1
+
+## Traversal in B-Tree
+
+Traversal is also similar to Inorder traversal of Binary Tree. We start from the leftmost child, recursively print the leftmost child, then repeat the same process for the remaining children and keys. In the end, recursively print the rightmost child.
+
+## Search Operation in B-Tree
+
+- Start from the root and recursively traverse down.
+- For every visited non-leaf node
+    - If the node has the key, we simply return the node
+    - Otherwise, we recur down to the appropriate child
+- If we reach a leaf node and don't find k in the leaf node, then return NULL
+
+Searching a B-Tree is similar to searching a binary tree. The algorithm is similar and goes with recursion. At each level, the search is optimized as if the key value is not present in the range of the parent then the key is present in another branch.
