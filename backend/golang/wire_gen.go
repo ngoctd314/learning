@@ -10,7 +10,5 @@ package main
 
 // Injectors from wire.go:
 func initializeBar() string {
-	myFooer := provideMyFooer()
-	string2 := provideBar(myFooer)
-	return string2
+	return ""
 }
