@@ -111,3 +111,26 @@ func initializeBaz(ctx context.Context) (foobarbaz.Baz, error) {
 ```
 
 ## Advanced Features
+
+### Binding Interfaces
+
+Frequently, dependency injection is used to bind a concrete implementation for an interface. Wire matches inputs to outputs via type identity, so the inclination might be to create a provider that returns an interface type. However, this would not be idiomatic, since the Go best practice is to return concrete types. Instead, you can declare an interface binding in a provider set:
+
+```go
+type Fooer interface {
+    Foo() string
+}
+
+type MyFooer string
+
+func (b *MyFooer) Foo() string {
+    return string(*b)
+}
+
+func provideMyFooer() *MyFooer {
+    b := new(MyFooer)
+    *b = "Hello World!"
+    return b
+}
+
+```

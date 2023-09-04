@@ -6,18 +6,11 @@
 
 package main
 
-import (
-	"context"
-)
-
 // Injectors from wire.go:
 
-func initializeBaz(ctx context.Context) (Baz, error) {
-	foo := ProvideFoo()
-	bar := ProvideBar(foo)
-	baz, err := ProvideBaz(ctx, bar)
-	if err != nil {
-		return Baz{}, err
-	}
-	return baz, nil
+// Injectors from wire.go:
+func initializeBar() string {
+	myFooer := provideMyFooer()
+	string2 := provideBar(myFooer)
+	return string2
 }

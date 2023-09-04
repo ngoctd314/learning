@@ -1,40 +1,35 @@
 package main
 
 import (
-	"context"
-	"errors"
-
 	"github.com/google/wire"
 )
 
-type Foo struct {
-	X int
+type Fooer interface {
+	Foo() string
 }
 
-func ProvideFoo() Foo {
-	return Foo{X: 42}
+type MyFooer string
+
+func (b *MyFooer) Foo() string {
+	return string(*b)
 }
 
-type Bar struct {
-	X int
+func provideMyFooer() *MyFooer {
+	b := new(MyFooer)
+	*b = "Hello, World"
+
+	return b
 }
 
-func ProvideBar(foo Foo) Bar {
-	return Bar{X: -foo.X}
+type Bar string
+
+func provideBar(f Fooer) string {
+	// f will be a *MyFooer
+	return f.Foo()
 }
 
-type Baz struct {
-	X int
-}
-
-func ProvideBaz(ctx context.Context, bar Bar) (Baz, error) {
-	if bar.X == 0 {
-		return Baz{}, errors.New("cannot provide baz when bar is zero")
-	}
-	return Baz{X: bar.X}, nil
-}
-
-var (
-	SuperSet = wire.NewSet(ProvideFoo, ProvideBar, ProvideBaz)
-	MegaSet  = wire.NewSet(SuperSet)
+var Set = wire.NewSet(
+	provideMyFooer,
+	wire.Bind(new(Fooer), new(*MyFooer)),
+	provideBar,
 )
