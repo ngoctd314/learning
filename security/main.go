@@ -29,7 +29,6 @@ func main() {
 	hash := md5.New()
 	rs := hash.Sum([]byte("randomHello World"))
 	fmt.Printf("random_%x", md5.Sum(rs))
-
 }
 
 // User model
