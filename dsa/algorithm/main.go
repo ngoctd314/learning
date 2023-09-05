@@ -7,28 +7,8 @@ import (
 )
 
 func main() {
-	// fmt.Println(cnt(9))
-	// fmt.Println(10, cnt(10))
-	// fmt.Println(100, cnt(100))
-	// fmt.Println(1000, cnt(1000))
-	// fmt.Println(10000, cnt(10000))
-	// fmt.Println(100 / 10)
-	// fmt.Println(calc(1000) + 500 + cnt(500))
-	// fmt.Println(cnt(1500))
-	// fmt.Println(cnt(1000), cnt(4000)-cnt(3000))
-	// fmt.Println(cnt(1000) + 999 + cnt(999))
-	// fmt.Println(cnt(2000))
-	// 800000
-	// cnt(100000) + 99999 + cnt(99999) + cnt(10000)*(k-1)
-	//
-	// cnt(n) + (n-1) + cnt(n-1) + cnt(n)*(k-1)
-	// k*cnt(n) + cnt(n-1) + n-k
-	// fmt.Println(cnt(8000))
-	fmt.Println(5 / 2)
-
-	// fmt.Println(cnt(10000), calc(10000))
-	// fmt.Println(cnt(100000), calc(100000))
-	// 824883294
+	fmt.Println('0')
+	fmt.Println(65 + 25)
 }
 
 func cnt(n int) int {
