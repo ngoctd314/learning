@@ -1,35 +1,31 @@
 package main
 
-import (
-	"github.com/google/wire"
-)
-
-type Fooer interface {
-	Foo() string
+type Person struct {
+	Name    string `gorm:"column:name" json:"name,omitempty"`
+	Age     int    `gorm:"column:age" json:"age,omitempty"`
+	Address string `gorm:"column:address" json:"address,omitempty"`
 }
 
-type MyFooer string
-
-func (b *MyFooer) Foo() string {
-	return string(*b)
+func (person *Person) Write(p []byte) (n int, err error) {
+	panic("not implemented") // TODO: Implement
 }
 
-func provideMyFooer() *MyFooer {
-	b := new(MyFooer)
-	*b = "Hello, World"
+func merge[T any](ch1, ch2 <-chan T) <-chan T {
+	rs := make(chan T, len(ch1)+len(ch2))
+	go func() {
+		for v := range ch1 {
+			rs <- v
+		}
+	}()
+	go func() {
+		for v := range ch2 {
+			rs <- v
+		}
+	}()
 
-	return b
+	return rs
 }
 
-type Bar string
-
-func provideBar(f Fooer) string {
-	// f will be a *MyFooer
-	return f.Foo()
+func isOdd(n int) bool {
+	return n%2 == 1
 }
-
-var Set = wire.NewSet(
-	provideMyFooer,
-	wire.Bind(new(Fooer), new(*MyFooer)),
-	provideBar,
-)

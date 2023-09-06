@@ -1,29 +1,23 @@
 package main
 
-import (
-	"sort"
-	"testing"
-)
+import "testing"
 
-func Benchmark_SortString(b *testing.B) {
-	s := []string{"heart", "lungs", "brain", "kidneys", "pancreas"}
-	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
-		sort.Strings(s)
+func Test_isOdd(t *testing.T) {
+	type args struct {
+		n int
 	}
-}
-
-func BenchmarkSortStrings(b *testing.B) {
-	s := []string{"heart", "lungs", "brain", "kidneys", "pancreas"}
-	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
-		// var ss sort.StringSlice = s
-		// var si sort.Interface = ss // allocation
-		sort.Slice(s, func(i, j int) bool {
-			return s[i] < s[j]
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isOdd(tt.args.n); got != tt.want {
+				t.Errorf("isOdd() = %v, want %v", got, tt.want)
+			}
 		})
 	}
-}
-
-func Test_fibo(t *testing.T) {
 }

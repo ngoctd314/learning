@@ -100,3 +100,6 @@ func serializeJSON(ctx context.Context, client *redis.Client) {
 	json.Unmarshal(data, &p)
 	fmt.Println(p)
 }
+
+func setjson(ctx context.Context, client *redis.Client) {
+}

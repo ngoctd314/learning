@@ -1,6 +1,6 @@
 # Data types
 
-## Redis Strings
+## Strings
 
 Redis strings store sequences of bytes, including text, serialized objects and binary arrays. Since Redis keys are strings, when we use the string type as a value too, we are mapping a string to another string. The string data type is useful for a number of use cases, like caching HTML fragments or pages.
 
@@ -123,4 +123,13 @@ By default, a single Redis string can be a maximum 512MB.
 ### Performance
 
 Most string operations are O(1), which means they're highly efficient. However, be careful with the SUBSTR, GETRANGE, and SETRANGE commands, which can be O(n). These random-access string commands may cause performance issues when dealing with large strings.
+
+### Alternatives
+
+If you're storing structured data as serialized string, you may also want to consider Redis hashes or JSON.
+
+## JSON
+
+Lets you store, update, and retrieve JSON values in a Redis database, similar to any other Redis data type.
+
 
