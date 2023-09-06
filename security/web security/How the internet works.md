@@ -77,3 +77,13 @@ When a web server wants to keep track of which user it's responding to with each
 Session information contained in cookies is a juicy target for hackers. If an attacker steals another user's cookie, they can pretend to be that user on the website. Similarly, if an attacker successfully persuades a website to accept a forged cookie, they can impersonate any user they please.
 
 **4. Encryption**
+
+When the web was first invented, HTTP requests and responses were sent in plaintext form, which meant they could be read by anyone intercepting the data packets; this kind of interception is known as man-in-the-middle attack.
+
+To secure their communications, web servers and browsers send requests and responses by using Transport Layer Security (TLS), a method of encryption that provides both privacy and data integrity. TLS ensures that packets intercepted by a third party can't be decrypted without the appropriate encryption keys.
+
+HTTP conversations conducted using TLS are called HTTP Secure (HTTPS). HTTPS requires the client and server to perform a TLS hand-shake in which both parties agree on an encryption method (a cipher) and exchange encryption keys. One the hand-shake is complete, any futher messages (both requests and responses) will be opaque to outsides.
+
+### Summary
+
+TCP enables reliable communication between internet-connected computers that each have an IP address. The Domain Nam System provides human readable aliases for IP addresses. HTTP builds on top of TCP to send HTTP requests from user agents (such as web browsers) to web servers, which in turn reply with HTTP responses. Each request is sent to a specific URL, and you learned about various types of HTTP methods. Web servers respond with status codes, and send back cookies to initiate stateful connections. Finally, encryption (in the form of HTTPS) can be used to secure communication between a user agent and a web server.

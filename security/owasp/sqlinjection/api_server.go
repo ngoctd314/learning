@@ -2,7 +2,7 @@ package sqlinjection
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/jmoiron/sqlx"
@@ -10,9 +10,8 @@ import (
 
 // APIServer ...
 func APIServer(db *sqlx.DB) {
-
 	http.HandleFunc("/update", func(w http.ResponseWriter, r *http.Request) {
-		data, err := ioutil.ReadAll(r.Body)
+		data, err := io.ReadAll(r.Body)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
