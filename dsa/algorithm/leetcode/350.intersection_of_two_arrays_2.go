@@ -1,0 +1,20 @@
+package main
+
+func intersectOf2ArraysII(nums1 []int, nums2 []int) []int {
+	s1 := make(map[int]int)
+	for i := 0; i < len(nums1); i++ {
+		s1[nums1[i]]++
+	}
+	s2 := make(map[int]int)
+	for i := 0; i < len(nums2); i++ {
+		s2[nums2[i]]++
+	}
+	var rs []int
+	for k, v1 := range s1 {
+		if v2 := s2[k]; v1 == v2 {
+			rs = append(rs, k)
+		}
+	}
+
+	return rs
+}

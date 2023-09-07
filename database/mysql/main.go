@@ -51,9 +51,7 @@ func main() {
 	}
 }
 
-func seedCityDemo() {
-
-}
+func seedCityDemo() {}
 
 type person struct {
 	Name     string `db:"name"`

@@ -16,4 +16,10 @@ Is a standard business production environment, a sandbox might be misunderstood 
 
 **In development**
 
-In development, a sandbox usually involves a development server and staging server.
+In development, a sandbox usually involves a development server and staging server. The development server is separated from the production environment but may still require basic network access. Developers use this server to upload code and test it as the codebase changes.
+
+The staging server is designed to be an extract replica of production. This server is where quality assurance (QA) tests code before deploying to production. Because the staging environment is the same as the production environment, code that runs without issues in staging should run without issues in production.
+
+**In cybersecurity research**
+
+The sandbox must not be have any access to critical infrastructure.
