@@ -21,7 +21,7 @@ func Test_intersection2Pointer(t *testing.T) {
 				nums1: []int{1, 2, 2, 1},
 				nums2: []int{2, 2},
 			},
-			want: []int{2},
+			want: []int{2, 2},
 		},
 		{
 			name: "Test 2",
@@ -31,10 +31,18 @@ func Test_intersection2Pointer(t *testing.T) {
 			},
 			want: []int{9, 4},
 		},
+		{
+			name: "Test 3",
+			args: args{
+				nums1: []int{1, 2, 2, 1},
+				nums2: []int{2},
+			},
+			want: []int{2},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := intersection2Pointer(tt.args.nums1, tt.args.nums2); !reflect.DeepEqual(got, tt.want) {
+			if got := intersectOf2ArraysIIBruteForce(tt.args.nums1, tt.args.nums2); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("intersection2Pointer() = %v, want %v", got, tt.want)
 			}
 		})
