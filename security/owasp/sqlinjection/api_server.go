@@ -32,7 +32,7 @@ func APIServer(db *sqlx.DB) {
 		w.Write([]byte("UPDATE success"))
 	})
 
-	http.HandleFunc("/all", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/all", func(w http.ResponseWriter, _ *http.Request) {
 		var listUser []User
 		if err := db.Select(&listUser, "SELECT * FROM users"); err != nil {
 			w.WriteHeader(http.StatusBadRequest)

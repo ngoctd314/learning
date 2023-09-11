@@ -59,4 +59,14 @@ if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 log.Println(tx.RowsAffected, person)
 ```
 
-The First and Last methods will find the first and last record (respectively) as orderd by primary key. They only work when a pointer to the destination struct is passed to the methods as argument or when the model is specified using db.Model()
+The First and Last methods will find the first and last record (respectively) as orderd by primary key. They only work when a pointer to the destination struct is passed to the methods as argument or when the model is specified using db.Model(). Additionally, if no primary key is defined for relevant model, then the model will be ordered by the first field.
+
+## Retrieving objects with primary key
+
+```go
+db.First(&user, 10)
+// SELECT * FROM users WHERE id = 10
+
+db.First(&users, []int{1,2,3})
+// SELECT * FROM users WHERE id IN (1,2,3)
+```
