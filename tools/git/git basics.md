@@ -76,3 +76,93 @@ git add file_to
 ```
 
 ## Viewing the commit history
+
+```bash
+git log 
+```
+
+git log lists the commits made in that repository in reverse chronological order; that is, the most recent commits show up first. As you can see, this command lists each commit with its SHA-1 checksum, the author's name and email, the data written, and the commit message.
+
+One of the more helpful options is -p or --patch, which shows the difference (the patch output) introduced in each commit. 
+
+```bash
+git log -p
+```
+
+You can also use a series of summarizing options with git log. For example, if you want to see some abbreviated stats 
+
+```bash
+git log --stat
+```
+
+### Undoing things
+
+At any stage, you may want to undo something. Here, we'll review a few basic tools for undoing changes that you've made. Be careful, because you can't always undo some of these undos. This is one of the few areas in Git where you may lose some work if you do it wrong.
+
+One of the common undos takes place when you commit too early and possibly forget to add some files or you mess up your commit message. If you want to redo that commit, make the additional changes you forgot, stage them, and commit again user the --amend option:
+
+```sh
+git commit -m 'Initial commit'
+git add forgotten_file
+git commit --amend
+```
+
+### Unstaging a Staged File
+
+The next two sections demonstrate how to work with your staging area and working directory changes. The nice part is that the command you use to determine the state of those two area also reminds you how to undo changes to them. For example, let's say you've changed two files and want to commit them as two separate changes, but you accidentally type git add * and stage them both. How can you unstage one of the two?
+
+```sh
+git add *
+git status
+```
+
+Right below the "Changes to be commited" text, it says use git reset HEAD <file> to unstage.
+
+```sh
+git reset HEAD CONTRIBUTING.md
+```
+
+### Unmodifying a Modified File
+
+What if you realize that you don't want to keep your changes to the CONTRIBUTING.md file? How can you easily unmodified it - revert it back to what it looked like when you last committed.
+
+```sh
+git checkout -- <file>
+```
+
+### Undoing things with git restore
+
+Git version 2.23.0 introduced a new command: git restore. It's basically an alternative to git reset which we jsut covered. From Git version 2.23.0 onwards, Git will use git restore instead of git reset
+
+#### Unstaging a Staged File with git restore
+
+```bash
+git restore --staged CONTRIBUTING.md
+```
+
+The CONTRIBUTING.md file is modified but once again unstaged
+
+#### Unmodifying a Modified File with git restore
+
+```bash
+git restore CONTRIBUTING.md
+```
+
+## Working with Remotes
+
+To be able to collaborate on any Git project, you need to know how to manage your remote repositories. Remote repositories are versions of your project that hosted are on the internet.
+
+
+### Showing your remotes
+
+```bash
+git remote
+```
+
+Remote is the default name Git gives to the server you cloned from.
+
+You can also specify -v, which shows you the URLs that Git has stored for the shortname to be used when reading and writing to that remote.
+
+```bash
+git remote -v
+```
