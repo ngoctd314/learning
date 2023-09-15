@@ -10,13 +10,10 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+type Person struct {
+}
+
 func main() {
-	rdb := redis.NewClient(&redis.Options{
-		Addr: "192.168.49.2:30301",
-		DB:   0,
-	})
-	ctx := context.Background()
-	serializeJSON(ctx, rdb)
 }
 
 func exampleClient() {

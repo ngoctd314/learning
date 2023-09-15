@@ -1,5 +1,7 @@
 package main
 
+import "runtime"
+
 type Person struct {
 	Name    string `gorm:"column:name" json:"name,omitempty"`
 	Age     int    `gorm:"column:age" json:"age,omitempty"`
@@ -22,6 +24,7 @@ func merge[T any](ch1, ch2 <-chan T) <-chan T {
 			rs <- v
 		}
 	}()
+	runtime.Goexit()
 
 	return rs
 }
