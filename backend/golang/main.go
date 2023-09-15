@@ -1,6 +1,8 @@
 package main
 
-import "runtime"
+import (
+	"runtime"
+)
 
 type Person struct {
 	Name    string `gorm:"column:name" json:"name,omitempty"`
