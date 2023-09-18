@@ -166,3 +166,51 @@ You can also specify -v, which shows you the URLs that Git has stored for the sh
 ```bash
 git remote -v
 ```
+
+### Fetching and pullling from your Remotes
+
+```bash
+git fetch <remote>
+```
+
+The command goes out to that remote project and pulls down all the data from that remote project that you don't have yet. After you do this, you should have references to all the branches from that remote, which you can merge in or inspect at any time. Git fetch command only downloads the data to your local repository - it doesn't automatically merge it with any of your work or modify what you're currently working on.
+
+If you current branch is set up to track a remote branch, you can use the git pull command to automatically fetch and then merge that remote branch into your current branch. This may be an easier or more comfortable workflow for you.
+
+Running git pull generally fetches data from the server you originally cloned from and automatically tries to merge it into the code you're currently working on.
+
+From Git version 2.27 onward, git pull will give a warning if the pull.rebase variable is not set. Git will keep warning you until you set the variable.
+
+If you want the default behavior of Git (fast-forward if possible, else create a merge commit): git config --global pull.rebase "false" 
+
+If you want rebase when pulling: git config --global pull.rebase "true"
+
+### Pushing to Your remotes
+
+#### Renaming and removing remotes
+
+## Tagging
+
+Git has the ability to tag specific points in a repository's history as being important. Typically, people use this functionality to mark release points(v1.0, v2.0 and so on).
+
+## Git Aliases
+
+```bash
+git config --global alias.co checkout
+git config --global alias.br branch
+git config --global alias.ci commit
+git config --global alias.st status
+```
+
+```bash
+git config --global alias.unstage 'reset HEAD --'
+```
+
+```bash
+git unstage fileA
+git reset HEAD -- fileA
+```
+
+## Summary
+
+At this point, you can do all the basic local Git operations - creating or cloning a repository, making changes, staging and commiting those changes, and viewing the history of all the changes the repository has been through.
