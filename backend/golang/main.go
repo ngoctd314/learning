@@ -1,8 +1,15 @@
 package main
 
 import (
+	"fmt"
+	"math"
 	"runtime"
 )
+
+func main() {
+	var counter int32 = math.MaxInt32
+	fmt.Println(counter)
+}
 
 type Person struct {
 	Name    string `gorm:"column:name" json:"name,omitempty"`

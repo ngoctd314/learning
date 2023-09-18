@@ -84,4 +84,55 @@ For the sake of memory use over time, we'll say that after a week users can no l
 
 What happen if user 115423 were to vote for article 100408.
 
-18
+When someone tries to vote on an article, we first verify that the articles was posted within the last week by checking the article's post time with ZSCORE. If we still have time, we then try to add the user to the article's voted SET with SADD.
+
+Article 100408 got a new vote, so its score was increased.
+
+Since user 115423 voted on the article, they are added to the voted SET.
+
+Finally, if the user didn't previously vote on the article, we increment the score of the article by 432 (which we calculated eariler) with ZINCRBY (a command that increments the score of a member), and update the vote count in the HASH with HINCRBY (a command that increments a value in a hash).
+
+### Posting and fetching articles
+
+To post an article, we first create an article ID by incrementing a counter with INCR. We then create the voted SET by adding the poster's ID to the SET with SADD. To ensure that the SET is removed after one week, we'll give it an expiration time with the EXPIRE command, which lets Redis automatically delete it. We then store the article information with HMSET. Finally, we add the initial score and posting time to the relevant ZSETs with with ZADD.
+
+```go
+func PostArticle(ctx context.Context, conn *redis.Client, user string, title, link string) int64 {
+	articleID, err := conn.Incr(ctx, "article:").Result()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	voted := fmt.Sprintf("voted:%d", articleID)
+	conn.SAdd(ctx, voted, user)
+	conn.Expire(ctx, voted, ONE_WEEK_IN_SECONDS)
+
+	now := time.Now().Unix()
+	article := fmt.Sprintf("article:%d", articleID)
+	conn.HSet(ctx, article, map[string]any{
+		"title":  title,
+		"link":   link,
+		"poster": user,
+		"time":   now,
+		"votes":  1,
+	})
+	conn.ZAdd(ctx, "score:", redis.Z{
+		Score:  VOTE_SCORE,
+		Member: article,
+	})
+	conn.ZAdd(ctx, "time:", redis.Z{
+		Score:  float64(now),
+		Member: article,
+	})
+
+	return articleID
+}
+```
+
+So we can vote, and we can post articles. But what about fetching the current top-scoring or most recent articles? For that, we can use ZRANGE to fetch the article IDs, and then we can make calls to HGETALL to fetch information about each article. The only tricky path is that we must remember that ZSETs are stored in ascending order by their score. But we can fetch items based on the reverse order with ZREVRANGEBYSCORE.
+
+## Summary
+
+In this chapter, we covered the basics of what Redis is, and how it's both similar to and different from other databases.
+
+Redis is in-memory (making is fast), remote (making it accessible to multiple clients/servers), persistent (giving you the opportunity to keep data between reboots), and scalable (via slaving and sharding) you can build solutions to a variety of problems in ways that you're already used to.
