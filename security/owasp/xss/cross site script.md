@@ -4,6 +4,10 @@ If your web server is secure, a hacker's next best injectiontarget is the web br
 
 JavaScript can read or modify any part of a web page, so there's a lot of attacker can do with cross-site scripting vulnerabilities. If JS can read HTTP session information, they can hijack a user's session entirely, allowing them to log in as that user remotely.
 
+Typically, an XSS attack attempts to fetch content from previously unknown sources and bring it into the browser. Then, whatever payload is embedded in the cross-site script runs commands or renders content in place of the developer's original intent.
+
+IFrame are a common XSS attack target on Golang applications.
+
 ## Stored Cross-Site Scripting Attacks
 
 Websites routinely generate and render HTML using information stored in a database. Retail websites will store product information in a database, and social media sites will store user conversations. Websites will take content from the database according to the URL user has navigated to, and interpolate it into the page to produce the finished HTML.
@@ -21,4 +25,3 @@ Malicious JavaScript can be planted in a database by using the SQL injection met
 ### Mitigation: Escape Dynamic Content from HTTP Requests
 
 ## DOM-Based Cross-Site Scripting Attacks
-

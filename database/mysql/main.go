@@ -7,7 +7,6 @@ import (
 	"math/rand"
 	"os"
 	"os/signal"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -20,8 +19,8 @@ var (
 
 // User ...
 type User struct {
-	Name string `db:"name"`
-	Age  int    `db:"age"`
+	Name string `json:"name" db:"name"`
+	Age  int    `db:"age" json:"age"`
 }
 
 func init() {
@@ -31,17 +30,29 @@ func init() {
 	}
 	db = conn
 	// seedPeople()
-	seedTestHash()
+	// seedTestHash()
 }
 
 func main() {
 	var rs []people
-	now := time.Now()
-	err := db.Select(&rs, "SELECT * FROM people WHERE last_name like ?", "%1000")
+	query := "SELECT * FROM people LIMIT 4000000"
+	rows, err := db.Query(query)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(rs, time.Since(now).Seconds(), "s")
+	defer rows.Close()
+	for rows.Next() {
+		var tmp people
+
+		if err := rows.Scan(&tmp.LastName, &tmp.FirstName, &tmp.Dob, &tmp.Gender); err != nil {
+			log.Println(err)
+		}
+
+		rs = append(rs, tmp)
+	}
+	for _, v := range rs {
+		_ = v
+	}
 
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt)
@@ -152,4 +163,8 @@ func seedTestHash() {
 			log.Println(err)
 		}
 	}
+}
+
+func add(a, b int) int {
+	return a + b
 }

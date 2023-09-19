@@ -4,19 +4,28 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"learn-redis/projects/voting"
 	"log"
 	"time"
 
 	"github.com/redis/go-redis/v9"
 )
 
+type Person struct {
+}
+
 func main() {
-	rdb := redis.NewClient(&redis.Options{
+	ctx := context.Background()
+	conn := redis.NewClient(&redis.Options{
 		Addr: "192.168.49.2:30301",
 		DB:   0,
 	})
-	ctx := context.Background()
-	serializeJSON(ctx, rdb)
+
+	// articleID := voting.PostArticle(ctx, conn, "user:6", "learn redis", "http://redis.io")
+	// fmt.Println(articleID)
+	articles := voting.GetArticles(ctx, conn, 1)
+	fmt.Println(articles)
+
 }
 
 func exampleClient() {
@@ -26,17 +35,13 @@ func exampleClient() {
 	})
 	ctx := context.Background()
 
-	key := "test-key"
-	rs := rdb.SetXX(ctx, key, "test-value-4", time.Minute)
-	// rdb.Set(ctx, key, "test-value", time.Minute)
-	if err := rs.Err(); err != nil {
-		log.Println(err)
+	key := "setname"
+	n, err := rdb.SAdd(ctx, key, 1, 2, 3).Result()
+	if err != nil {
+		log.Fatal(err)
 	}
-	fmt.Print("result: ")
-	fmt.Println(rs.Result())
+	log.Println("n", n)
 
-	cmd := rdb.Get(ctx, key)
-	fmt.Println("val", cmd.Val())
 }
 
 func setSuccessWhenKeyNotExist(ctx context.Context, client *redis.Client) {
