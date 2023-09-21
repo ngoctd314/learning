@@ -2,13 +2,20 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"runtime"
 )
 
 func main() {
-	var counter int32 = math.MaxInt32
-	fmt.Println(counter)
+	a := make([]int, 3, 6)
+	fmt.Printf("%p\n", &a)
+	a = append(a, 1)
+	fmt.Printf("%p\n", &a)
+	a = append(a, 1)
+	fmt.Printf("%p\n", &a)
+	a = append(a, 1)
+	fmt.Printf("%p\n", &a)
+	a = append(a, 1)
+	fmt.Printf("%p\n", &a)
 }
 
 type Person struct {

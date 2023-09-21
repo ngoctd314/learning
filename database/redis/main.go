@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"learn-redis/projects/voting"
 	"log"
 	"time"
 
@@ -21,10 +20,16 @@ func main() {
 		DB:   0,
 	})
 
+	// value, err := conn.Set(ctx, "key", "value", time.Minute).Result()
+	// fmt.Println(value, err)
+
+	ok, err := conn.SetNX(ctx, "key", "value", time.Minute).Result()
+	fmt.Println("ok", ok, "err", err)
+
 	// articleID := voting.PostArticle(ctx, conn, "user:6", "learn redis", "http://redis.io")
 	// fmt.Println(articleID)
-	articles := voting.GetArticles(ctx, conn, 1)
-	fmt.Println(articles)
+	// articles := voting.GetArticles(ctx, conn, 1)
+	// fmt.Println(articles)
 
 }
 
