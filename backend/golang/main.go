@@ -1,43 +1,26 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"math"
-	"runtime"
 )
 
 func main() {
-	var counter int32 = math.MaxInt32
-	fmt.Println(counter)
+	fmt.Println(Foo())
 }
 
-type Person struct {
-	Name    string `gorm:"column:name" json:"name,omitempty"`
-	Age     int    `gorm:"column:age" json:"age,omitempty"`
-	Address string `gorm:"column:address" json:"address,omitempty"`
+func Foo() error {
+	err := errors.New("permission denied")
+	if err != nil {
+		return BarError{err}
+	}
+	return nil
 }
 
-func (person *Person) Write(p []byte) (n int, err error) {
-	panic("not implemented") // TODO: Implement
+type BarError struct {
+	Err error
 }
 
-func merge[T any](ch1, ch2 <-chan T) <-chan T {
-	rs := make(chan T, len(ch1)+len(ch2))
-	go func() {
-		for v := range ch1 {
-			rs <- v
-		}
-	}()
-	go func() {
-		for v := range ch2 {
-			rs <- v
-		}
-	}()
-	runtime.Goexit()
-
-	return rs
-}
-
-func isOdd(n int) bool {
-	return n%2 == 1
+func (b BarError) Error() string {
+	return "bar failed:" + b.Err.Error()
 }
