@@ -2,49 +2,22 @@ package main
 
 import (
 	"fmt"
-	"runtime"
 )
 
 func main() {
-	a := make([]int, 3, 6)
-	fmt.Printf("%p\n", &a)
-	a = append(a, 1)
-	fmt.Printf("%p\n", &a)
-	a = append(a, 1)
-	fmt.Printf("%p\n", &a)
-	a = append(a, 1)
-	fmt.Printf("%p\n", &a)
-	a = append(a, 1)
-	fmt.Printf("%p\n", &a)
+	s1 := []int{1, 2, 3}
+	s2 := s1[1:2]
+	s2 = append(s2, 4)
+	fmt.Println(s1, s2)
+	s2 = s1[1:2:2]
+	s2 = append(s2, 5)
+	fmt.Println(s1, s2)
 }
 
-type Person struct {
-	Name    string `gorm:"column:name" json:"name,omitempty"`
-	Age     int    `gorm:"column:age" json:"age,omitempty"`
-	Address string `gorm:"column:address" json:"address,omitempty"`
+type person struct {
+	Name []string `json:"name"`
 }
 
-func (person *Person) Write(p []byte) (n int, err error) {
-	panic("not implemented") // TODO: Implement
-}
-
-func merge[T any](ch1, ch2 <-chan T) <-chan T {
-	rs := make(chan T, len(ch1)+len(ch2))
-	go func() {
-		for v := range ch1 {
-			rs <- v
-		}
-	}()
-	go func() {
-		for v := range ch2 {
-			rs <- v
-		}
-	}()
-	runtime.Goexit()
-
-	return rs
-}
-
-func isOdd(n int) bool {
-	return n%2 == 1
+func log(i int, s []string) {
+	fmt.Printf("%d: empty=%t\tnil=%t\n", i, len(s) == 0, s == nil)
 }
