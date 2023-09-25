@@ -153,3 +153,142 @@ WHERE pa.package_order = 1510775540
 **extra**
 
 ## Explain format json
+
+- Lợi ích:
+
+Cho chúng ta biết chi tiết kế hoạch thực thi của câu truy vấn.
+
+Các chỉ số giúp chúng ta hiểu về quá trình thực thi truy vấn và giúp tìm cách tối ưu câu truy vấn.
+
+- Hạn chế:
+
+Không nói cho chúng ta biết bản chất vấn đề. Tại sao kế hoạch thực thi đó lại tối ưu và được lựa chọn
+
+Không có thông tin về triggers, store functions
+
+Các con số thống kê chỉ là ước lượng và có thể outdate
+
+Không nói lên tất cả vấn đề
+
+## Optimizer trace
+
+Explain: Trả lời câu hỏi HOW, diễn giải kế hoạch thực thi được chọn
+
+- Kế hoạch thực thi câu truy vấn như thế nào
+
+Optimizer trace: Trả lời câu hỏi WHY
+
+- Tại sao kế hoạch đó được chọn, có những kế hoạch nào khác?
+- Quá trình thực thi chi tiết và nhiều thông tin khác.
+
+### Where condition
+
+- Đơn giản hóa logic: bộ optimizer không phải bao giờ cũng hiệu quả. Hãy biến đổi logic về đơn giản nhất, chuyển các tính toán logic sang vế phải
+- Đánh index hiệu quả
+
+- Leftmode prefix
+- Index (const, range)
+- Multi-column index
+- Index condition pushdown
+- Index merge
+
+### Join
+
+#### Inner join vs left join
+
+- Chỉ định thứ tự Join bằng left join
+- Chú ý nếu left join có mệnh đề where trên bảng bên phải thì left join ~ inner join
+
+SELECT \* FROM t1 LEFT JOIN t2 ON (column1) WHERE t2.column2=5;
+
+#### NESTED loop join
+
+- Thuật toán join được implement ở hầu hết database
+- Đặt bảng có điều kiện filter tốt sang trái
+
+#### Sử dụng Count(\*) thay COUNT(col)
+
+Sử dụng COUNT(_) nếu muốn count số records trả về. Hãy dùng COUNT(_) để tránh nhập nhằng NULL value
+
+#### Tính xấp xỉ
+
+Sử dụng EXPLAIN để tính xấp xỉ số row trả về
+
+SHOW TABLE STATUS estimate số row của bảng
+
+#### Kỹ thuật Caching
+
+### ORDER BY, GROUP BY
+
+- Sử dụng index cho các toán tử ORDER BY, GROUP BY
+
+* Đánh index với cột trong mệnh đề ORDER BY, GROUP BY để hạn chế SORTING
+* Với MySQL 8.0 đánh Descending indexes cho các toán tử ORDER BY ASC, DESC custom
+
+- ORDER BY NULL
+
+* Trong các toán tử GROUP BY nếu không cần sắp xếp kết quả, hãy thêm ORDER BY NULL để hạn chế SORTING
+
+- Sử dụng các kỹ thuật khác
+
+Bản thân các database OLTP không thiết kế phù hợp cho các câu truy vấn tổng hợp, thống kê.
+
+Hãy sử dụng database OLAP, hoặc tính toán trước kết quả qua các kỹ thuật CDC, tmp table, view...
+
+### LIMIT, OFFSET
+
+**LIMIT dữ liệu trả về**
+
+- Nếu không cần phải lấy toàn bộ dữ liệu, hãy LIMIT để hạn chế số lượng records trả về
+- Không SELECT \*, chỉ select các cột cần thiết
+
+**Cẩn thận với LIMIT OFFSET**
+
+- Câu truy vấn LIMIT 10 OFFSET 10000 tương đương với việc database phải truy cập qua 10010 records để lấy 10 records cuối cùng
+- Với các màn hình phân trang, các màn cuối thường sẽ rất chậm nếu sử dụng LIMIT OFFSET
+
+=> Chuyển qua phân trang WHERE trên KEY
+
+```sql
+SELECT id, username, fullname
+FROM users LIMIT 10 OFFSET 1000;
+
+SELECT id, username, fullname
+FROM users WHERE id >= 1000 AND id < 1010;
+
+SELECT id, usernamee, fullname
+FROM users
+ORDER BY id LIMIT 10 -- last id = 123
+
+SELECT id, username, fullname
+FROM users WHERE id > 123
+ORDER BY id LIMIT 10;
+```
+
+**Tách truy vấn**
+
+## Union
+
+- MySQL mặc định sẽ tạo bảng tạm (mem hoặc disk) để gộp kết quả của các câu truy vấn. Chi phí cho UNION khá lớn.
+- Hãy LIMIT kết quả trả về nhất có thể trước khi UNION
+
+```sql
+( SELECT username, fullname FROM user ORDER BY username LIMIT 20 )
+UNION ALL
+( SELECT username, fullname FROM ightk_users ORDER BY username LIMIT 20 )
+LIMIT 20;
+```
+
+- Nếu không cần distinct kết quả trả về, hãy sử dụng UNION ALL để tránh MySQL phải thêm thao tác so sánh, loại bỏ giá trị trùng lặp.
+
+## Distinct, Subquery
+
+**Sử dụng EXISTS để tránh DISTINCT**
+
+Trong một số trường hợp cần DISTINCT kết quả, có thể chuyển qua dùng EXIST để tránh việc phải tạo bảng tạm.
+
+**Convert Subquery**
+
+Với MySQL 5.7 trở về trước, convert subquery WHERE IN (SELECT ... FROM ...) sang EXIST hoặc chuyển về JOIN.
+
+Hạn chế dependency subquery.
