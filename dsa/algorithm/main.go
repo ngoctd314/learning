@@ -7,8 +7,7 @@ import (
 )
 
 func main() {
-	fmt.Println('0')
-	fmt.Println(65 + 25)
+	fmt.Println('a', 'z')
 }
 
 func cnt(n int) int {
