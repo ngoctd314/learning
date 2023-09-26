@@ -1,6 +1,13 @@
-## Kinh nghiệm đợi BP về VN
+Companies
+You're given strings jewels representing the types of stones that are jewels, and stones representing the stones you have. Each character in stones is a type of stone you have. You want to know how many of the stones you have are also jewels.
 
-1. Vé bán ế ngày 1, ngày 2 đắt. Lý do: người ngày 1 đi chơi up ảnh, gây ra hiệu ứng
-2. Thời tiết mưa => bán áo mưa, nắng nóng => bán quạt (băng rôn, biển hiệu mình là FAN...)
+Letters are case sensitive, so "a" is considered a different type of stone from "A".
 
-## Dân ta có một lòng nồng nàn yêu nước. Đó là truyền thống quý báu của nhân dân ta. 
+Example 1:
+
+Input: jewels = "aA", stones = "aAAbbbb"
+Output: 3
+Example 2:
+
+Input: jewels = "z", stones = "ZZ"
+Output: 0
