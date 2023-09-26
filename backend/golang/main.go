@@ -12,16 +12,20 @@ type Foo struct {
 }
 
 func main() {
-	foos := make([][]byte, 1_000)
+}
 
-	for i := 0; i < len(foos); i++ {
-		foos[i] = make([]byte, 1024*1024)
+func allocMapV1(n int) {
+	var m = make(map[int]string)
+	for i := 0; i < n; i++ {
+		m[i] = fmt.Sprint("data")
 	}
-	printAlloc()
-	two := keepFirstTwoElementsOnly(foos)
-	runtime.GC()
-	printAlloc()
-	runtime.KeepAlive(two)
+}
+
+func allocMapV2(n int) {
+	var m = make(map[int]string, n)
+	for i := 0; i < n; i++ {
+		m[i] = fmt.Sprint("data")
+	}
 }
 
 func keepFirstTwoElementsOnly(foos [][]byte) [][]byte {
