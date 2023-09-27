@@ -3,31 +3,18 @@ package main
 import (
 	"fmt"
 	"runtime"
+
+	"github.com/gin-gonic/gin"
 )
 
-var leaker [][]byte
+type Person struct{}
 
-type Foo struct {
-	v []byte
-}
-
-type account struct {
-	balance float32
-}
-
+// /home/ubuntu/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go
 func main() {
-	accounts := []account{{100}, {200}, {300}}
-	for _, ac := range accounts {
-		ac.balance += 100
-	}
-	fmt.Println(accounts)
-}
-
-func keepFirstTwoElementsOnly(foos [][]byte) [][]byte {
-	for i := 2; i < len(foos); i++ {
-		foos[i] = nil
-	}
-	return foos[:2]
+	m := make(map[*int]string)
+	_ = m
+	v := gin.Default()
+	v.Run()
 }
 
 func printAlloc() {
@@ -38,7 +25,7 @@ func printAlloc() {
 	// which is a snapshot as of the most recently completed garbage
 	// collection cycle.
 	runtime.ReadMemStats(&m)
-	fmt.Printf("%d KB\n", m.Alloc/1000)
+	fmt.Printf("%d KB\n", m.Alloc/1024)
 }
 
 // cpy := make([]byte, 1)

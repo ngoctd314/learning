@@ -1,7 +1,3 @@
-def f(ham: str, eggs: str = "eggs") -> str:
-    print("Annotations:", f.__annotations__)
-    print("Arguments:", ham, eggs)
-    return ham + " and " + eggs
-
-
-f("spam")
+basket = ["apple", "orange", "apple", "pear", "orange", "banana"]
+for f in sorted(set(basket)):
+    print(f)
