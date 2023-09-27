@@ -11,17 +11,16 @@ type Foo struct {
 	v []byte
 }
 
-func main() {
-	foos := make([][]byte, 1_000)
+type account struct {
+	balance float32
+}
 
-	for i := 0; i < len(foos); i++ {
-		foos[i] = make([]byte, 1024*1024)
+func main() {
+	accounts := []account{{100}, {200}, {300}}
+	for _, ac := range accounts {
+		ac.balance += 100
 	}
-	printAlloc()
-	two := keepFirstTwoElementsOnly(foos)
-	runtime.GC()
-	printAlloc()
-	runtime.KeepAlive(two)
+	fmt.Println(accounts)
 }
 
 func keepFirstTwoElementsOnly(foos [][]byte) [][]byte {
