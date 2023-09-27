@@ -11,21 +11,16 @@ type Foo struct {
 	v []byte
 }
 
+type account struct {
+	balance float32
+}
+
 func main() {
-}
-
-func allocMapV1(n int) {
-	var m = make(map[int]string)
-	for i := 0; i < n; i++ {
-		m[i] = fmt.Sprint("data")
+	accounts := []account{{100}, {200}, {300}}
+	for _, ac := range accounts {
+		ac.balance += 100
 	}
-}
-
-func allocMapV2(n int) {
-	var m = make(map[int]string, n)
-	for i := 0; i < n; i++ {
-		m[i] = fmt.Sprint("data")
-	}
+	fmt.Println(accounts)
 }
 
 func keepFirstTwoElementsOnly(foos [][]byte) [][]byte {

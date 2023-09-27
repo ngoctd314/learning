@@ -6,7 +6,7 @@ SQL injection attacks target websites that use an underlying SQL database and co
 
 ## Anatomy of a SQL Injection Attack
 
-SQL injection attacks occur when the web server insecurely constructs the SQL statement it passes to the database driver. This allows the attacker to pass arguments via the HTTP request that cause the dirver to perform actions other than those the developer inteads.
+SQL injection attacks occur when the web server insecurely constructs the SQL statement it passes to the database driver. This allows the attacker to pass arguments via the HTTP request that cause the driver to perform actions other than those the developer inteads.
 
 The attacker might cause the database driver to run additional commands on the database.
 
