@@ -3,18 +3,28 @@ package main
 import (
 	"fmt"
 	"runtime"
-
-	"github.com/gin-gonic/gin"
 )
 
 type Person struct{}
 
-// /home/ubuntu/go/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go
 func main() {
-	m := make(map[*int]string)
-	_ = m
-	v := gin.Default()
-	v.Run()
+	var n int = 1e6
+	m := make(map[int][128]byte)
+	printAlloc()
+
+	for i := 0; i < n; i++ {
+		m[i] = [128]byte{}
+	}
+	printAlloc()
+
+	for i := 0; i < n; i++ {
+		delete(m, i)
+	}
+	fmt.Println(len(m))
+
+	runtime.GC()
+	printAlloc()
+	runtime.KeepAlive(m)
 }
 
 func printAlloc() {

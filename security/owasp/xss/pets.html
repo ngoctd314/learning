@@ -1,0 +1,25 @@
+<html>
+  <body>
+    <div>
+      <img
+        style="width: 650px"
+        src="https://res.cloudinary.com/enchanting/q_70,f_auto,c_lfill,g_auto/exodus-web/2021/12/39180.jpg"
+      />
+    </div>
+    <div style="margin-top: 15px">
+      <form action="/" method="post">
+        <label for="data">Comment:</label>
+        <input type="text" id="data" name="data" /> </br></br>
+        <input type="submit" value="Submit" />
+      </form>
+    </div>
+    <div>
+      <p style="font-size: 20px; font-weight: 700">Comments:</p>
+      {{ range . }}
+      <div>
+        <p>{{ .Comment}}</p>
+      </div>
+      {{ end }}
+    </div>
+  </body>
+</html>
