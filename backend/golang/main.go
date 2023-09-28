@@ -5,7 +5,9 @@ import (
 	"runtime"
 )
 
-type Person struct{}
+type Person struct {
+	Name string
+}
 
 func main() {
 	var n int = 1e6
@@ -40,5 +42,7 @@ func printAlloc() {
 	fmt.Printf("%d KB\n", m.Alloc/1024)
 }
 
-// cpy := make([]byte, 1)
-// copy(cpy, msgs[:1])
+func add(a, b int) int {
+	sum := a + b
+	return sum
+}
