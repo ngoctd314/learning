@@ -17,14 +17,16 @@ func main() {
 	}
 	printAlloc()
 
-	for i := 0; i < n; i++ {
-		delete(m, i)
-	}
-	fmt.Println(len(m))
+	cpM := make(map[int][128]byte)
+	// for i := 0; i < n; i++ {
+	// 	if i%11 != 0 {
+	// 		cpM[i] = [128]byte{}
+	// 	}
+	// }
 
 	runtime.GC()
 	printAlloc()
-	runtime.KeepAlive(m)
+	runtime.KeepAlive(cpM)
 }
 
 func printAlloc() {
