@@ -9,26 +9,17 @@ type Person struct {
 	Name string
 }
 
+type Printer interface {
+	Print() any
+}
+type PrinterV2 interface {
+	Print() any
+}
+
 func main() {
-	var n int = 1e6
-	m := make(map[int][128]byte)
-	printAlloc()
-
-	for i := 0; i < n; i++ {
-		m[i] = [128]byte{}
-	}
-	printAlloc()
-
-	cpM := make(map[int][128]byte)
-	// for i := 0; i < n; i++ {
-	// 	if i%11 != 0 {
-	// 		cpM[i] = [128]byte{}
-	// 	}
-	// }
-
-	runtime.GC()
-	printAlloc()
-	runtime.KeepAlive(cpM)
+	var printer Printer
+	var printerV2 PrinterV2
+	fmt.Println(printer == printerV2)
 }
 
 func printAlloc() {

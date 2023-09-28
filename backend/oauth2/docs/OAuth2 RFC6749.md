@@ -21,12 +21,12 @@ The traditional client-server authentication model
 
 OAuth2 defines four roles:
 
-|Roles|Description|
-|-|-|
-|Resource owner|An entity capable of granting access to a protected resource. When resource owner is a person, it is referred to as an end-user|
-|Resource server|The server hosting the protected resources, capable of accepting and responding to protected resource requests using access tokens|
-|Client|An application making protected resource requests on behalf of the resource owner and with its authorization.|
-|Authorization server|The server issuing access tokens to the client after successfully authenticating the resource owner and obtaining authorization|
+| Roles                | Description                                                                                                                        |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Resource owner       | An entity capable of granting access to a protected resource. When resource owner is a person, it is referred to as an end-user    |
+| Resource server      | The server hosting the protected resources, capable of accepting and responding to protected resource requests using access tokens |
+| Client               | An application making protected resource requests on behalf of the resource owner and with its authorization.                      |
+| Authorization server | The server issuing access tokens to the client after successfully authenticating the resource owner and obtaining authorization    |
 
 The authorization server may be the same server as the resource server or a separate entity. A single authorization server may issue access tokens accepted by multiple resource servers.
 
@@ -34,14 +34,14 @@ The authorization server may be the same server as the resource server or a sepa
 
 <div style="text-align:left"><img src="../assets/protocol_flow.png" width=500 /></div>
 
-|Step|Action|
-|-|-|
-|1|Client requests authorization from the resource owner.|
-|2|Client receives an authorization grant, a credential represeting the resource owner's authorization.|
-|3|Client requests an access token by authenticating with the authorization server and presenting the authorization grant|
-|4|Authorization server authenticates the client and validates the authorization grant, issues an access token|
-|5|Client requests the protected resource from the resource server and authenticates by presenting the access token|
-|6|The resource server validates the access token, and serves the request|
+| Step | Action                                                                                                                 |
+| ---- | ---------------------------------------------------------------------------------------------------------------------- |
+| 1    | Client requests authorization from the resource owner.                                                                 |
+| 2    | Client receives an authorization grant, a credential represeting the resource owner's authorization.                   |
+| 3    | Client requests an access token by authenticating with the authorization server and presenting the authorization grant |
+| 4    | Authorization server authenticates the client and validates the authorization grant, issues an access token            |
+| 5    | Client requests the protected resource from the resource server and authenticates by presenting the access token       |
+| 6    | The resource server validates the access token, and serves the request                                                 |
 
 ### 1.3. Authorization Grant
 
@@ -107,7 +107,7 @@ The client type designation is based on the authorization server's definition of
 
 **Native application**
 
-Is a public client installed and executed on the device used by the resource owner. Protocol data and credentials are accessible to the resource owner. It is assumed that any client authentication credentials included in the application can be extracted. 
+Is a public client installed and executed on the device used by the resource owner. Protocol data and credentials are accessible to the resource owner. It is assumed that any client authentication credentials included in the application can be extracted.
 
 ### 2.2. Client Identifier
 
@@ -115,11 +115,11 @@ Is a public client installed and executed on the device used by the resource own
 
 ### 2.3. Client Authentication
 
-If the client type is confidential, the client and authorization server establish a client authentication method suitable for the security requirements of the authorization server. 
+If the client type is confidential, the client and authorization server establish a client authentication method suitable for the security requirements of the authorization server.
 
 Confidential clients are typically issued (or establish) a set of client credentials used for authenticating with the authorization server (password, public/private key pair).
 
-#### 2.3.1. Client Password **
+#### 2.3.1. Client Password \*\*
 
 Clients in possession of a client password MAY use the HTTP basic authentication scheme as defined in to authenticate with the authorization scheme to authenticate with the authorization server. The client identifier is encoded using the "application/x-www-form-urlencoded" encoding algorithm. The authorization server MUST support the HTTP Basic authentication scheme for authenticating clients that were is issued a client password.
 
@@ -131,6 +131,7 @@ The authorization server MAY support including the client credentials in the req
 client_id: REQUIRED. The client identifier issued to the client during the registration process.
 client_secret: REQUIRED. The client secret. The client MAY omit the parameter if the client secret is an empty string.
 ```
+
 #### 2.3.2. Other Authentication Methods
 
 ### 2.4. Unregistered Clients
@@ -154,8 +155,9 @@ The authorization endpoint is used by the authorization code grant type and impl
 ```txt
 response_type
     REQUIRED. The value MUST be one of "code" for requesting an authorization code,
-    "token" for requesting an access token (implicit grant) 
+    "token" for requesting an access token (implicit grant)
 ```
+
 If an authorization request is missing the "response_type" parameter, or if the response type is not understood, the authorization server MUST return an error response.
 
 #### 3.1.2. Redirection Endpoint
@@ -199,7 +201,7 @@ The token endpoint is used by the client to obtain an access token by presenting
 
 Since requests to the token endpoint result in the transmission of clear-text credentials (in the HTTP request and response), the authorization server MUST request the use of TLS.
 
-#### 3.2.1. Client Authentication **
+#### 3.2.1. Client Authentication \*\*
 
 ### 3.3. Access Token Scope
 
@@ -209,7 +211,7 @@ The value of the scope parameter is expressed as a list of space-delimited, case
 
 The authorization server MAY fully or partitionally ignore the scope requested by the client, based on the authorization server policy or the resource owner's instructions. If the issued access token scope is different from the one requested by the client, the authorization server MUST include the "scope" response parameter to inform the client of the actual scope granted.
 
-If the client omits the scope parameter when requesting authorization, the authorization server MUST either process the request  using a pre-defined default value or fail the request indicating an invalid scope.
+If the client omits the scope parameter when requesting authorization, the authorization server MUST either process the request using a pre-defined default value or fail the request indicating an invalid scope.
 
 ## 4. Obtaining Authorization
 
@@ -227,7 +229,7 @@ If the client omits the scope parameter when requesting authorization, the autho
 
 - (E) The authorization server authenticates the client, validates the authorization code, and ensures that the redirection URI received matches the URI used to redirect the client in step (C). If valid, the authorization server responds back with an access token and, optionally, a refresh token.
 
-#### 4.1.1. Authorization Request 
+#### 4.1.1. Authorization Request
 
 The client constructs the request URI by adding the following params, using the "application/x-www-form-urlencoded" format
 
@@ -246,7 +248,7 @@ state
     back to the client. The parameter SHOULD be used for preventing CSRF
 ```
 
-#### 4.1.2. Authorization Response 
+#### 4.1.2. Authorization Response
 
 If the resource owner grants the access request, the authorization server issues an authorization code and delivers it to the client by adding the following parameters to the query component of the redirection URI using the "application/x-www-form-urlencoded" format
 
@@ -258,9 +260,9 @@ state
     REQUIRE if the "state" parameter was present in the client authorization request. The exact value received from the client.
 ```
 
-##### 4.1.2.1. Error Response **
+##### 4.1.2.1. Error Response \*\*
 
-#### 4.1.3. Access Token Request  
+#### 4.1.3. Access Token Request
 
 The client makes a request to the token endpoint by sending the following parameters using the "application/x-www-form-urlencoded" format with a character encoding of UTF-8 in the HTTP request entity-body
 
@@ -288,8 +290,7 @@ The authorization server must
 
 If the access token is valid and authorized, the authorization server issues an access token and optional refresh token. If the request client authentication failed or is invalid, the authorization server returns an error response.
 
-
-### 4.2. Implicit Grant **
+### 4.2. Implicit Grant \*\*
 
 ### 4.3. Resource Owner Password Credentials Grant
 
@@ -333,7 +334,7 @@ Since this access token request utilizes the resource owner's password, the auth
 
 If the access token request is valid and authorized, the authorization server issues ac access token and optional refresh token token.
 
-### 4.4. Client Credentials Grant **
+### 4.4. Client Credentials Grant \*\*
 
 ### 4.5. Extension Grants
 
@@ -342,6 +343,7 @@ The client uses an extension grant type by specifying the grant type using an ab
 ```txt
 grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Asaml2-bearer&assertion=PEFzc2VydGlvbiBJc3N1ZUluc3RhbnQ9IjIwMTEtMDU
 ```
+
 ## 5. Issuing an Access Token
 
 If is valid request, the authorization server issues an access token and optional refresh token.
@@ -367,7 +369,8 @@ scope
     OPTIONAL, if identical to the scope requested by the client;
 ```
 
-The authorization server MUST include the HTTP "Cache-Control" response header field with a value of "no-store" in any response containing tokens, credentials, or other sensitive information 
+The authorization server MUST include the HTTP "Cache-Control" response header field with a value of "no-store" in any response containing tokens, credentials, or other sensitive information
+
 ### 5.2. Error Response
 
 The authorization server responds with an HTTP 400 (Bad Request) status code and includes
@@ -411,21 +414,22 @@ refresh_token
 scope
     OPTIONAL.
 ```
+
 Because refresh tokens are typically long-lasting credentials used to request additional access tokens, the refresh token is bound to the client to which it was issued. If the client type is confidential or the client was issued client credentials (or assigned other authentication requirements).
 
 The authorization server MAY issue a new refresh token, in which case the client MUST discard the old refresh and replace it with the new refresh token. The authorization server MAY revoke the old refresh token after issuing a new refresh token to the client. If a new refresh token is issued, the refresh token scope MUST be identical to that of the refresh included by the client in the request.
 
 ## 7. Accessing Protected Resources
 
-The client accesss protected resources by presenting the access token to the resource server. The resource server MUST validate the access token and ensure that it has expired and that its scope covers the requested resource. The methods used by the resource server to validate the access token (as well as any error responses) are beyond the scope of this specification but generally involve an interaction or coordination between the resource server and the authorization server. 
+The client accesss protected resources by presenting the access token to the resource server. The resource server MUST validate the access token and ensure that it has expired and that its scope covers the requested resource. The methods used by the resource server to validate the access token (as well as any error responses) are beyond the scope of this specification but generally involve an interaction or coordination between the resource server and the authorization server.
 
 ### 7.1. Access Token Types
 
 The access token type provides the client with the information required to successfully utilize the access token to make a protected resource request. The client MUST NOT use an access token if it does not understand the token type.
 
-The "bearer" token type is utilized by simply including the access token string in the request 
+The "bearer" token type is utilized by simply including the access token string in the request
 
-While th "mac" token type is utilized by  issuing a Message Authentication Code (MAC) key together with the access token that is used to sign certain components of the HTTP requests.
+While th "mac" token type is utilized by issuing a Message Authentication Code (MAC) key together with the access token that is used to sign certain components of the HTTP requests.
 
 ### 7.2. Error Response
 
@@ -433,7 +437,7 @@ While th "mac" token type is utilized by  issuing a Message Authentication Code 
 
 ### 8.1. Defining Access Token Types
 
-Access token types can be defined in one of two ways: registered in the Access Token Types registry 
+Access token types can be defined in one of two ways: registered in the Access Token Types registry
 
 ### 8.2. Defining New Endpoint Parameters
 
@@ -441,15 +445,15 @@ Access token types can be defined in one of two ways: registered in the Access T
 
 ### 8.4. Defining New Authorization Endpoint Response Types
 
-### 8.5. Defining Additional Error Codes 
+### 8.5. Defining Additional Error Codes
 
-## 9. Native Applications **
+## 9. Native Applications \*\*
 
 Native applications are clients installed and executed on the device used by the resource owner (desktop application, native mobile application). Native applications require special consideration related to security, platform capabilities, and overall end-user experience.
 
 The authorization endpoint requires interaction between the client and the resource owner's user-agent. Native applications can invoke an external user-agent or embed a user-agent within the application. Native applications can invoke an external user-agent or embed a user-agent within the application.
 
-- External user-agent - the native application can capture the response from the authorization server using a redirection URI 
+- External user-agent - the native application can capture the response from the authorization server using a redirection URI
 
 ## 10. Security Considerations
 
@@ -473,7 +477,7 @@ The authorization server MUST authenticate the client whenever possible. If the 
 
 Access Token credentials (as well as any confidential access token attributes) MUST be kept confidential in transit and storage.
 
-The client SHOULD request access tokens with the minimal scope necessary. The authorization server SHOULD take the client identity into account whenc  choosing how to honor the requested scope and MAY issue an access token with less rights that requested.
+The client SHOULD request access tokens with the minimal scope necessary. The authorization server SHOULD take the client identity into account whenc choosing how to honor the requested scope and MAY issue an access token with less rights that requested.
 
 ### 10.4. Refresh Tokens
 
@@ -481,7 +485,7 @@ Refresh tokens MUST be kept confidential in transit and storage, and shared only
 
 The authorization server could employ refresh token rotation in which a new refresh token is issued with every access token refresh response.
 
-### 10.5. Authorization Codes 
+### 10.5. Authorization Codes
 
 The transmission of authorization codes SHOULD be made over a secure channel, and the client SHOULD require the use of TLS with its redirection URI if the URI identifies a network resource.
 
