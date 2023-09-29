@@ -5,21 +5,20 @@ import (
 	"runtime"
 )
 
-type Person struct {
-	Name string
-}
-
-type Printer interface {
-	Print() any
-}
-type PrinterV2 interface {
-	Print() any
-}
-
 func main() {
-	var printer Printer
-	var printerV2 PrinterV2
-	fmt.Println(printer == printerV2)
+	m := make(map[int][128]byte)
+	for i := 0; i < 1e6; i++ {
+		// m[i] = make([]byte, 128)
+		m[i] = [128]byte{}
+	}
+	printAlloc()
+	for i := 0; i < 1e6; i++ {
+		delete(m, i)
+	}
+
+	runtime.GC()
+	printAlloc()
+	runtime.KeepAlive(m)
 }
 
 func printAlloc() {
