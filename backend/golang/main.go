@@ -6,19 +6,13 @@ import (
 )
 
 func main() {
-	m := make(map[int][128]byte)
-	for i := 0; i < 1e6; i++ {
-		// m[i] = make([]byte, 128)
-		m[i] = [128]byte{}
+	a := [3]int{0, 1, 2}
+	for i, v := range a {
+		a[2] = 10
+		if i == 2 {
+			println(v)
+		}
 	}
-	printAlloc()
-	for i := 0; i < 1e6; i++ {
-		delete(m, i)
-	}
-
-	runtime.GC()
-	printAlloc()
-	runtime.KeepAlive(m)
 }
 
 func printAlloc() {
