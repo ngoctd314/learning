@@ -46,3 +46,34 @@ CREATE TABLE
         `verified` TINYINT(4) NOT NULL COMMENT 'webhook is verified or not',
         `status` INT(11) NOT NULL COMMENT 'webhook is active/inactive for receive incoming webhook'
     )
+
+CREATE TABLE `shops` (
+  id int, 
+  name varchar(36),
+  join_date datetime,
+  join_channel tinyint(4)
+);
+
+-- 10M records
+-- Query shop join theo ngay trong 1 thang gan nhat
+
+SELECT join_channel, join_date, count(id) FROM shops WHERE join_date > now() - interval 1 month
+GROUP BY join_channel, join_date 
+ORDER BY count(id) DESC;
+
+CREATE TABLE bills (
+  id int primary key auto_increment,
+  order_id int,
+  user_id int
+);
+
+-- 1M records
+
+CREATE TABLE orders (
+  id int primary key auto_increment,
+  product int
+);
+
+-- 4M records
+
+SELECT * FROM orders o LEFT JOIN bills b ON o.id = b.order_id AND b.user_id = 1222 

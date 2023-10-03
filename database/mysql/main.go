@@ -4,9 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math/rand"
-	"os"
-	"os/signal"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -24,45 +21,27 @@ type User struct {
 }
 
 func init() {
-	conn, err := sqlx.Connect("mysql", "root:secret@(192.168.49.2:30300)/learn")
+	conn, err := sqlx.Connect("mysql", "root:secret@(192.168.49.2:30300)/mysql")
 	if err != nil {
 		log.Fatal(err)
 	}
 	db = conn
-	// seedPeople()
-	// seedTestHash()
+}
+
+type Order struct {
+	ID      int `db:"id"`
+	Product int `db:"product"`
+}
+
+type Bills struct {
+	ID      int `db:"id"`
+	OrderID int `db:"order_id"`
+	UserID  int `db:"user_id"`
 }
 
 func main() {
-	var rs []people
-	query := "SELECT * FROM people LIMIT 4000000"
-	rows, err := db.Query(query)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var tmp people
-
-		if err := rows.Scan(&tmp.LastName, &tmp.FirstName, &tmp.Dob, &tmp.Gender); err != nil {
-			log.Println(err)
-		}
-
-		rs = append(rs, tmp)
-	}
-	for _, v := range rs {
-		_ = v
-	}
-
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, os.Interrupt)
-	select {
-	case <-sig:
-		log.Println("exit")
-	}
+	seedPerson()
 }
-
-func seedCityDemo() {}
 
 type person struct {
 	Name     string `db:"name"`
@@ -72,22 +51,20 @@ type person struct {
 }
 
 func seedPerson() {
-	var in [][]person
+	var in [][]Bills
 	for i := 0; i < 2000; i++ {
-		var tmp []person
+		var tmp []Bills
 		for j := 0; j < 2000; j++ {
-			tmp = append(tmp, person{
-				Name:     fmt.Sprintf("name-%d-%d", i, j),
-				Age:      int8(rand.Intn(100)),
-				Address:  fmt.Sprintf("address-%d", rand.Intn(1000)),
-				Birthday: fmt.Sprintf("birthday-%d", rand.Intn(365*100)),
+			tmp = append(tmp, Bills{
+				OrderID: i*2000 + j,
+				UserID:  i*2000 + j,
 			})
 		}
 		in = append(in, tmp)
 	}
 
 	for _, v := range in {
-		_, err := db.NamedExec("INSERT INTO persons (name, age, address, birthday) VALUES (:name, :age, :address, :birthday) ", v)
+		_, err := db.NamedExec("INSERT INTO bills (order_id, user_id) VALUES (:order_id, :user_id) ", v)
 		if err != nil {
 			log.Println(err)
 		}
