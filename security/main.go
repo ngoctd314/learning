@@ -12,31 +12,19 @@ type Query struct {
 	Question string
 }
 
+// password = ” or 1 = 1--'
 func main() {
 	tmpl, err := template.New("reflected_xss.html").ParseFiles("reflected_xss.html")
 	if err != nil {
 		panic(err)
 	}
 
-	http.HandleFunc("/tmpl", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		query := r.URL.Query().Get("q")
 		if len(strings.TrimSpace(query)) == 0 {
 			query = "Unknown"
 		}
 		err = tmpl.Execute(w, Query{query})
-		if err != nil {
-			panic(err)
-		}
-	})
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.SetCookie(w, &http.Cookie{
-			Name:     "test",
-			Value:    "value",
-			Secure:   true,
-			SameSite: http.SameSiteNoneMode,
-		})
-		err = tmpl.Execute(w, Query{})
 		if err != nil {
 			panic(err)
 		}

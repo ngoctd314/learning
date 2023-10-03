@@ -1,4 +1,5 @@
 <html>
+ <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
   <body>
     <div style="margin-top: 15px">
       <form action="/" method="get">
@@ -9,6 +10,7 @@
     </div>
     <div>
        <p style="font-size: 20px; font-weight: 700">Search result for: {{.Question}}</p>
+       <script>alert(111)</script>
     </div>
   </body>
 	<script>
