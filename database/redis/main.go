@@ -17,13 +17,15 @@ func main() {
 	ctx := context.Background()
 	conn := redis.NewClient(&redis.Options{
 		Addr: "192.168.49.2:30301",
-		DB:   0,
+		DB:   1,
 	})
 
 	// value, err := conn.Set(ctx, "key", "value", time.Minute).Result()
 	// fmt.Println(value, err)
 
-	ok, err := conn.SetNX(ctx, "key", "value", time.Minute).Result()
+	m := map[string]string{"project_data_types": "https://www.checkatrade.com/blog/wp-content/uploads/2021/08/Feature-How-much-does-it-cost-to-build-a-car-park.jpg"}
+	data, _ := json.Marshal(m)
+	ok, err := conn.Set(ctx, "label-1", data, time.Hour).Result()
 	fmt.Println("ok", ok, "err", err)
 
 	// articleID := voting.PostArticle(ctx, conn, "user:6", "learn redis", "http://redis.io")
