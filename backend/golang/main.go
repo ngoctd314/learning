@@ -6,12 +6,13 @@ import (
 )
 
 func main() {
-	a := [3]int{0, 1, 2}
-	for i, v := range &a {
-		a[1] = 10
-		if i == 1 {
-			println(a[1], v)
-		}
+	a := []int{0, 1, 2}
+	m := make(map[int]*int)
+	for i, v := range a {
+		m[i] = &v
+	}
+	for k, v := range m {
+		fmt.Println(k, *v)
 	}
 }
 
