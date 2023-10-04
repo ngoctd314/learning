@@ -6,7 +6,11 @@ import (
 	"log"
 	"os"
 	"os/signal"
+
+	"github.com/jmoiron/sqlx"
 )
+
+var db *sqlx.DB
 
 func execDeadLock() {
 	go func() {

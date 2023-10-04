@@ -2,158 +2,70 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 var (
-	db  *sqlx.DB
-	ctx = context.Background()
+	mysqlConn *sqlx.DB
+	ctx       = context.Background()
 )
 
-type Shop struct {
-	ID          int       `db:"id"`
-	Name        string    `db:"name"`
-	JoinDate    time.Time `db:"join_date"`
-	JoinChannel string    `db:"join_channel"`
-}
-
-// User ...
-type User struct {
-	Name string `json:"name" db:"name"`
-	Age  int    `db:"age" json:"age"`
-}
-
 func init() {
-	conn, err := sqlx.Connect("mysql", "root:secret@(192.168.49.2:30300)/mysql")
+	// conn, err := sqlx.Connect("mysql", "root:secret@(192.168.49.2:30300)/mysql")
+	conn, err := sqlx.Connect("postgres", "user=admin password=secret host=192.168.49.2 port=30303 dbname=db sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
-	db = conn
-}
-
-type Order struct {
-	ID      int `db:"id"`
-	Product int `db:"product"`
-}
-
-type Bills struct {
-	ID      int `db:"id"`
-	OrderID int `db:"order_id"`
-	UserID  int `db:"user_id"`
+	mysqlConn = conn
 }
 
 func main() {
-	seedPerson()
+	seed()
 }
 
-type person struct {
-	Name     string `db:"name"`
-	Age      int8   `db:"age"`
-	Address  string `db:"address"`
-	Birthday string `db:"birthday"`
+type Data struct {
+	Meta []byte `db:"meta"`
 }
 
-var e = [4]string{"facebook", "email", "ads", "cs_refer"}
+type Meta struct {
+	ID   int            `db:"id" json:"id"`
+	From string         `db:"from" json:"from"`
+	To   string         `db:"to" json:"to"`
+	Data map[string]int `db:"data" json:"data"`
+}
 
-func seedPerson() {
-	var in [][]Shop
-	for i := 0; i < 2000; i++ {
-		var tmp []Shop
-		for j := 0; j < 2000; j++ {
-			tmp = append(tmp, Shop{
-				Name:        fmt.Sprintf("name-%d-%d", i, j),
-				JoinDate:    time.Now().Add(-1 * time.Minute * time.Duration(i+j)),
-				JoinChannel: e[rand.Intn(4)],
+func seed() {
+	var in [][]Data
+	for i := 0; i < 1000; i++ {
+		var tmp []Data
+		for j := 0; j < 1000; j++ {
+			meta, _ := json.Marshal(Meta{
+				ID:   i*j + j,
+				From: fmt.Sprintf("from-%d-%d", i, j),
+				To:   fmt.Sprintf("to-%d-%d", i, j),
+				Data: map[string]int{
+					"rand1000": rand.Intn(1000),
+					"rand2000": rand.Intn(2000),
+				},
+			})
+			tmp = append(tmp, Data{
+				Meta: meta,
 			})
 		}
 		in = append(in, tmp)
 	}
 
 	for _, v := range in {
-		_, err := db.NamedExec("INSERT INTO shops (name, join_date, join_channel) VALUES (:name, :join_date, :join_channel) ", v)
+		_, err := mysqlConn.NamedExec("INSERT INTO test_jsons (meta) VALUES (:meta) ", v)
 		if err != nil {
 			log.Println(err)
 		}
 	}
-}
-
-type gender string
-
-const (
-	male   gender = "m"
-	female gender = "f"
-)
-
-type people struct {
-	LastName  string `db:"last_name"`
-	FirstName string `db:"first_name"`
-	Dob       string `db:"dob"`
-	Gender    gender `db:"gender"`
-}
-
-func seedPeople() {
-	var in [][]people
-	for i := 0; i < 2000; i++ {
-		var tmp []people
-		for j := 0; j < 2000; j++ {
-			tmp = append(tmp, people{
-				LastName:  fmt.Sprintf("last_name-%d-%d", i, j),
-				FirstName: fmt.Sprintf("first_name-%d-%d", i, j),
-				// Dob:       time.Now().Add(-time.Hour * 24 * 365 * time.Duration(rand.Intn(100)+1)),
-				Gender: func() gender {
-					if j%2 == 0 {
-						return male
-					}
-					return female
-				}(),
-			})
-		}
-		in = append(in, tmp)
-	}
-
-	for _, v := range in {
-		_, err := db.NamedExec(`INSERT INTO people (last_name, first_name, dob, gender) 
-         VALUES (:last_name, :first_name, :dob, :gender)`, v)
-		if err != nil {
-			log.Println(err)
-		}
-	}
-}
-
-type testhash struct {
-	FName string `db:"fname"`
-	LNAME string `db:"lname"`
-}
-
-func seedTestHash() {
-	var in [][]testhash
-
-	for i := 0; i < 2000; i++ {
-		var tmp []testhash
-		for j := 0; j < 2000; j++ {
-			tmp = append(tmp, testhash{
-				FName: fmt.Sprintf("fname-%d-%d", i, j),
-				LNAME: fmt.Sprintf("lname-%d-%d", i, j),
-			})
-		}
-		in = append(in, tmp)
-	}
-
-	for _, v := range in {
-		_, err := db.NamedExec(`INSERT INTO testhash (fname, lname) 
-         VALUES (:fname, :lname)`, v)
-		if err != nil {
-			log.Println(err)
-		}
-	}
-}
-
-func add(a, b int) int {
-	return a + b
 }
