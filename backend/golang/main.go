@@ -3,32 +3,22 @@ package main
 import (
 	"fmt"
 	"runtime"
-	"strings"
 )
 
 func main() {
-	m := func(mp map[int]int) map[int]int {
-		fmt.Println("evaluated")
-		return mp
+	m := map[int]bool{
+		0: true,
+		1: false,
+		2: true,
 	}
-
-	_ = m
-	mp := map[int]int{1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6}
-	for k, v := range mp {
-		fmt.Println(k, v)
+	cpM := make(map[int]bool)
+	for k, v := range m {
+		cpM[k] = v
+		if v {
+			cpM[10+k] = true
+		}
 	}
-	fmt.Println(strings.Repeat("~", 30))
-	for k, v := range mp {
-		fmt.Println(k, v)
-	}
-	fmt.Println(strings.Repeat("~", 30))
-	for k, v := range mp {
-		fmt.Println(k, v)
-	}
-	fmt.Println(strings.Repeat("~", 30))
-	for k, v := range mp {
-		fmt.Println(k, v)
-	}
+	fmt.Println(m, cpM)
 }
 
 func printAlloc() {
