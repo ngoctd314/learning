@@ -3,16 +3,31 @@ package main
 import (
 	"fmt"
 	"runtime"
+	"strings"
 )
 
 func main() {
-	a := []int{0, 1, 2}
-	m := make(map[int]*int)
-	for i, v := range a {
-		m[i] = &v
+	m := func(mp map[int]int) map[int]int {
+		fmt.Println("evaluated")
+		return mp
 	}
-	for k, v := range m {
-		fmt.Println(k, *v)
+
+	_ = m
+	mp := map[int]int{1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6}
+	for k, v := range mp {
+		fmt.Println(k, v)
+	}
+	fmt.Println(strings.Repeat("~", 30))
+	for k, v := range mp {
+		fmt.Println(k, v)
+	}
+	fmt.Println(strings.Repeat("~", 30))
+	for k, v := range mp {
+		fmt.Println(k, v)
+	}
+	fmt.Println(strings.Repeat("~", 30))
+	for k, v := range mp {
+		fmt.Println(k, v)
 	}
 }
 

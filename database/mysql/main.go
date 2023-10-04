@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math/rand"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -13,6 +15,13 @@ var (
 	db  *sqlx.DB
 	ctx = context.Background()
 )
+
+type Shop struct {
+	ID          int       `db:"id"`
+	Name        string    `db:"name"`
+	JoinDate    time.Time `db:"join_date"`
+	JoinChannel string    `db:"join_channel"`
+}
 
 // User ...
 type User struct {
@@ -50,21 +59,24 @@ type person struct {
 	Birthday string `db:"birthday"`
 }
 
+var e = [4]string{"facebook", "email", "ads", "cs_refer"}
+
 func seedPerson() {
-	var in [][]Bills
+	var in [][]Shop
 	for i := 0; i < 2000; i++ {
-		var tmp []Bills
+		var tmp []Shop
 		for j := 0; j < 2000; j++ {
-			tmp = append(tmp, Bills{
-				OrderID: i*2000 + j,
-				UserID:  i*2000 + j,
+			tmp = append(tmp, Shop{
+				Name:        fmt.Sprintf("name-%d-%d", i, j),
+				JoinDate:    time.Now().Add(-1 * time.Minute * time.Duration(i+j)),
+				JoinChannel: e[rand.Intn(4)],
 			})
 		}
 		in = append(in, tmp)
 	}
 
 	for _, v := range in {
-		_, err := db.NamedExec("INSERT INTO bills (order_id, user_id) VALUES (:order_id, :user_id) ", v)
+		_, err := db.NamedExec("INSERT INTO shops (name, join_date, join_channel) VALUES (:name, :join_date, :join_channel) ", v)
 		if err != nil {
 			log.Println(err)
 		}

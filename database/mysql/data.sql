@@ -77,3 +77,16 @@ CREATE TABLE orders (
 -- 4M records
 
 SELECT * FROM orders o LEFT JOIN bills b ON o.id = b.order_id AND b.user_id = 1222 
+
+CREATE TABLE shops (
+  id int primary  key auto_increment,
+  name varchar(255),
+  join_date datetime,
+  join_channel enum('facebook','email', 'ads', 'cs_refer')
+);
+
+SELECT join_channel, join_date, count(id) 
+FROM shops 
+WHERE join_date > now() - interval 1 month 
+GROUP BY join_channel, join_date 
+ORDER BY count(id) DESC;
