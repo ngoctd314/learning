@@ -6,19 +6,13 @@ import (
 )
 
 func main() {
-	m := map[int]bool{
-		0: true,
-		1: false,
-		2: true,
+	for i := 0; i < 5; i++ {
+		defer func(i int) {
+			fmt.Println(i)
+		}(i)
+		fmt.Println("i", i)
 	}
-	cpM := make(map[int]bool)
-	for k, v := range m {
-		cpM[k] = v
-		if v {
-			cpM[10+k] = true
-		}
-	}
-	fmt.Println(m, cpM)
+	fmt.Println("RUN")
 }
 
 func printAlloc() {
@@ -32,6 +26,8 @@ func printAlloc() {
 	fmt.Printf("%d KB\n", m.Alloc/1024)
 }
 
+// phải chăng m là con lừa, thân m nó thích ưa nặng
+// bản thân m là trí nô, thì đừng cố ra vẻ trí thức
 func add(a, b int) int {
 	sum := a + b
 	return sum
