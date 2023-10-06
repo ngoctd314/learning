@@ -1,0 +1,60 @@
+WORK=/tmp/go-build2152912811
+mkdir -p $WORK/b001/
+cat >/tmp/go-build2152912811/b001/importcfg << 'EOF' # internal
+# import config
+packagefile fmt=/home/ubuntu/.cache/go-build/cf/cff345f70671e508776e8b231b79e372c4676ffe417a1a3806c5caf95e9bd7cf-d
+packagefile runtime=/home/ubuntu/.cache/go-build/f5/f5eae97d918371c7c83fe2a88e9dbb2fec09960c36aeb1d26b1c2f09d89305f9-d
+EOF
+cd /home/ubuntu/code/learning/backend/golang
+/usr/local/go/pkg/tool/linux_amd64/compile -o $WORK/b001/_pkg_.a -trimpath "$WORK/b001=>" -p main -complete -buildid SNxy0awl4vXH8dQPSWOK/SNxy0awl4vXH8dQPSWOK -goversion go1.20.4 -c=4 -nolocalimports -importcfg $WORK/b001/importcfg -pack ./main.go
+/usr/local/go/pkg/tool/linux_amd64/buildid -w $WORK/b001/_pkg_.a # internal
+cp $WORK/b001/_pkg_.a /home/ubuntu/.cache/go-build/d7/d7249f07d8083f8ff2fc60e7ce13b14494127b23ff4be28c82eaf428451ad3f6-d # internal
+cat >/tmp/go-build2152912811/b001/importcfg.link << 'EOF' # internal
+packagefile command-line-arguments=/tmp/go-build2152912811/b001/_pkg_.a
+packagefile fmt=/home/ubuntu/.cache/go-build/cf/cff345f70671e508776e8b231b79e372c4676ffe417a1a3806c5caf95e9bd7cf-d
+packagefile runtime=/home/ubuntu/.cache/go-build/f5/f5eae97d918371c7c83fe2a88e9dbb2fec09960c36aeb1d26b1c2f09d89305f9-d
+packagefile errors=/home/ubuntu/.cache/go-build/c3/c3ca51b3dbf02d375ed334068291399ab9045e70f116b083e81befc8b32073f9-d
+packagefile internal/fmtsort=/home/ubuntu/.cache/go-build/60/60db98208e085d1cb81f8849168369dd6dffaa75a2a8817537ff9840e544def8-d
+packagefile io=/home/ubuntu/.cache/go-build/3f/3f47dbb23d8a725a8add0ccee53d305b53d47438adf59f282afb4e58c957e946-d
+packagefile math=/home/ubuntu/.cache/go-build/90/90e33f0d8f79c7585c1559728930cf6936e8721a38d6c2b25ab179c8cce393d3-d
+packagefile os=/home/ubuntu/.cache/go-build/9f/9f4f9105c37b2865b130bc5f783edf18bd1066b6d71eee53c8f53f2da3e87710-d
+packagefile reflect=/home/ubuntu/.cache/go-build/d5/d5fd69d99da4bee5f1ec02b332f5f903af8e9e36df61950ce58553ec3f55b3a3-d
+packagefile sort=/home/ubuntu/.cache/go-build/15/15c97b460afc045139634ffdd726154b4fce1651774ecd3a8a04434096da3516-d
+packagefile strconv=/home/ubuntu/.cache/go-build/1a/1ad0a4bf26d6a401443abecef2c0d58a39aa53cee9a04b799ed3b380005d7b6a-d
+packagefile sync=/home/ubuntu/.cache/go-build/8c/8ca5cd7b10f028bde0add0570182855542c74dd7b0f3f185d05d55cfb2761225-d
+packagefile unicode/utf8=/home/ubuntu/.cache/go-build/3f/3f60081ee412ab78743d2744ee4e8db7b1a927b3480e8a0d74f175a6da78f2b4-d
+packagefile internal/abi=/home/ubuntu/.cache/go-build/97/97e46b4de6600d66a48c41890d9b418b13b20b22bb9116831e53bb277d3cc219-d
+packagefile internal/bytealg=/home/ubuntu/.cache/go-build/3d/3d8c80401513467afb4c0ae8bfb06d098f84d53f83c67e867a73d5a9bd52c621-d
+packagefile internal/coverage/rtcov=/home/ubuntu/.cache/go-build/92/926df4eb753eaf2114a466757f34e7afdfba1cf6ec04f1f2f34c85063d90e024-d
+packagefile internal/cpu=/home/ubuntu/.cache/go-build/06/0621a8c86a0f8a0475a63e05793305315e8701bc4b5d35227f39367f20a85bf7-d
+packagefile internal/goarch=/home/ubuntu/.cache/go-build/46/466361bf073f0514935abe900921ffaa557283dbec238ae7b237bf94e134e05e-d
+packagefile internal/goexperiment=/home/ubuntu/.cache/go-build/8d/8de78bf1ef63a81cea0842fb8c763a9242c3cb58755f22415c152ba39d813fbf-d
+packagefile internal/goos=/home/ubuntu/.cache/go-build/fc/fc2639e7d82ded59f6db84cb817dd44e79b4ce07bf385d940b6a585ea2251d8d-d
+packagefile runtime/internal/atomic=/home/ubuntu/.cache/go-build/9b/9b27352913aac753062d263539a28267204689b4f2b07b08874edc157621a704-d
+packagefile runtime/internal/math=/home/ubuntu/.cache/go-build/9f/9fdba1d4b52db1d9a6b1ef33709218afb9736e725ac2ed5b2d67732092133118-d
+packagefile runtime/internal/sys=/home/ubuntu/.cache/go-build/89/894fd9e5b3ec676bfc6db7792d9a73a660cab83b1469ee8b0ec1c7ab471453f3-d
+packagefile runtime/internal/syscall=/home/ubuntu/.cache/go-build/1d/1d8e21f62bbc5b5ae39b82f62d2103f987588ed752533b349b007897e395d080-d
+packagefile internal/reflectlite=/home/ubuntu/.cache/go-build/68/68e93efe874f570ec44808ba740ec9e7f85ae99517fc1aa4d7d47a25f1ba0dd5-d
+packagefile math/bits=/home/ubuntu/.cache/go-build/8a/8a8af225f53e3267a0e84e9236afd493febe04b00f6a1ebca9a385425ec5eb8b-d
+packagefile internal/itoa=/home/ubuntu/.cache/go-build/bf/bf12a0a0c4af776c027cff856238e7151c065ea070c1d8648374631c254efca2-d
+packagefile internal/poll=/home/ubuntu/.cache/go-build/8a/8a23e35e436231c957d53722575f693b9876e4444db8b34bddfa4b3af0d1a960-d
+packagefile internal/safefilepath=/home/ubuntu/.cache/go-build/7f/7f19737cdc4b7a80fe6c79a5773771840937e0649edced18bda637085f3eb5a7-d
+packagefile internal/syscall/execenv=/home/ubuntu/.cache/go-build/5a/5a5ad223fd7e129835d0f9a6c6ccecc70c2b50f40b78a6d4d20b06fafd51821b-d
+packagefile internal/syscall/unix=/home/ubuntu/.cache/go-build/42/426f444477d471f5cd570f0597420b970c802a8fbf1ca0ad38ac3b30f8bc3f0a-d
+packagefile internal/testlog=/home/ubuntu/.cache/go-build/cd/cde97acef886e8f87e5610349ed4489b23a91ea2a610ba3fc6155f73d540d8a1-d
+packagefile io/fs=/home/ubuntu/.cache/go-build/2c/2c2609c66a19a399f3dab8b33bd4da54655aefd1e62414acfe3fe7ffda6e7770-d
+packagefile sync/atomic=/home/ubuntu/.cache/go-build/60/607d046547a61f90e414bc462b44559534605a2b3331d30e80987de78eccec02-d
+packagefile syscall=/home/ubuntu/.cache/go-build/90/90c34d05dac34b8a71d3fe8c56629372bbf8c526cb99cd62209ee723971848f7-d
+packagefile time=/home/ubuntu/.cache/go-build/2d/2d930289955ec68431cef7e8d9bb7b5b2d6dccd93e45f68f63868cf7045146af-d
+packagefile internal/unsafeheader=/home/ubuntu/.cache/go-build/c5/c5b46fe40f7e8de2493764975e120119586accdba6937c78b1d5361bf99bc5b9-d
+packagefile unicode=/home/ubuntu/.cache/go-build/30/308aea17052e8d51adf8f3285ffddca41cb8097847ac43ecee40818df8954816-d
+packagefile internal/race=/home/ubuntu/.cache/go-build/8d/8d8748d628c00b0e17ec37c3b489e3f71aa648f54ebd42850107185a25c9c5d0-d
+packagefile internal/oserror=/home/ubuntu/.cache/go-build/6b/6bfc832c097aa830784db2380ca2fbeb0c5bbe680d0ce64ceda4afd925e21407-d
+packagefile path=/home/ubuntu/.cache/go-build/e3/e3566d6415cf10d62a5e496f409fab9922ec7c27417ea8ce5fe5a5a331f9b7f5-d
+modinfo "0w\xaf\f\x92t\b\x02A\xe1\xc1\a\xe6\xd6\x18\xe6path\tcommand-line-arguments\nbuild\t-buildmode=exe\nbuild\t-compiler=gc\nbuild\tCGO_ENABLED=1\nbuild\tCGO_CFLAGS=\nbuild\tCGO_CPPFLAGS=\nbuild\tCGO_CXXFLAGS=\nbuild\tCGO_LDFLAGS=\nbuild\tGOARCH=amd64\nbuild\tGOOS=linux\nbuild\tGOAMD64=v1\n\xf92C1\x86\x18 r\x00\x82B\x10A\x16\xd8\xf2"
+EOF
+mkdir -p $WORK/b001/exe/
+cd .
+/usr/local/go/pkg/tool/linux_amd64/link -o $WORK/b001/exe/a.out -importcfg $WORK/b001/importcfg.link -buildmode=exe -buildid=huHJgg6X47nsVj16UCiG/SNxy0awl4vXH8dQPSWOK/LsVr70NJx82He7odnxJS/huHJgg6X47nsVj16UCiG -extld=gcc $WORK/b001/_pkg_.a
+/usr/local/go/pkg/tool/linux_amd64/buildid -w $WORK/b001/exe/a.out # internal
+mv $WORK/b001/exe/a.out main

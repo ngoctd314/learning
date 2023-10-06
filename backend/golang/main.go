@@ -1,27 +1,7 @@
 package main
 
-import (
-	"fmt"
-	"log"
-	"net/http"
-)
-
-func convPointer(i *int) {
-	fmt.Printf("addr1 %p\n", i)
-	ii := *i
-	foobyval(ii)
-}
-
-func foobyval(n int) {
-	// println(n)
-	fmt.Printf("addr2 %p\n", &n)
-}
-
 func main() {
-	port := ":8080"
-	handler := http.FileServer(http.Dir("."))
-	if err := http.ListenAndServe(port, handler); err != nil {
-		log.Fatal(err)
+	for i := 0; i < 5; i++ {
 	}
 }
 
