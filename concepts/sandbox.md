@@ -1,6 +1,6 @@
-# Common concepts
+# Sandbox
 
-**1. Sandbox**
+**1. What is sandbox**
 
 What is a sandbox? A sandbox is an isolated testing environment that enables users to run programs or open files.
 
