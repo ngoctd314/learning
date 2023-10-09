@@ -1,0 +1,57 @@
+main.main STEXT size=170 args=0x0 locals=0x20 funcid=0x0 align=0x0
+(main.go:7)      TEXT    main.main(SB), ABIInternal, $32-0
+(main.go:7)      CMPQ    SP, 16(R14)
+(main.go:7)      PCDATA  $0, $-2
+(main.go:7)      JLS     158
+(main.go:7)      PCDATA  $0, $-1
+(main.go:7)      SUBQ    $32, SP
+(main.go:7)      MOVQ    BP, 24(SP)
+(main.go:7)      LEAQ    24(SP), BP
+(main.go:7)      FUNCDATA        $0, gclocals·J5F+7Qw7O7ve2QcWC7DpeQ==(SB)
+(main.go:7)      FUNCDATA        $1, gclocals·CnDyI2HjYXFz19SsOj98tw==(SB)
+(main.go:8)      LEAQ    type:int(SB), AX
+(main.go:8)      PCDATA  $1, $0
+(main.go:8)      NOP
+(main.go:8)      CALL    runtime.newobject(SB)
+(main.go:8)      MOVQ    AX, main.&i+16(SP)
+(main.go:8)      JMP     52
+(main.go:8)      MOVQ    main.&i+16(SP), AX
+(main.go:8)      INCQ    (AX)
+(main.go:8)      CMPQ    (AX), $5
+(main.go:8)      JGE     143
+(main.go:9)      LEAQ    type:noalg.struct { F uintptr; main.i *int }(SB), AX
+(main.go:9)      PCDATA  $1, $1
+(main.go:9)      CALL    runtime.newobject(SB)
+(main.go:9)      LEAQ    main.main.func1(SB), CX
+(main.go:9)      MOVQ    CX, (AX)
+(main.go:9)      PCDATA  $0, $-2
+(main.go:9)      CMPL    runtime.writeBarrier(SB), $0
+(main.go:9)      JNE     100
+(main.go:9)      MOVQ    main.&i+16(SP), DX
+(main.go:9)      MOVQ    DX, 8(AX)
+(main.go:9)      JMP     114
+(main.go:9)      LEAQ    8(AX), DI
+(main.go:9)      MOVQ    main.&i+16(SP), DX
+(main.go:9)      CALL    runtime.gcWriteBarrierDX(SB)
+(main.go:9)      PCDATA  $0, $-1
+(main.go:9)      CALL    runtime.deferproc(SB)
+(main.go:9)      TESTL   AX, AX
+(main.go:9)      JNE     125
+(main.go:9)      JMP     44
+(main.go:9)      PCDATA  $1, $0
+(main.go:9)      NOP
+(main.go:9)      CALL    runtime.deferreturn(SB)
+(main.go:9)      MOVQ    24(SP), BP
+(main.go:9)      ADDQ    $32, SP
+(main.go:9)      RET
+(main.go:13)     CALL    runtime.deferreturn(SB)
+(main.go:13)     MOVQ    24(SP), BP
+(main.go:13)     ADDQ    $32, SP
+(main.go:13)     RET
+(main.go:13)     NOP
+(main.go:7)      PCDATA  $1, $-1
+(main.go:7)      PCDATA  $0, $-2
+(main.go:7)      NOP
+(main.go:7)      CALL    runtime.morestack_noctxt(SB)
+(main.go:7)      PCDATA  $0, $-1
+(main.go:7)      JMP     0

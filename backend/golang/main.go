@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"net/http"
+	"runtime"
+	"sync"
+	"sync/atomic"
+	"time"
 )
 
 func convPointer(i *int) {
