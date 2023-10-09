@@ -13,11 +13,13 @@ func convPointer(i *int) {
 }
 
 func foobyval(n int) {
+	fmt.Println()
 	// println(n)
 	fmt.Printf("addr2 %p\n", &n)
 }
 
 func main() {
+	fmt.Println()
 	port := ":8080"
 	handler := http.FileServer(http.Dir("."))
 	if err := http.ListenAndServe(port, handler); err != nil {
@@ -29,7 +31,7 @@ func main() {
 // var m runtime.MemStats
 // ReadMemStats populates m with memory allocator statistic
 // The returned memory allocator statistics are up to date as of the
-// call to ReadMemStats. This is in constrast with a heap profile
+// call to ReadMemStats. This is in constrast with a heap profileff
 // which is a snapshot as of the most recently completed garbage
 // collection cycle.
 // runtime.ReadMemStats(&m)
