@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"runtime"
 	"sync"
@@ -9,13 +10,30 @@ import (
 )
 
 func main() {
-	i := 0
-	go func() {
-		i++
+
+	m()
+}
+
+func m() {
+	x := 2
+	fmt.Printf("%p\n", &x)
+	defer func() {
+		fmt.Printf("%p\n", &x)
 	}()
-	go func() {
-		i++
+}
+
+func fn() (string, error) {
+	rs := "ngoctd"
+	err := errors.New("err")
+	defer func() {
+		rs = "xyz"
+		err = errors.New("invalid")
 	}()
+	return rs, err
+}
+
+type Person struct {
+	Name string
 }
 
 func sequentialVer() (int64, float64) {
