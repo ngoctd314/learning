@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func countConsistentStrings1(allowed string, words []string) int {
 	m := make(map[byte]struct{})

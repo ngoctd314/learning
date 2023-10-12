@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func sortString(s string) string {
 	var a [26]rune

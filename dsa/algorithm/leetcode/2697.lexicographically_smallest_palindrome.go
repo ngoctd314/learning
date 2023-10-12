@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func makeSmallestPalindrome(s string) string {
 	a := []rune(s)

@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func getConcatenation(nums []int) []int {
 	l := len(nums)

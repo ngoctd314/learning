@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func countPairs(nums []int, target int) int {
 	rs := 0

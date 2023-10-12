@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func digitCount(num string) bool {
 	s := make(map[rune]rune)

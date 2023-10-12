@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func divideArray(nums []int) bool {
 	s := make(map[int]int)

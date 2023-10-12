@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func isPowerOfFour(n int) bool {
 	return true

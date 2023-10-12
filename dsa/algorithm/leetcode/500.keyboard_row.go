@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func findWords(words []string) []string {
 	var set = make(map[byte]int)

@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func countCharacters(words []string, chars string) int {
 	s := make(map[rune]int)

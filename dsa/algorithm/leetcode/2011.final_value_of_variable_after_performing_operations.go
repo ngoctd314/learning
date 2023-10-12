@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func finalValueAfterOperations(operations []string) int {
 	r := 0

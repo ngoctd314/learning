@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func firstUniqChar(s string) int {
 

@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func numberOfPoints(nums [][]int) int {
 	s := make(map[int]struct{})

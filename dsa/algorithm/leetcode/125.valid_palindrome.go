@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func isPalindrome(s string) bool {
 	conv := func(r byte) (byte, bool) {

@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func maxArea(height []int) int {
 	rs := 0

@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func countGoodSubstrings(s string) int {
 	var rs int

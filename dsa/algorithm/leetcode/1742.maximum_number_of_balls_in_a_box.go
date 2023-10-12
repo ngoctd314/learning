@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func countBalls(lowLimit int, highLimit int) int {
 	var rs int

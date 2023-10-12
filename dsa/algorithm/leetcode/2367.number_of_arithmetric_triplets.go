@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func arithmeticTriplets(nums []int, diff int) int {
 	if len(nums) < 3 {

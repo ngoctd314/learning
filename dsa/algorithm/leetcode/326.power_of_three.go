@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func isPowerOfThree(n int) bool {
 	if n < 0 {

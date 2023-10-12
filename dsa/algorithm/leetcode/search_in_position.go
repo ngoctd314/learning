@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func searchInPosition(nums []int, target int) int {
 	l, h := 0, len(nums)-1

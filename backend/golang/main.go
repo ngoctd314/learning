@@ -3,10 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"runtime"
-	"sync"
-	"sync/atomic"
-	"time"
 )
 
 func convPointer(i *int) {
@@ -42,6 +38,7 @@ func fn() (string, error) {
 		err = errors.New("invalid")
 	}()
 	return rs, err
+
 }
 
 type Person struct {
@@ -49,10 +46,7 @@ type Person struct {
 }
 
 func sequentialVer() (int64, float64) {
-	now := time.Now()
-	var rs int64 = 0
-	for i := 0; i < 1e9; i++ {
-	}
+	return 0, 0
 }
 
 // func printAlloc() {

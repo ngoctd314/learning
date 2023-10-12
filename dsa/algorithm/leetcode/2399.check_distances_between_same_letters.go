@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func checkDistances(s string, distance []int) bool {
 	ar := [26]int{}

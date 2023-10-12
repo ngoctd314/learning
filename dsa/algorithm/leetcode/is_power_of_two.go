@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func isPowerOfTwoRecursion(n int) bool {
 	if n == 1 {

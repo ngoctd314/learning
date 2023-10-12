@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func intersectOf2ArraysIIBruteForce(nums1 []int, nums2 []int) []int {
 	s1 := make(map[int]int)

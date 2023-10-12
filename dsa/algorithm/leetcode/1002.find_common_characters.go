@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func commonChars(words []string) []string {
 	lw := len(words)

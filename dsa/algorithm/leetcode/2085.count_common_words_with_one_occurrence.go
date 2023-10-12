@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func countWords(words1 []string, words2 []string) int {
 	s := make(map[string]int)

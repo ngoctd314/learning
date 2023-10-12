@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func findFinalValue(nums []int, original int) int {
 	s := make(map[int]struct{})
