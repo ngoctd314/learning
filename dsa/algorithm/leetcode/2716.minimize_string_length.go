@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func minimizedStringLength(s string) int {
 	set := make(map[rune]struct{})

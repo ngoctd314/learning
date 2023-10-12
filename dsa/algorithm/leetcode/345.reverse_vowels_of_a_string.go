@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func reverseVowelsRecursion(s string) string {
 	return ""

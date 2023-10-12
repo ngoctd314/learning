@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func repeatedCharacter(s string) byte {
 	var m [26]byte

@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func frequencySort(nums []int) []int {
 	s := make(map[int]int)

@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func numJewelsInStones(jewels string, stones string) int {
 	s := make(map[rune]int)

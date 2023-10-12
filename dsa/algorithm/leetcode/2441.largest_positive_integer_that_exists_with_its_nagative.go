@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func findMaxK(nums []int) int {
 	s := make(map[int]struct{})

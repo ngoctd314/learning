@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func buildArray(nums []int) []int {
 	rs := make([]int, len(nums))

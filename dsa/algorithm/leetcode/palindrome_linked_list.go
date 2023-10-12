@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func palindromeLinkedListRecursion(head *ListNode) bool {
 	return false

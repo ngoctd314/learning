@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func searchInsert(nums []int, target int) int {
 	s, e := 0, len(nums)-1

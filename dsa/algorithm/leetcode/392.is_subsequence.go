@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func isSubsequence(s string, t string) bool {
 	// 2 pointers

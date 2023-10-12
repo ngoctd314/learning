@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func checkIfPangram(sentence string) bool {
 	m := make(map[rune]int8)

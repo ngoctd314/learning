@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func greatestLetter(s string) string {
 	rs := [52]byte{}

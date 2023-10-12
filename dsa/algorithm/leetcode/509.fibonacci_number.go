@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func fibRecursion(n int) int {
 	f0, f1 := 0, 1

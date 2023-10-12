@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func countKDifference(nums []int, k int) int {
 	rs := 0

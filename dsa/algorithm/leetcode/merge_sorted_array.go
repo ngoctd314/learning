@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func mergeSortedArray(ar1 []int, m int, ar2 []int, n int) {
 	cpAr1 := make([]int, m)

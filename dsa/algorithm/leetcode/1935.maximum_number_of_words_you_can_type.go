@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func canBeTypedWords(text string, brokenLetters string) int {
 	blackList := make(map[rune]struct{})

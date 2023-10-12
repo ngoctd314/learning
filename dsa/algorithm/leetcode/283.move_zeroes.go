@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func moveZeroesBruteForce(nums []int) {
 	var n1 []int

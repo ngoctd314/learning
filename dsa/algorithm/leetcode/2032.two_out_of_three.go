@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func twoOutOfThree(nums1 []int, nums2 []int, nums3 []int) []int {
 	s := make(map[int]int)

@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func uniqueOccurrences(arr []int) bool {
 	s := make(map[int]int)

@@ -1,4 +1,4 @@
-package main
+package leetcode
 
 func unequalTriplets(nums []int) int {
 	s := make(map[int]struct{})
