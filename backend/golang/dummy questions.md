@@ -42,3 +42,39 @@ func main() {
 ```
 
 ### 3. When child goroutine exist, return
+
+### 4. Result of this program
+
+```go
+func main() {
+	fmt.Println(baz())
+}
+
+func baz() (x int) {
+	defer func() {
+		fmt.Println("RUN defer")
+		x = 10
+	}()
+
+	return foo()
+}
+func foo() int {
+	fmt.Println("RUN foo")
+	return 1
+}
+```
+
+### 5. Result of this program
+
+```go
+func main() {
+    var (
+        b *bytes.Buffer
+        w io.Writer
+    )
+
+    w = b
+    fmt.Println(w == nil)
+}
+```
+

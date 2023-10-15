@@ -1,10 +1,61 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"runtime"
+	"time"
 )
 
+type publisher interface {
+	Publish(ctx context.Context, position int) error
+}
+
+type publishHandler struct {
+	pub publisher
+}
+
+func (h publishHandler) publishPosition(position int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
+	// What's the rationale for calling the cancel function as a defer function?
+	// Internally, context.WithTimeout creates a goroutine that will be retained in memory for 4 seconds or until cancel
+	// is called. Therefore, calling cancel as a defer function means that when we exit the parent function, the context will
+	// be canceled, and the goroutine created will be stopped. It's a safeguard so that when we return, we don't leave retianed
+	// objects in memory.
+	defer cancel()
+
+	return h.pub.Publish(ctx, position)
+}
+
+func main() {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	cancel()
+	time.Sleep(time.Millisecond * 500)
+	fmt.Println(runtime.NumGoroutine())
+	time.Sleep(time.Millisecond * 500)
+	fmt.Println(runtime.NumGoroutine())
+	time.Sleep(time.Millisecond * 500)
+	fmt.Println(runtime.NumGoroutine())
+	select {
+	case <-ctx.Done():
+		fmt.Println("DONE")
+	}
+
+}
+
+func baz() (x int) {
+	defer func() {
+		fmt.Println("RUN after")
+		x = 10
+	}()
+
+	return foo()
+}
+func foo() int {
+	fmt.Println("RUN")
+	return 1
+}
 func convPointer(i *int) {
 	fmt.Printf("addr1 %p\n", i)
 	ii := *i
@@ -15,11 +66,6 @@ func foobyval(n int) {
 	fmt.Println()
 	// println(n)
 	fmt.Printf("addr2 %p\n", &n)
-}
-
-func main() {
-
-	m()
 }
 
 func m() {
