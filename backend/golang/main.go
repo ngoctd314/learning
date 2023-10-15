@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"runtime"
+	"net/http"
 	"time"
 )
 
@@ -29,19 +29,24 @@ func (h publishHandler) publishPosition(position int) error {
 }
 
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	cancel()
-	time.Sleep(time.Millisecond * 500)
-	fmt.Println(runtime.NumGoroutine())
-	time.Sleep(time.Millisecond * 500)
-	fmt.Println(runtime.NumGoroutine())
-	time.Sleep(time.Millisecond * 500)
-	fmt.Println(runtime.NumGoroutine())
-	select {
-	case <-ctx.Done():
-		fmt.Println("DONE")
-	}
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), "key", "val")
+		// ctx = context.WithoutCancel(ctx)
+		go func(ctx context.Context) {
+			for {
+				select {
+				case <-ctx.Done():
+					fmt.Printf("ctx.Err() %s\n", ctx.Err())
+				default:
+					fmt.Println(ctx.Value("key"))
+				}
+			}
+		}(ctx)
+		time.Sleep(time.Second * 5)
 
+		w.Write([]byte("OK"))
+	})
+	http.ListenAndServe(":8080", nil)
 }
 
 func baz() (x int) {
@@ -105,3 +110,19 @@ func sequentialVer() (int64, float64) {
 // runtime.ReadMemStats(&m)
 // fmt.Printf("%d KB\n", m.Alloc/1024)
 // }
+
+type detactContext struct {
+	context.Context
+}
+
+func (d detactContext) Deadline() (time.Time, bool) {
+	return time.Time{}, false
+}
+
+func (d detactContext) Done() <-chan struct{} {
+	return nil
+}
+
+func (d detactContext) Err() error {
+	return nil
+}
