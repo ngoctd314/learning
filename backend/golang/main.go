@@ -4,38 +4,63 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
+	"net/http"
+	"time"
 )
 
+type publisher interface {
+	Publish(ctx context.Context, position int) error
+}
+
+type publishHandler struct {
+	pub publisher
+}
+
+func (h publishHandler) publishPosition(position int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
+	// What's the rationale for calling the cancel function as a defer function?
+	// Internally, context.WithTimeout creates a goroutine that will be retained in memory for 4 seconds or until cancel
+	// is called. Therefore, calling cancel as a defer function means that when we exit the parent function, the context will
+	// be canceled, and the goroutine created will be stopped. It's a safeguard so that when we return, we don't leave retianed
+	// objects in memory.
+	defer cancel()
+
+	return h.pub.Publish(ctx, position)
+}
+
 func main() {
-	ctx := context.Background()
-	var m sync.Mutex
-	key := "key"
-	wg := sync.WaitGroup{}
-	ctx = context.WithValue(ctx, key, 0)
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), "key", "val")
+		// ctx = context.WithoutCancel(ctx)
+		go func(ctx context.Context) {
+			for {
+				select {
+				case <-ctx.Done():
+					fmt.Printf("ctx.Err() %s\n", ctx.Err())
+				default:
+					fmt.Println(ctx.Value("key"))
+				}
+			}
+		}(ctx)
+		time.Sleep(time.Second * 5)
 
-	n := 1000
-	wg.Add(n)
-	for i := 0; i < n; i++ {
-		go func() {
-			defer wg.Done()
-			m.Lock()
-			ctx = context.WithValue(ctx, key, ctx.Value(key).(int)+1)
-			m.Unlock()
-		}()
-	}
-	wg.Wait()
-	fmt.Println(ctx.Value(key))
+		w.Write([]byte("OK"))
+	})
+	http.ListenAndServe(":8080", nil)
 }
 
-func cancelCtx(ctx context.Context) {
-	fmt.Printf("ctx.Err() %v\n", ctx.Err())
-	select {
-	case <-ctx.Done():
-		fmt.Println("<-ctx.Done()")
-	}
-}
+func baz() (x int) {
+	defer func() {
+		fmt.Println("RUN after")
+		x = 10
+	}()
 
+	return foo()
+}
+func foo() int {
+	fmt.Println("RUN")
+	return 1
+}
 func convPointer(i *int) {
 	fmt.Printf("addr1 %p\n", i)
 	ii := *i
@@ -85,3 +110,19 @@ func sequentialVer() (int64, float64) {
 // runtime.ReadMemStats(&m)
 // fmt.Printf("%d KB\n", m.Alloc/1024)
 // }
+
+type detactContext struct {
+	context.Context
+}
+
+func (d detactContext) Deadline() (time.Time, bool) {
+	return time.Time{}, false
+}
+
+func (d detactContext) Done() <-chan struct{} {
+	return nil
+}
+
+func (d detactContext) Err() error {
+	return nil
+}
