@@ -78,3 +78,25 @@ func main() {
 }
 ```
 
+### 6. Result or this program
+
+```go
+func main() {
+	ch := foo1()
+	go func() {
+		for v := range ch {
+			_ = v
+		}
+		fmt.Println("unreachable")
+	}()
+	go func() {
+		time.Sleep(time.Second * 100)
+	}()
+
+	select {}
+}
+func foo1() chan int {
+	ch := make(chan int)
+	return ch
+}
+```

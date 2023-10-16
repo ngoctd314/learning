@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/http"
 	"time"
 )
 
@@ -28,25 +27,46 @@ func (h publishHandler) publishPosition(position int) error {
 	return h.pub.Publish(ctx, position)
 }
 
-func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.WithValue(r.Context(), "key", "val")
-		// ctx = context.WithoutCancel(ctx)
-		go func(ctx context.Context) {
-			for {
-				select {
-				case <-ctx.Done():
-					fmt.Printf("ctx.Err() %s\n", ctx.Err())
-				default:
-					fmt.Println(ctx.Value("key"))
-				}
-			}
-		}(ctx)
-		time.Sleep(time.Second * 5)
+func callByReference(n1, n2 *int, s1, s2 *string) {
+	*n1 = 3
+	*n2 = 7
+	fmt.Printf("n1(%p)=%v n2(%p)=%v\n", n1, *n1, n2, *n2)
 
-		w.Write([]byte("OK"))
-	})
-	http.ListenAndServe(":8080", nil)
+	*s1 = "world"
+	*s2 = "universe"
+
+	fmt.Printf("s1(%p)=%v s2(%p)=%v\n", s1, *s1, s2, *s2)
+
+}
+
+func callByValue(n1, n2 int, s1, s2 string) {
+	n1 = 3
+	n2 = 7
+	fmt.Printf("n1(%p)=%v n2(%p)=%v\n", &n1, n1, &n2, n2)
+
+	s1 = "world"
+	s2 = "universe"
+
+	fmt.Printf("s1(%p)=%v s2(%p)=%v\n", &s1, s1, &s2, s2)
+}
+
+func main() {
+	ch := foo1()
+	go func() {
+		for v := range ch {
+			_ = v
+		}
+		fmt.Println("unreachable")
+	}()
+	go func() {
+		time.Sleep(time.Second * 100)
+	}()
+
+	select {}
+}
+func foo1() chan int {
+	ch := make(chan int)
+	return ch
 }
 
 func baz() (x int) {
