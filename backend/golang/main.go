@@ -1,9 +1,40 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"sync"
 )
+
+func main() {
+	ctx := context.Background()
+	var m sync.Mutex
+	key := "key"
+	wg := sync.WaitGroup{}
+	ctx = context.WithValue(ctx, key, 0)
+
+	n := 1000
+	wg.Add(n)
+	for i := 0; i < n; i++ {
+		go func() {
+			defer wg.Done()
+			m.Lock()
+			ctx = context.WithValue(ctx, key, ctx.Value(key).(int)+1)
+			m.Unlock()
+		}()
+	}
+	wg.Wait()
+	fmt.Println(ctx.Value(key))
+}
+
+func cancelCtx(ctx context.Context) {
+	fmt.Printf("ctx.Err() %v\n", ctx.Err())
+	select {
+	case <-ctx.Done():
+		fmt.Println("<-ctx.Done()")
+	}
+}
 
 func convPointer(i *int) {
 	fmt.Printf("addr1 %p\n", i)
@@ -15,11 +46,6 @@ func foobyval(n int) {
 	fmt.Println()
 	// println(n)
 	fmt.Printf("addr2 %p\n", &n)
-}
-
-func main() {
-
-	m()
 }
 
 func m() {
