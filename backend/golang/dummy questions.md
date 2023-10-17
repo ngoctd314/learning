@@ -100,3 +100,15 @@ func foo1() chan int {
 	return ch
 }
 ```
+
+### 7. Result of this program
+
+```go
+func main() {
+	a := make([]int, 0, 5)
+	b := a
+
+	b = append(b, 1, 2, 3, 4, 5)
+	fmt.Println(a, b)
+}
+```
