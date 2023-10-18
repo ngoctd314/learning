@@ -8,6 +8,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"runtime"
 	"time"
 )
 
@@ -69,10 +70,10 @@ func fileHandle() {
 }
 
 func main() {
-	// fileHandle()
-	// udpServer()
-	udpClient()
-	// tcpServer()
+	defer func() {
+		fmt.Println("RUN defer before go exist")
+	}()
+	runtime.Goexit()
 }
 
 func udpServer() {
