@@ -43,7 +43,7 @@ func Test_bubbleSort(t *testing.T) {
 		{
 			name: "Test 1",
 			args: args{
-				ar: []int{5, 1, -1, 5, 23, -33},
+				ar: []int{8, 22, 7, 9, 31, 19, 5, 13},
 			},
 			want: []int{-33, -1, 1, 5, 5, 23},
 		},
