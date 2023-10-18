@@ -69,11 +69,30 @@ func fileHandle() {
 	fmt.Println(n, err)
 }
 
+type person struct {
+	id int
+}
+
+func (p *person) print() {
+	fmt.Println(p.id)
+}
+
 func main() {
-	defer func() {
-		fmt.Println("RUN defer before go exist")
-	}()
+	ar := []person{}
+	for i := 0; i < 5; i++ {
+		ar = append(ar, person{
+			id: i,
+		})
+	}
+
+	for _, v := range ar {
+		go v.print()
+	}
 	runtime.Goexit()
+}
+
+func printAr(v int) {
+	fmt.Println(v)
 }
 
 func udpServer() {
