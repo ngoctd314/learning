@@ -112,3 +112,55 @@ func main() {
 	fmt.Println(a, b)
 }
 ```
+
+### 8. Result of this program
+
+```go
+type person struct {
+	id int
+}
+
+func (p person) print() {
+	fmt.Println(p.id)
+}
+
+func main() {
+	ar := []person{}
+	for i := 0; i < 5; i++ {
+		ar = append(ar, person{
+			id: i,
+		})
+	}
+
+	for _, v := range ar {
+		go v.print()
+	}
+	runtime.Goexit()
+}
+```
+
+### 9. Result of this program
+
+```go
+type person struct {
+	id int
+}
+
+func (p *person) print() {
+	fmt.Println(p.id)
+}
+
+func main() {
+	ar := []person{}
+	for i := 0; i < 5; i++ {
+		ar = append(ar, person{
+			id: i,
+		})
+	}
+
+	for _, v := range ar {
+		go v.print()
+	}
+	runtime.Goexit()
+}
+```
