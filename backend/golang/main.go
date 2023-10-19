@@ -8,7 +8,6 @@ import (
 	"log"
 	"net"
 	"os"
-	"runtime"
 	"time"
 )
 
@@ -78,17 +77,24 @@ func (p *person) print() {
 }
 
 func main() {
-	ar := []person{}
-	for i := 0; i < 5; i++ {
-		ar = append(ar, person{
-			id: i,
-		})
+	messageCh := make(chan int, 10)
+	for i := 0; i < 10; i++ {
+		messageCh <- i
 	}
 
-	for _, v := range ar {
-		go v.print()
+	disconnectCh := make(chan int, 10)
+	for i := 0; i < 10; i++ {
+		disconnectCh <- i
 	}
-	runtime.Goexit()
+
+	for {
+		select {
+		case msg := <-messageCh:
+			fmt.Println("receive message:", msg)
+		case abortMsg := <-disconnectCh:
+			fmt.Println("abort message:", abortMsg)
+		}
+	}
 }
 
 func printAr(v int) {
