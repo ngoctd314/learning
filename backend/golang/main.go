@@ -9,6 +9,7 @@ import (
 	"net"
 	"os"
 	"time"
+	"unsafe"
 )
 
 type publisher interface {
@@ -81,35 +82,14 @@ type message struct {
 	disconnect bool
 }
 
+type emptyStruct struct{}
+
+type emptyInterface interface{}
+
 func main() {
-	messageCh := make(chan int)
-	disconnectCh := make(chan int)
+	var a emptyInterface
+	fmt.Println(unsafe.Sizeof(a))
 
-	go func() {
-		for i := 0; i < 10; i++ {
-			messageCh <- i
-		}
-		go func() {
-			disconnectCh <- 10
-		}()
-	}()
-
-	for {
-		select {
-		case v := <-messageCh:
-			fmt.Printf("Message: %d\n", v)
-		case <-disconnectCh:
-			for {
-				select {
-				case v := <-messageCh:
-					fmt.Printf("Message: %d\n", v)
-				default:
-					fmt.Println("Disconnect")
-					return
-				}
-			}
-		}
-	}
 }
 
 func printAr(v int) {
