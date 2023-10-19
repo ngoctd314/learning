@@ -76,23 +76,38 @@ func (p *person) print() {
 	fmt.Println(p.id)
 }
 
-func main() {
-	messageCh := make(chan int, 10)
-	for i := 0; i < 10; i++ {
-		messageCh <- i
-	}
+type message struct {
+	data       int
+	disconnect bool
+}
 
-	disconnectCh := make(chan int, 10)
-	for i := 0; i < 10; i++ {
-		disconnectCh <- i
-	}
+func main() {
+	messageCh := make(chan int)
+	disconnectCh := make(chan int)
+
+	go func() {
+		for i := 0; i < 10; i++ {
+			messageCh <- i
+		}
+		go func() {
+			disconnectCh <- 10
+		}()
+	}()
 
 	for {
 		select {
-		case msg := <-messageCh:
-			fmt.Println("receive message:", msg)
-		case abortMsg := <-disconnectCh:
-			fmt.Println("abort message:", abortMsg)
+		case v := <-messageCh:
+			fmt.Printf("Message: %d\n", v)
+		case <-disconnectCh:
+			for {
+				select {
+				case v := <-messageCh:
+					fmt.Printf("Message: %d\n", v)
+				default:
+					fmt.Println("Disconnect")
+					return
+				}
+			}
 		}
 	}
 }
