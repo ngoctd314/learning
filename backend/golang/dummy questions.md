@@ -164,3 +164,14 @@ func main() {
 	runtime.Goexit()
 }
 ```
+
+```go
+var data int // 1
+
+go func() { // 2
+    data++ // 3
+}() // 4
+if data == 0 { // 5
+    fmt.Printf("the value is %v.\n", data)
+}
+```
