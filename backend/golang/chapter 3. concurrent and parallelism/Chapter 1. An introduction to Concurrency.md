@@ -42,3 +42,65 @@ if data == 0 {
 
 Have we solved our data race? No. In fact, it's still possible for all three outcomes to arise from this program, just increasingly unlikely. The longer we sleep in between invoking our goroutine and checking the value of data, the closer our program gets to achieving correctless.
 
+Race conditions are one of the most insidious types of concurrency bugs because they may not show up until years after the code has been placed into production. They are usually precipiated by a change in the environment the code is executing in, or an unprecedented occurrence. 
+
+### Atomicity
+
+When something is considered atomic, or to have the property of atomicity, this means that within the context that it is operating, it is indivisible, or uninterruptible.
+
+The first thing that's very important is the word "context". Something may be atomic in one context, but not another. Operations that are atomic within the context of your process may not be atomic in the context of the operating system; operations that are atomic within the context of the operating system may not be atomic within the context of your machine... In other words, the atomicity of an operation can change depending on the currently defined scope. This fact and work both and against you!
+
+When thinking about atomicity, very often the frist thing you need to do is to define the context, or scope, the operation will be considered to be atomic in.
+
+Now let's look at the terms "indivisible" and "uninterruptible". These term mean that within the context you've defined. Something that is atomic will happen in its entirely withont anything happening in that context simultaneously. That's still a monthful, so let's look at an example:
+
+i++
+
+It may look atomic, but a brief analysis reveals several operations:
+
+- Retrieve the value of i.
+- Increment the value of i.
+- Store the value of i.
+
+While each of these operations alone is atomic, the combination of the three may not be, depending on your context. This reveals an interesting property of atomic operations: combining them does not necessarily produce a larger atomic operation. Making the operation atomic is dependent on which  context you'd like it to be atomic within. If your context is a goroutine that doesn't expose i to other goroutines, the this code is atomic.
+
+So why do we care? Atomicity is important because if something is atomic, implicitly it is safe within concurrent contexts. This allow us to compose logically correct programs, and-as we'll later see - can even serve as a way to optimize concurrent programs.
+
+Most statements are not atomic, let alone functions, methods, and programs. If atomicity is the key to composing logically correct programs, and most statements aren't atomic, how do we reconcile these two statements? We can force atomicity by employing various techniques.
+
+### Memory Access Synchronization
+
+The following code is not idiomatic GO (don't suggest you attempt to solve your data race problems like this), but it very simply demonstrates memory access synchronization.
+
+```go
+var memoryAccess sync.Mutex
+var value int
+go func() {
+    memoryAccess.Lock()
+    value++
+    memoryAccess.Unlock()
+}()
+
+memoryAccess.Lock()
+if value == 0 {
+    fmt.Printf("the value is %v.\n", value)
+} else {
+    fmt.Printf("the value is %v.\n", value)
+}
+memoryAccess.Unlock()
+```
+
+In this example we've created a convention for developers to follow. Anytime developers want to access the data variable's memory, they must first call Lock, and when they're finished they must call Unlock. Code between those two statements can then assume it has exclusive access to data; we have successfully synchronized access to the memory.
+
+You may have noticed that while we have solved our data race, we haven't actually solved our race condition! The order of operations in this program is still non-deterministic; we've just narrowed the scope of the non-deterministic a bit.
+
+Sychronizing access to the memory in this manner also has performance ramifactions. Calls to Lock you see can make our program slow. Every time we perform one of these operations, our program pauses for a period of time.
+
+- Are my critical sections entered and exited repeatedly?
+- What size should my critical section be?
+
+Answering these two questions in the context of your program is an art, and this adds to the difficulty in synchronizing access to the memory.
+
+### Deadlocks, Livelocks, AbandonLock and Starvation
+
+A deadlocked program is one in which all concurrent process are waiting on one another. In this state, the program will never recover without outside intervention
