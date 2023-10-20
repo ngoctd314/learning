@@ -9,7 +9,6 @@ import (
 	"net"
 	"os"
 	"time"
-	"unsafe"
 )
 
 type publisher interface {
@@ -87,9 +86,45 @@ type emptyStruct struct{}
 type emptyInterface interface{}
 
 func main() {
-	var a emptyInterface
-	fmt.Println(unsafe.Sizeof(a))
+	ch1 := make(chan int, 5)
+	for i := 0; i < 5; i++ {
+		ch1 <- i
+	}
+	close(ch1)
+	ch2 := make(chan int, 5)
+	for i := 0; i < 5; i++ {
+		ch2 <- i
+	}
+	close(ch2)
+	ch := merge(ch1, ch2)
+	for v := range ch {
+		print(v, "\t")
+	}
+}
 
+func merge(ch1, ch2 <-chan int) <-chan int {
+	ch := make(chan int, 1)
+	go func() {
+		for ch1 != nil || ch2 != nil {
+			select {
+			case v, open := <-ch1:
+				if !open {
+					ch1 = nil
+					break // break select
+				}
+				ch <- v
+			case v, open := <-ch2:
+				if !open {
+					ch2 = nil
+					break // break select
+				}
+				ch <- v
+			}
+		}
+		close(ch)
+	}()
+
+	return ch
 }
 
 func printAr(v int) {
