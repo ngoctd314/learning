@@ -103,4 +103,47 @@ Answering these two questions in the context of your program is an art, and this
 
 ### Deadlocks, Livelocks, AbandonLock and Starvation
 
-A deadlocked program is one in which all concurrent process are waiting on one another. In this state, the program will never recover without outside intervention
+A deadlocked program is one in which all concurrent process are waiting on one another. In this state, the program will never recover without outside intervention.
+
+If that sounds grim, it's because it is! The Go runtime attempts to do its part and will detect some deadlocks (all goroutines must be blocked, or "asleep"), but this doesn't do much to help you prevent deadlocks.
+
+```go
+func main() {
+	type value struct {
+		mu    sync.Mutex
+		value int
+	}
+	var wg sync.WaitGroup
+	printSum := func(v1, v2 *value) {
+		defer wg.Done()
+
+        // we attempt to enter the critical section for the incoming value
+		v1.mu.Lock()
+        // we use the defer statement to exit the critical section before printSum returns
+		defer v1.mu.Unlock()
+
+        // Here we sleep a period of time to simulate work (and trigger a deadlock)
+		time.Sleep(time.Second)
+
+		v2.mu.Lock()
+		defer v2.mu.Unlock()
+	}
+	var a, b value
+	wg.Add(2)
+	go printSum(&a, &b)
+	go printSum(&b, &a)
+	wg.Wait()
+}
+```
+
+If you were to try and run this code, you'd probably see:
+
+```txt
+fatal error: all goroutines are asleep - deadlock!
+```
+
+Why? If you look carefully, you'll see a timing issue in this code. Following is a graphical representation of what's going on. The boxes represent functions, the horizontal lines calls to these functions, and the vertical bars lifetimes of the function at the head of the graphic.
+
+[]()
+
+Essentially, we have create two gears that cannot turn together: our first call to print Sum locks a and then attempts to lock b, but in the meantime our second call to print Sum has locked b and has attempted to lock a. Both goroutines wait infinitely on each other.
