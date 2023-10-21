@@ -2,31 +2,39 @@ package main
 
 import (
 	"fmt"
-	"runtime"
-	"sync"
-	"time"
 )
 
+type Notifier interface {
+	Send(msg string)
+}
+type notificationService struct {
+	notifier Notifier
+}
+
+type EmailNotifier struct {
+	notifierType string
+}
+
+func (n EmailNotifier) Send(msg string) {
+	// Do send email logic
+	fmt.Printf("Sending message: %s (Sender: %s)\n", msg, n.notifierType)
+}
+
+type SmsNotifier struct {
+	notifierType string
+}
+
+func (n SmsNotifier) Send(msg string) {
+	// Do send sms logic
+	fmt.Printf("Sending message: %s (Sender: %s)\n", msg, n.notifierType)
+}
+
 func main() {
-	runtime.GOMAXPROCS(3)
-	cpuComsumption := func() {
-		for i := 0; i < 30e9; i++ {
-		}
-	}
+	smsNotifier := SmsNotifier{"sms"}
+	emailNotifier := EmailNotifier{"email"}
+	s := notificationService{smsNotifier}
+	s.notifier.Send("Hello World")
 
-	now := time.Now()
-	wg := sync.WaitGroup{}
-
-	wg.Add(2)
-	go func() {
-		defer wg.Done()
-		cpuComsumption()
-	}()
-	go func() {
-		defer wg.Done()
-		cpuComsumption()
-	}()
-	wg.Wait()
-
-	fmt.Printf("execute in: %fs", time.Since(now).Seconds())
+	s = notificationService{emailNotifier}
+	s.notifier.Send("Hello World")
 }

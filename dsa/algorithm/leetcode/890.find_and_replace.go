@@ -1,36 +1,42 @@
 package leetcode
 
-import (
-	"sort"
-)
-
+// TODO: optimize
 func findAndReplacePattern(words []string, pattern string) []string {
-	build := func(s string) []int {
-		l := make([]int, 26)
-		for i := 0; i < len(s); i++ {
-			l[s[i]-97]++
-		}
-		sort.Slice(l, func(i, j int) bool {
-			return l[i] < l[j]
-		})
+	m, acc, buildPattern := make(map[byte]int), 0, make([]int, 0, len(pattern))
 
-		return l
+	for i := 0; i < len(pattern); i++ {
+		if v, ok := m[pattern[i]-97]; !ok {
+			acc++
+			m[pattern[i]-97] = acc
+			buildPattern = append(buildPattern, acc)
+		} else {
+			buildPattern = append(buildPattern, v)
+		}
 	}
-	buildPattern := build(pattern)
-	var rs []string
-	for _, word := range words {
-		tmp := build(word)
-		ok := true
-		for i := 0; i < 26; i++ {
-			if buildPattern[i] != tmp[i] {
-				ok = false
+
+	var result []string
+	for _, s := range words {
+		m, acc, noBreak := make(map[byte]int), 0, true
+		var rs []int
+
+		for i := 0; i < len(s); i++ {
+			if v, ok := m[s[i]-97]; !ok {
+				acc++
+				m[s[i]-97] = acc
+				rs = append(rs, acc)
+			} else {
+				rs = append(rs, v)
+			}
+			if rs[i] != buildPattern[i] {
+				noBreak = false
 				break
 			}
 		}
-		if ok {
-			rs = append(rs, word)
+		if noBreak {
+			result = append(result, s)
 		}
+
 	}
 
-	return rs
+	return result
 }
