@@ -1,30 +1,37 @@
 package main
 
 import (
+	"fmt"
 	"sync"
-	"time"
 )
 
+// In an interview
+// Interviewer: tell me about deadlock. If your question is true, you will pass this interview.
+// Candidate: Allow me pass this interview. After that, i will tell you about deadlock.
+// Interviewer: ...
 func main() {
-	type value struct {
-		mu    sync.Mutex
-		value int
-	}
-	var wg sync.WaitGroup
-	printSum := func(v1, v2 *value) {
-		defer wg.Done()
+	passInterviewLock := sync.Mutex{}
+	answer := make(chan interface{})
 
-		v1.mu.Lock()
-		defer v1.mu.Unlock()
+	// interview process (interview expect this happen)
+	go func() {
+		passInterviewLock.Lock()
+		defer passInterviewLock.Unlock()
 
-		time.Sleep(time.Second)
+		fmt.Println("Tell me about deadlock. If your question is true, you will pass this interview.")
 
-		v2.mu.Lock()
-		defer v2.mu.Unlock()
-	}
-	var a, b value
-	wg.Add(2)
-	go printSum(&a, &b)
-	go printSum(&b, &a)
-	wg.Wait()
+		fmt.Println("Answering...")
+		// waiting answer
+		msg := <-answer
+		fmt.Println(msg)
+	}()
+
+	// candidate process (candidate expect this happen)
+	go func() {
+		passInterviewLock.Lock()
+		answer <- "Allow me pass this interview. After that, i will tell you about deadlock."
+		defer passInterviewLock.Unlock()
+	}()
+
+	select {}
 }

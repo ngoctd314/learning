@@ -103,6 +103,8 @@ Answering these two questions in the context of your program is an art, and this
 
 ### Deadlocks, Livelocks, AbandonLock and Starvation
 
+**Deadlock**
+
 A deadlocked program is one in which all concurrent process are waiting on one another. In this state, the program will never recover without outside intervention.
 
 If that sounds grim, it's because it is! The Go runtime attempts to do its part and will detect some deadlocks (all goroutines must be blocked, or "asleep"), but this doesn't do much to help you prevent deadlocks.
@@ -144,6 +146,38 @@ fatal error: all goroutines are asleep - deadlock!
 
 Why? If you look carefully, you'll see a timing issue in this code. Following is a graphical representation of what's going on. The boxes represent functions, the horizontal lines calls to these functions, and the vertical bars lifetimes of the function at the head of the graphic.
 
-[]()
+![deadlock](./assets/deadlock.png)
 
 Essentially, we have create two gears that cannot turn together: our first call to print Sum locks a and then attempts to lock b, but in the meantime our second call to print Sum has locked b and has attempted to lock a. Both goroutines wait infinitely on each other.
+
+```md
+**Irony**
+
+To keep this example simple, we use a time.Sleep to trigger the deadlock. However, this introudces a race condition! Can you find it?
+A logically "perfect" deadlock would require correct synchronization?
+```
+
+It seems pretty obvious with deadlock is occurring when we lay it out graphically like that, but we would benefit from a more rigorous definition. It turns out there are a few conditions that must be present for deadlocks to arise. The Coffman Conditions and are the basic for techniques that help detect, prevent, and correct deadlocks.
+
+The Coffman Conditions are as follows:
+
+- Mututal Exclusion: A concurrent process holds exclusive rights to a resource at any one time.
+- Wait for Condition: A concurrent process must simultaneously hold a resource and be waiting for an additional resource.
+- No Preemption: A resource held by a concurrent process can only be released by that process, so it fullfills this condition.
+- Circular Wait: A concurrent process (P1) must be waiting on a chain of other concurrent processes (P2), which are in turn waiting on it (P1), so fullfills this final condition too.
+
+
+Let's examine our contrived program and determine if it meets all four conditions:
+
+- The printSum function does require exclusive rights at both a and b, so it fullfills this condition
+- Because printSum holds either a or b and is waiting for on the other, it fullfills this condition.
+- We haven't given any way for our goroutines to be preempted. 
+- Our first invocation of printSum is waiting on our second invocation, and vice versa.
+
+Yep, we definitely have a deadlock on our hands.
+
+These laws allow us to prevent deadlocks too. If we ensure that at least one of these conditions is not true, we can prevent deadlocks from occurring. Unfortunately, in practice these conditions can be hard to reason about, and therefore difficulty to prevent.
+
+**Livelock**
+
+Livelocks are programs that are actively performing concurrent operations, but these operations do nothing to move the state of the program forward.
