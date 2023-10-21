@@ -43,4 +43,39 @@ func findKeySequence(key1, key2 *key, d time.Duration) {
 
 2. Interview deadlock
 
+```go
+// In an interview
+// Interviewer: tell me about deadlock. If your question is true, you will pass this interview.
+// Candidate: Allow me pass this interview. After that, i will tell you about deadlock.
+// Interviewer: ...
+func main() {
+	passInterviewLock := sync.Mutex{}
+	answerLock := sync.Mutex{}
 
+	// interview process (interview expect this happen)
+	go func() {
+		passInterviewLock.Lock()
+		defer passInterviewLock.Unlock()
+
+		fmt.Println("Tell me about deadlock. If your question is true, you will pass this interview.")
+
+		fmt.Println("Answering...")
+		answerLock.Lock()
+		defer answerLock.Unlock()
+	}()
+
+	// candidate process (candidate expect this happen)
+	answerLock.Lock()
+	defer answerLock.Unlock()
+
+	time.Sleep(time.Second)
+
+	fmt.Println("Allow me pass this interview. After that, i will tell you about deadlock.")
+	passInterviewLock.Lock()
+	defer passInterviewLock.Unlock()
+}
+```
+
+## Starvation
+
+Database delete

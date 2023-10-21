@@ -181,3 +181,68 @@ These laws allow us to prevent deadlocks too. If we ensure that at least one of 
 **Livelock**
 
 Livelocks are programs that are actively performing concurrent operations, but these operations do nothing to move the state of the program forward.
+
+Have you ever been in hallway walking toward another person? She moves to one side, but you're just done the same. So you move to the other side, but she's also done the same. Imagine this going on forever, and you understand livelocks.
+
+**Starvation**
+
+Starvation is any situation where a concurrent process cannot get all the resources it needs to perform work.
+
+When we discussed livelocks, the resource each goroutine was starved of was a shared lock. Livelocks warrant discussion separate from starvation because in a livelock, all the concurrent processes are starved equally, and no work is accomplished. More broadly, starvation usually implies that there are or more greedy concurrent process that are unfairly preventing one or more concurrent processes from accomplishing work as efficiently as possible, or maybe at all.
+
+Here's an example of a program with a greedy goroutine and a pollite goroutine:
+
+```go
+func main() {
+	var wg sync.WaitGroup
+	var sharedLock sync.Mutex
+	const runtime = time.Second * 1
+
+	greedyWorker := func() {
+		defer wg.Done()
+
+		var count int
+		for begin := time.Now(); time.Since(begin) <= runtime; {
+			sharedLock.Lock()
+			time.Sleep(3 * time.Nanosecond)
+			sharedLock.Unlock()
+			count++
+		}
+
+		fmt.Printf("Greedy worker was able to execute %v work loops.\n", count)
+	}
+
+	politeWorker := func() {
+		defer wg.Done()
+
+		var count int
+		for begin := time.Now(); time.Since(begin) <= runtime; {
+			sharedLock.Lock()
+			time.Sleep(time.Nanosecond)
+			sharedLock.Unlock()
+
+			sharedLock.Lock()
+			time.Sleep(time.Nanosecond)
+			sharedLock.Unlock()
+
+			sharedLock.Lock()
+			time.Sleep(time.Nanosecond)
+			sharedLock.Unlock()
+
+			count++
+		}
+
+		fmt.Printf("Polite worker was able to execute %v work loops.\n", count)
+	}
+
+	wg.Add(2)
+	go greedyWorker()
+	go politeWorker()
+
+	wg.Wait()
+}
+```
+
+The greedy worker greedily holds onto the shared lock for entirely of its work loop, whereas the polite worker attempts to only lock when it needs to. Both wokers do the same amount of simulated work (sleeping for three nanoseconds), but as you can see in the same amount of time, the greedy worker got almost twice the amount of work done!
+
+
