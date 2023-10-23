@@ -42,4 +42,4 @@ This reveals a few interesting and important things. The first is that we do not
 
 The second interesting thing is that we see it is possible - maybe even desirable - to be ignorant of whether our concurrent code is actually running in parallel. This is only made possible by the layers of abstraction that lie beneath our program's model: the concurrent primitives, the program's runtime, the os, the platform the os runs on (hypervisors, containers, and virtual machines), and ultimately the CPUs. These abstractions are what allow us to make the distinction between concurrency and parallelism.
 
-
+The third and final interesting thing is that parallelism is a function of time, or context. Remember in Atomicity where we discussed the concept of context? There, context was defined as the bounds by which an operation was considered atomic. Here, it's defined as the bounds by which two or more operations could be considered parallel.
