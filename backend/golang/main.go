@@ -2,39 +2,48 @@ package main
 
 import (
 	"fmt"
+	"sync"
 )
 
-type Notifier interface {
-	Send(msg string)
-}
-type notificationService struct {
-	notifier Notifier
+type Cache struct {
+	mu       sync.RWMutex
+	balances map[string]float64
 }
 
-type EmailNotifier struct {
-	notifierType string
+func (c *Cache) AddBalance(id string, balance float64) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.balances[id] += balance
 }
 
-func (n EmailNotifier) Send(msg string) {
-	// Do send email logic
-	fmt.Printf("Sending message: %s (Sender: %s)\n", msg, n.notifierType)
-}
+func (c *Cache) AverageBalance() float64 {
+	c.mu.RLock()
+	balances := c.balances
+	c.mu.RUnlock()
+	sum := 0.0
+	for _, balance := range balances {
+		sum += balance
+	}
 
-type SmsNotifier struct {
-	notifierType string
-}
-
-func (n SmsNotifier) Send(msg string) {
-	// Do send sms logic
-	fmt.Printf("Sending message: %s (Sender: %s)\n", msg, n.notifierType)
+	return sum / float64(len(balances))
 }
 
 func main() {
-	smsNotifier := SmsNotifier{"sms"}
-	emailNotifier := EmailNotifier{"email"}
-	s := notificationService{smsNotifier}
-	s.notifier.Send("Hello World")
+	c := &Cache{
+		balances: make(map[string]float64),
+	}
 
-	s = notificationService{emailNotifier}
-	s.notifier.Send("Hello World")
+	go func() {
+		for i := 0; i < 10; i++ {
+			c.AddBalance(fmt.Sprint(i), 10)
+		}
+		c.AverageBalance()
+	}()
+
+	go func() {
+		for i := 0; i < 10; i++ {
+			c.AddBalance(fmt.Sprint(i), 10)
+		}
+		c.AverageBalance()
+	}()
 }

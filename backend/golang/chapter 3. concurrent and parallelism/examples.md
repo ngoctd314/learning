@@ -2,8 +2,6 @@
 
 ## Deadlock
 
-1. Two keys
-
 ```go
 // You are join a game
 // This game is very simple: you must find 2 keys in 2 differents location
@@ -41,8 +39,6 @@ func findKeySequence(key1, key2 *key, d time.Duration) {
 }
 ```
 
-2. Interview deadlock
-
 ```go
 // In an interview
 // Interviewer: tell me about deadlock. If your question is true, you will pass this interview.
@@ -79,3 +75,48 @@ func main() {
 ## Starvation
 
 Database delete
+
+## Abandon lock
+
+```go
+type bill struct {
+	mutex   sync.RWMutex
+	price   int
+	divided float64
+}
+
+func (b *bill) readBill() float64 {
+	b.mutex.RLock()
+	defer b.mutex.RUnlock()
+	return b.divided
+}
+
+func (b *bill) division(n int) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println(r)
+		}
+	}()
+
+	b.mutex.Lock()
+	b.divided = float64(b.price / n)
+	b.mutex.Unlock()
+
+	// Abandonlock
+	fmt.Println("Can't run here when panic")
+}
+
+func main() {
+	b := &bill{price: 100}
+	b.division(2)
+	fmt.Println(b.readBill())
+
+	b.division(0)
+	fmt.Println(b.readBill())
+}
+```
+
+## Data race without race condition
+
+```go
+```

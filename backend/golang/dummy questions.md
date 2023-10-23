@@ -141,6 +141,7 @@ func main() {
 
 ### 9. Result of this program
 
+**For loop**
 ```go
 type person struct {
 	id int
@@ -165,6 +166,7 @@ func main() {
 }
 ```
 
+**Data race**
 ```go
 var data int // 1
 
@@ -173,5 +175,54 @@ go func() { // 2
 }() // 4
 if data == 0 { // 5
     fmt.Printf("the value is %v.\n", data)
+}
+```
+
+**Slice len, cap**
+```go
+func main() {
+	s := make([]int, 0, 1)
+
+	_ = append(s, 10)
+	fmt.Println(s)
+}
+```
+
+**This is data race, why it is also race condition**
+```go
+func main() {
+	s := make([]int, 0, 1)
+
+	go func() {
+		s1 := append(s, 1)
+		fmt.Println("s1:", s1)
+	}()
+
+	go func() {
+		s2 := append(s, 2)
+		fmt.Println("s2:", s2)
+	}()
+
+	time.Sleep(time.Millisecond)
+}
+```
+
+**Improve data race**
+```go
+func main() {
+	s := make([]int, 0, 1)
+
+	go func() {
+		s1 := append(s, 1)
+		fmt.Println("s1:", s1)
+	}()
+
+	go func() {
+		s2 := append(s, 2)
+		runtime.Gosched()
+		fmt.Println("s2:", s2)
+	}()
+
+	time.Sleep(time.Millisecond * 2)
 }
 ```
