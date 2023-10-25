@@ -1,25 +1,48 @@
 package main
 
-import "sync"
+import (
+	"fmt"
+	"runtime"
+	"time"
+)
 
-type Counter struct {
-	mu       *sync.Mutex
-	counters map[string]int
+func main() {
+	ch := make(chan Event)
+	go func() {
+		for i := 0; ; i++ {
+			ch <- Event{}
+		}
+	}()
+	consumer(ch)
 }
 
-func NewCounter() Counter {
-	return Counter{
-		mu:       &sync.Mutex{},
-		counters: map[string]int{},
+type Event struct{}
+
+func consumer(ch <-chan Event) {
+	timerDuration := time.Hour
+	timer := time.NewTimer(timerDuration)
+	defer timer.Stop()
+
+	for {
+		printAlloc()
+		timer.Reset(timerDuration)
+		select {
+		case event := <-ch:
+			fmt.Println("recv event: ", event)
+		case <-timer.C:
+			fmt.Println("warning: no message received")
+			return
+		}
 	}
 }
 
-func (c *Counter) Increment(name string) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.counters[name]++
+func printAlloc() {
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	fmt.Printf("Alloc = %v MiB", bToMb(m.Alloc))
+	fmt.Printf("\tTotalAlloc = %v MiB\n", bToMb(m.TotalAlloc))
+
 }
-
-func main() {
-
+func bToMb(b uint64) uint64 {
+	return b / 1024 / 1024
 }
