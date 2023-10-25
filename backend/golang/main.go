@@ -1,39 +1,40 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"runtime"
 	"time"
 )
 
-func main() {
-	ch := make(chan Event)
-	go func() {
-		for i := 0; ; i++ {
-			ch <- Event{}
-		}
-	}()
-	consumer(ch)
+type Event struct {
+	ID int `json:"id"`
+	time.Time
 }
 
-type Event struct{}
+type foo struct{}
 
-func consumer(ch <-chan Event) {
-	timerDuration := time.Hour
-	timer := time.NewTimer(timerDuration)
-	defer timer.Stop()
+func (foo) MarshalJSON() ([]byte, error) {
+	return []byte(`"foo"`), nil
+}
 
-	for {
-		printAlloc()
-		timer.Reset(timerDuration)
-		select {
-		case event := <-ch:
-			fmt.Println("recv event: ", event)
-		case <-timer.C:
-			fmt.Println("warning: no message received")
-			return
-		}
+func main() {
+	b, err := json.Marshal(foo{})
+	if err != nil {
+		panic(err)
 	}
+	fmt.Println(string(b))
+
+	e := Event{
+		ID:   1234,
+		Time: time.Now(),
+	}
+	data, _ := json.Marshal(e)
+	fmt.Println(string(data))
+}
+
+func (e Event) MarshalJSON() ([]byte, error) {
+	return []byte(`"ABC"`), nil
 }
 
 func printAlloc() {
