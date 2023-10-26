@@ -1,0 +1,86 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+App	acme/internal/config/config.go	/^var App *Config$/;"	v
+ComputePath	deprecate.go	/^func ComputePath() {}$/;"	f
+Config	acme/internal/config/config.go	/^type Config struct {$/;"	t
+Dashboard	html/html.go	/^func Dashboard(w io.Writer, p DashboardParams) error {$/;"	f
+DashboardParams	html/html.go	/^type DashboardParams struct {$/;"	t
+Debug	acme/internal/logging/logging.go	/^func (l LoggerStdOut) Debug(message string, args ...any) {$/;"	f
+DefaultEnvVar	acme/internal/config/config.go	/^const DefaultEnvVar = "ACME_CONFIG"$/;"	c
+Depre	deprecate.go	/^func Depre() {$/;"	f
+Do	acme/internal/modules/get/get.go	/^func (g *Getter) Do(ID int) (*data.Person, error) {$/;"	f
+Do	acme/internal/modules/list/list.go	/^func (l *Lister) Do() ([]*data.Person, error) {$/;"	f
+ErrNotFound	acme/internal/modules/data/data.go	/^	ErrNotFound = errors.New("not found")$/;"	v
+Error	acme/internal/logging/logging.go	/^func (l LoggerStdOut) Error(message string, args ...any) {$/;"	f
+Getter	acme/internal/modules/get/get.go	/^type Getter struct{}$/;"	t
+Info	acme/internal/logging/logging.go	/^func (l LoggerStdOut) Info(message string, args ...any) {$/;"	f
+L	acme/internal/logging/logging.go	/^var L = &LoggerStdOut{}$/;"	v
+Lister	acme/internal/modules/list/list.go	/^type Lister struct{}$/;"	t
+Load	acme/internal/modules/data/data.go	/^func Load(ID int) (*Person, error) {$/;"	f
+LoadAll	acme/internal/modules/data/data.go	/^func LoadAll() ([]*Person, error) {$/;"	f
+LoggerStdOut	acme/internal/logging/logging.go	/^type LoggerStdOut struct{}$/;"	t
+NewRegisterHandler	acme/internal/modules/register/register.go	/^func NewRegisterHandler(model RegisterModel) *RegisterHandler {$/;"	f
+Person	acme/internal/modules/data/data.go	/^type Person struct {$/;"	t
+ProfileEdit	html/html.go	/^func ProfileEdit(w io.Writer, p ProfileEditParams) error {$/;"	f
+ProfileEditParams	html/html.go	/^type ProfileEditParams struct {$/;"	t
+ProfileParams	html/html.go	/^type ProfileParams struct {$/;"	t
+ProfileShow	html/html.go	/^func ProfileShow(w io.Writer, p ProfileParams) error {$/;"	f
+RegisterHandler	acme/internal/modules/register/register.go	/^type RegisterHandler struct {$/;"	t
+RegisterModel	acme/internal/modules/register/register.go	/^type RegisterModel interface {$/;"	t
+Save	acme/internal/modules/data/data.go	/^func Save(in *Person) (int, error) {$/;"	f
+ServeHTTP	acme/internal/modules/register/register.go	/^func (h *RegisterHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {$/;"	f
+TestLoad	acme/internal/config/config_test.go	/^func TestLoad(t *testing.T) {$/;"	f
+TestLoadAll_tableDrivenTest	acme/internal/modules/data/data_test.go	/^func TestLoadAll_tableDrivenTest(t *testing.T) {$/;"	f
+TestSave_getDBError	acme/internal/modules/data/data_test.go	/^func TestSave_getDBError(t *testing.T) {$/;"	f
+TestSave_happyPath	acme/internal/modules/data/data_test.go	/^func TestSave_happyPath(t *testing.T) {$/;"	f
+TestSave_insertError	acme/internal/modules/data/data_test.go	/^func TestSave_insertError(t *testing.T) {$/;"	f
+Warn	acme/internal/logging/logging.go	/^func (l LoggerStdOut) Warn(message string, args ...any) {$/;"	f
+config	acme/internal/config/config.go	/^package config$/;"	p
+config	acme/internal/config/config_test.go	/^package config$/;"	p
+convertSQLToRegex	acme/internal/modules/data/data_test.go	/^func convertSQLToRegex(in string) string {$/;"	f
+dashboard	html/html.go	/^	dashboard   = parse("dashboard.html")$/;"	v
+data	acme/internal/modules/data/data.go	/^package data$/;"	p
+data	acme/internal/modules/data/data_test.go	/^package data$/;"	p
+db	acme/internal/modules/data/data.go	/^	db          *sql.DB$/;"	v
+defaultPersonID	acme/internal/modules/data/data.go	/^	defaultPersonID = 0$/;"	c
+errPeopleNotFound	acme/internal/modules/list/list.go	/^	errPeopleNotFound = errors.New("no people found")$/;"	v
+errPersonNotFound	acme/internal/modules/get/get.go	/^	errPersonNotFound = errors.New("person not found")$/;"	v
+extractPayload	acme/internal/modules/register/register.go	/^func (h *RegisterHandler) extractPayload(request *http.Request) (*registerRequest, error) {$/;"	f
+files	html/html.go	/^var files embed.FS$/;"	v
+get	acme/internal/modules/get/get.go	/^package get$/;"	p
+getDB	acme/internal/modules/data/data.go	/^var getDB = func() (*sql.DB, error) {$/;"	v
+html	html/html.go	/^package html$/;"	p
+init	acme/internal/config/config.go	/^func init() {$/;"	f
+initializeBar	wire.go	/^func initializeBar() string {$/;"	f
+initializeBar	wire_gen.go	/^func initializeBar() string {$/;"	f
+list	acme/internal/modules/list/list.go	/^package list$/;"	p
+load	acme/internal/config/config.go	/^func load(filename string) error {$/;"	f
+load	acme/internal/modules/list/list.go	/^func (l *Lister) load() ([]*data.Person, error) {$/;"	f
+logging	acme/internal/logging/logging.go	/^package logging$/;"	p
+main	acme/main.go	/^func main() {$/;"	f
+main	acme/main.go	/^package main$/;"	p
+main	deprecate.go	/^package main$/;"	p
+main	main.go	/^func main() {$/;"	f
+main	main.go	/^package main$/;"	p
+main	main_test.go	/^package main$/;"	p
+main	person.go	/^package main$/;"	p
+main	srv/main.go	/^func main() {$/;"	f
+main	srv/main.go	/^package main$/;"	p
+main	wire.go	/^package main$/;"	p
+main	wire_gen.go	/^package main$/;"	p
+parse	html/html.go	/^func parse(file string) *template.Template {$/;"	f
+populatePerson	acme/internal/modules/data/data.go	/^func populatePerson(scanner scanner) (*Person, error) {$/;"	f
+profileEdit	html/html.go	/^	profileEdit = parse("profile\/edit.html")$/;"	v
+profileShow	html/html.go	/^	profileShow = parse("profile\/show.html")$/;"	v
+register	acme/internal/modules/register/register.go	/^func (h *RegisterHandler) register(requestPayload *registerRequest) (int, error) {$/;"	f
+register	acme/internal/modules/register/register.go	/^package register$/;"	p
+registerRequest	acme/internal/modules/register/register.go	/^type registerRequest struct{}$/;"	t
+scanner	acme/internal/modules/data/data.go	/^type scanner func(dest ...interface{}) error$/;"	t
+sqlAllColumns	acme/internal/modules/data/data.go	/^	sqlAllColumns = "id, fullname, phone, currency, price"$/;"	c
+sqlInsert	acme/internal/modules/data/data.go	/^	sqlInsert     = "INSERT INTO person (fullname, phone, currency, price) VALUES (?, ?, ?, ?)"$/;"	c
+sqlLoadAll	acme/internal/modules/data/data.go	/^	sqlLoadAll    = "SELECT " + sqlAllColumns + " FROM person"$/;"	c
+sqlLoadByID	acme/internal/modules/data/data.go	/^	sqlLoadByID   = "SELECT " + sqlAllColumns + " FROM person WHERE id = ? LIMIT 1"$/;"	c

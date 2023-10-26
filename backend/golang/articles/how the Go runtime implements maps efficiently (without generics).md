@@ -28,8 +28,14 @@ It's important to talk about the properties of a good hash function as the quali
 
 When used with a hashmap, hash functions have two important properties. The first is stability. The hash function must be stable. Given the same key, your hash function must return the same answer. If doesn't you will not be able to find things you put into the map.
 
-The second property is good distribution. Given two near identical keys, the result should be wildly different. This is important for two reasons. This is important for two reasons. Firstly, as we'll see, values in a hashmap should be distributed evenly across buckets, otherwise the access time is not O(1). Secondly as the user can control some of the aspects of the input to the hash function, they may be able to control some of the aspects of the input to the hash function, they may be able to control the output of the hash function, leading to poor distribution which has been a DDos vector for some languages.
+The second property is good distribution. Given two near identical keys, the result should be wildly different. This is important for two reasons. This is important for two reasons. Firstly, as we'll see, values in a hashmap should be distributed evenly across buckets, otherwise the access time is not O(1). Secondly as the user can control some of the aspects of the input to the hash function, they may be able to control some of the aspects of the input to the hash function, they may be able to control the output of the hash function, leading to poor distribution which has been a DDos vector for some languages. This property is also known as collision resistence.
 
 ## The hashmap data structure
 
+The second part of hashmap is the way data is stored.
 
+The classical hashmap is an array of buckets each of which contains a pointer to an arary of key/value entries. In this case our hashmap has eight buckets (as this is the value that the Go implementation uses) and each bucket can hold up eight entries each (again drawn from the Go implementation). Using powers of two allows the use of cheap bit masks and shifts rather than expensive division.
+
+As entries are added to a map, assuming a good hash function distribution, then the buckets will fill at roughly the same rate. Once the number of entries across each bucket passes some percentage of their total size, known as the load factor, then the map will grow by doubling the number of buckets and redistributing the entries across them.
+
+With this data structure in mind, if we had a map of project names to Github stars, how would we about inserting a value into the map?
