@@ -13,5 +13,6 @@ res = r.rpush("bikes:repairs", "list1")
 print(res)
 
 
-# res32 = r.brpop("bikes:repairs")
-# print(res32)
+
+res32 = r.brpop(["bikes:repairs"])
+print(res32)

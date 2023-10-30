@@ -255,4 +255,25 @@ It means "wait for elements in the list tasks, but return if after 5 seconds no 
 
 Note that you can use 0 as timeout to wait for elements forever, you can also specify multiple lists and not just one, in order to wait on multiple lists at the same time, and get notified when the first list receives an element.
 
+A few things to note about BRPOP:
 
+1. Clients are served in an ordered way: the first client that blocked waiting for a list, is served first when an element is pushed by some other client, and so forth.
+2. The return value is different compared to RPOP: it is a two-element array since it also includes the name of the key, because BRPOP and BLPOP are able to block waiting for elements from multiple lists.
+3. If the timeout is reached, NULL is returned.
+
+There are more things you should know about lists and blocking ops. We suggest that you read more on the following:
+
+- It is possible to build safer queues or rotating queues using LMOVE.
+- There is also a blocking variant of the command, called BLMOVE.
+
+**Automatic creation and removal of keys**
+
+So far in our examples we never had to create empty lists before pushing elements, or removing empty lists when they no longer have elements inside. It is Redis'responsibility to delete keys when lists are left empty, or to create an empty list if the key does not exist and we are trying to add elements to it, for example with LPUSH.
+
+This is not specific to lists, it applies to all the Redis data types composed of multiple elements: Streams, Sets, Sorted Sets and Hashes.
+
+Basically, we can summarize the behavior with three rules:
+
+1. When we add an element to an aggregate data type, if the target key does not exist, an empty aggregate data type is created before adding to the element.
+2. When we remove elements from an aggregate data type, if the value remains empty, the key is automatically destroyed. The Stream data type is the only exception to this rule.
+3. Calling a read-only command such as LLEN (which returns the length of the list), or a write command removing elements, with an empty key, always produces the same result if the key is holding an empty aggregate type of the command expects to find.
