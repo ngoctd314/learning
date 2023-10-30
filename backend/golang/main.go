@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"runtime"
 	"time"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type Event struct {
@@ -16,7 +18,10 @@ type Person struct {
 }
 
 func main() {
-	fmt.Println(1 * 86400 * 365)
+	// (a+b) / 2  -> b + (a-b) / 2
+	fmt.Println((1 - 4) / 2)
+	fmt.Println((4 - 1) / 2)
+
 }
 
 func printAlloc() {
