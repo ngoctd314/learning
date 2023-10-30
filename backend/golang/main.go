@@ -18,8 +18,9 @@ type Person struct {
 }
 
 func main() {
-	s := "汉"
-	fmt.Println(len(s)) // 3
+	// (a+b) / 2  -> b + (a-b) / 2
+	fmt.Println((1 - 4) / 2)
+	fmt.Println((4 - 1) / 2)
 
 }
 
