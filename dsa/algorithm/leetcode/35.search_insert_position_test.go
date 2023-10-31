@@ -16,9 +16,9 @@ func Test_searchInsert(t *testing.T) {
 			name: "Test 1",
 			args: args{
 				nums:   []int{1, 3, 5, 6},
-				target: 5,
+				target: 2,
 			},
-			want: 2,
+			want: 1,
 		},
 		{
 			name: "Test 2",
