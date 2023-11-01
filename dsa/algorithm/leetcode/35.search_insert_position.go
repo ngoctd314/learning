@@ -1,37 +1,21 @@
 package leetcode
 
 func searchInsert(nums []int, target int) int {
-	s, e := 0, len(nums)-1
-	if target <= nums[s] {
-		return 0
-	}
-	if target > nums[e] {
-		return e + 1
-	}
-	if target == nums[e] {
-		return e
-	}
-	if len(nums) == 2 {
-		return 1
-	}
-	for {
-		m := (s + e) / 2
-		if nums[m] == target {
-			return m
-		}
-		if nums[m] > target {
-			if nums[m-1] == target {
-				return m - 1
-			}
-			if nums[m-1] < target {
-				return m
-			}
-			e = m
+	lo, hi := 0, len(nums)-1
+	for lo < hi {
+		mid := (lo + hi) / 2
+		if nums[mid] == target {
+			return mid
+		} else if nums[mid] < target {
+			lo = mid + 1
 		} else {
-			if nums[m+1] <= target {
-				return m + 1
-			}
-			s = m
+			hi = mid - 1
 		}
 	}
+
+	if nums[lo] < target {
+		return lo + 1
+	}
+
+	return lo
 }
