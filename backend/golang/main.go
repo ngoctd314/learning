@@ -1,27 +1,54 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	"log"
 	"runtime"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 )
 
-type Event struct {
-	Time time.Time
-}
-
-type Person struct {
-	Name string
-	Age  int
+type person struct {
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	Age      int    `json:"age"`
+	Address  string `json:"address"`
+	Birthday string `json:"birthday"`
 }
 
 func main() {
-	// (a+b) / 2  -> b + (a-b) / 2
-	fmt.Println((1 - 4) / 2)
-	fmt.Println((4 - 1) / 2)
+	db, err := sqlx.Open("mysql", "root:secret@tcp(192.168.49.2:30300)/learn")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
 
+	if err := db.Ping(); err != nil {
+		log.Fatal(err)
+	}
+	db.SetMaxOpenConns(1)
+
+	rows, _ := db.Query("SELECT name, address FROM persons WHERE id = 4000001")
+	defer rows.Close()
+	for rows.Next() {
+		var name, address sql.NullString
+		err := rows.Scan(&name, &address)
+		if err != nil {
+			log.Println(err)
+		}
+		log.Println(name, address)
+	}
+
+	if err := rows.Err(); err != nil {
+		return "", 0, err
+	}
+
+	now := time.Now()
+
+	fmt.Printf("Since %fs", time.Since(now).Seconds())
 }
 
 func printAlloc() {
