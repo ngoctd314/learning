@@ -1,54 +1,110 @@
 package main
 
 import (
-	"database/sql"
+	"bytes"
+	"context"
 	"fmt"
+	"io"
 	"log"
+	"net"
+	"net/http"
 	"runtime"
+	"strings"
+	"sync"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/jmoiron/sqlx"
 )
 
 type person struct {
-	ID       int    `json:"id"`
 	Name     string `json:"name"`
-	Age      int    `json:"age"`
 	Address  string `json:"address"`
 	Birthday string `json:"birthday"`
+	ID       int    `json:"id"`
+	Age      int    `json:"age"`
+}
+
+type handler struct {
+	client http.Client
+	url    string
+}
+
+func (h handler) getBody(delay time.Duration) (string, error) {
+	resp, err := h.client.Get(h.url)
+	_ = resp
+	if err != nil {
+		return "", err
+	}
+	// defer resp.Body.Close()
+	// readAll := func(r io.Reader) ([]byte, error) {
+	// 	b := make([]byte, 0, 5)
+	// 	for {
+	// 		fmt.Println("b", string(b))
+	// 		if len(b) == cap(b) {
+	// 			// Add more capacity (let append pick how much).
+	// 			b = append(b, 0)[:len(b)]
+	// 		}
+	// 		n, err := r.Read(b[len(b):cap(b)])
+	// 		b = b[:len(b)+n]
+	// 		if err != nil {
+	// 			if err == io.EOF {
+	// 				err = nil
+	// 			}
+	// 			return b, err
+	// 		}
+	// 	}
+	// }
+	// body, _ := readAll(resp.Body)
+	dst := bytes.NewBuffer(nil)
+	fmt.Println(io.Copy(dst, resp.Body))
+
+	fmt.Println(dst.String())
+
+	return string(""), nil
 }
 
 func main() {
-	db, err := sqlx.Open("mysql", "root:secret@tcp(192.168.49.2:30300)/learn")
-	if err != nil {
-		log.Fatal(err)
+	httpclient := http.Client{
+		Transport: &http.Transport{
+			DialContext: func(_ context.Context, network string, addr string) (net.Conn, error) {
+				log.Println("re DialContext")
+				return net.Dial(network, addr)
+			},
+			// Dial: func(network string, addr string) (net.Conn, error) {
+			// 	log.Println("re Dial")
+			// 	return net.Dial(network, addr)
+			// },
+			DisableKeepAlives:   false,
+			MaxIdleConns:        5,
+			MaxIdleConnsPerHost: 5,
+			MaxConnsPerHost:     5,
+			IdleConnTimeout:     time.Millisecond,
+		},
+		// Timeout: time.Second,
 	}
-	defer db.Close()
-
-	if err := db.Ping(); err != nil {
-		log.Fatal(err)
+	_ = httpclient
+	h := handler{
+		client: httpclient,
+		url:    "http://localhost:8080",
 	}
-	db.SetMaxOpenConns(1)
-
-	rows, _ := db.Query("SELECT name, address FROM persons WHERE id = 4000001")
-	defer rows.Close()
-	for rows.Next() {
-		var name, address sql.NullString
-		err := rows.Scan(&name, &address)
-		if err != nil {
-			log.Println(err)
-		}
-		log.Println(name, address)
-	}
-
-	if err := rows.Err(); err != nil {
-		return "", 0, err
-	}
-
 	now := time.Now()
+	n := 1
+	var wg sync.WaitGroup
+	wg.Add(n * 2)
 
-	fmt.Printf("Since %fs", time.Since(now).Seconds())
+	go func() {
+		fmt.Println(strings.Repeat("~", 20))
+		for i := 0; i < n*2; i++ {
+			go func() {
+				defer wg.Done()
+				h.getBody(time.Second * 1)
+			}()
+		}
+		fmt.Println(strings.Repeat("~", 20))
+	}()
+
+	wg.Wait()
+	fmt.Printf("since %fs", time.Since(now).Seconds())
 }
 
 func printAlloc() {
@@ -59,5 +115,5 @@ func printAlloc() {
 
 }
 func bToMb(b uint64) uint64 {
-	return b / 1024 / 1024
+	return b / 1024
 }
