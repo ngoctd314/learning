@@ -277,3 +277,39 @@ Basically, we can summarize the behavior with three rules:
 1. When we add an element to an aggregate data type, if the target key does not exist, an empty aggregate data type is created before adding to the element.
 2. When we remove elements from an aggregate data type, if the value remains empty, the key is automatically destroyed. The Stream data type is the only exception to this rule.
 3. Calling a read-only command such as LLEN (which returns the length of the list), or a write command removing elements, with an empty key, always produces the same result if the key is holding an empty aggregate type of the command expects to find.
+
+```py
+res35 = r.delete("new_bikes")
+print(res35)
+
+res36 = r.lpush("new_bikes", "bike:1", "bike:2", "bike:3")
+print(res36)
+```
+
+However, we can't perform operations against the wrong type if the key exists:
+
+```py
+res37 = r.set("new_bikes", "bike:1")
+print(res37)
+
+res38 = r.type("new_bikes")
+print(res38)
+
+try:
+    res39 = r.lpush("new_bikes", "bike:2", "bike:3") 
+except Exception as e:
+    print(e)
+```
+
+The key no longer exists after all the elements are popped.
+
+
+**Limits**
+
+The max length of a Redis list is 2^32 - 1 (4,294,967,295) elements.
+
+**Performance**
+
+List operations that access its head or tail are O(1), which means they're highly efficient. However, commands that manipulate elements within a list are usually O(n). Examples of these include LINDEX, LINSERT, and LSET. Exercise caution when running these commands, mainly when operating on large lists.
+
+
