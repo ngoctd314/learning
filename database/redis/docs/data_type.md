@@ -313,3 +313,38 @@ The max length of a Redis list is 2^32 - 1 (4,294,967,295) elements.
 List operations that access its head or tail are O(1), which means they're highly efficient. However, commands that manipulate elements within a list are usually O(n). Examples of these include LINDEX, LINSERT, and LSET. Exercise caution when running these commands, mainly when operating on large lists.
 
 
+## Redis sets
+
+A Redis set is an unordered of unique strings (members). You can use Redis sets to efficiently:
+
+- Track unique items (e.g. track unique IP address accessing a given blog post).
+- Represent relations (e.g. the set of all users with a given role).
+- Perform common set operations such as intersection, unions, and differences.
+
+**Basic commands**
+
+- SADD adds a new member to a set.
+- SREM removes the specified member from the set.
+- SISMEMBER tests a string for set membership.
+- SINTER returns the set members that two or more sets have in common.
+- SCARD returns the size (a.k.a cardinality) of a set.
+
+**Tutorial**
+
+The SADD command adds new elements to a set. It's possible to do a number of other operation against set like testing if a given element already exists, performing the intersection, union or difference between multiple sets, and so forth.
+
+When you want to remove items from a set, you can use the SREM command to remove one or more items from a set, you can use the SPOP command to remove a random item from a set. You can also return a random item from a set without removing it using the SRANDMEMBER command.
+
+**Limits**
+
+The max size of a Redis is 2^32 - 1 members
+
+**Performance**
+
+Most set operations, including adding removing, and checking whether an item is a set member are O(1). This means that they're highly efficient. However, for large sets with hundreds of thousands of members or more, you should exercise caution when running the SMEMBERS command. This command is O(n) and returns the entire set in a single response. As an alternative, consider the SSCAN, which lets you retrieve all members of a set iteratively.
+
+**Alternatives**
+
+Sets membership checks on large datasets (or on streaming data) can use a lot of memory. If you're concerned about memory usage and don't need perfect precision, consider a Bloom-filter or Cuckoo filter as an alternative to a set.
+
+
