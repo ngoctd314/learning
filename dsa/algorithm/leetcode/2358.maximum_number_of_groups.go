@@ -1,18 +1,7 @@
 package leetcode
 
-func maximumGroups(grades []int) int {
-	n := len(grades)
-	i := n / 2
+import "math"
 
-	for i <= n && i >= 1 {
-		s := (1 + i) * i / 2
-		if s <= n && 2*(s+i)+3 > n {
-			return i
-		} else if s > n {
-			i--
-		} else {
-			i++
-		}
-	}
-	return 1
+func maximumGroups(grades []int) int {
+	return int((-1 + math.Sqrt(1.0+float64(8*len(grades)))) / 2)
 }

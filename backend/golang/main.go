@@ -9,8 +9,6 @@ import (
 	"net"
 	"net/http"
 	"runtime"
-	"strings"
-	"sync"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -63,48 +61,36 @@ func (h handler) getBody(delay time.Duration) (string, error) {
 	return string(""), nil
 }
 
+type h struct {
+}
+
+func (h) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	time.Sleep(time.Second * 2) // exceed time.Second
+	defer r.Body.Close()
+	// only load from meme, not from network
+	data, _ := io.ReadAll(r.Body)
+
+	w.Write([]byte(fmt.Sprintf("forward body: %s", string(data))))
+}
+
 func main() {
-	httpclient := http.Client{
+	httpclient := &http.Client{
 		Transport: &http.Transport{
-			DialContext: func(_ context.Context, network string, addr string) (net.Conn, error) {
-				log.Println("re DialContext")
+			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+				log.Println("re-dial")
 				return net.Dial(network, addr)
 			},
-			// Dial: func(network string, addr string) (net.Conn, error) {
-			// 	log.Println("re Dial")
-			// 	return net.Dial(network, addr)
-			// },
-			DisableKeepAlives:   false,
-			MaxIdleConns:        5,
-			MaxIdleConnsPerHost: 5,
-			MaxConnsPerHost:     5,
-			IdleConnTimeout:     time.Millisecond,
+			DisableKeepAlives: false,
+			MaxConnsPerHost:   100,
+			MaxIdleConns:      1000,
+			IdleConnTimeout:   time.Second * 10,
 		},
-		// Timeout: time.Second,
 	}
-	_ = httpclient
-	h := handler{
-		client: httpclient,
-		url:    "http://localhost:8080",
+	for i := 0; i < 10; i++ {
+		go httpclient.Get("http://localhost:8080")
+
 	}
-	now := time.Now()
-	n := 1
-	var wg sync.WaitGroup
-	wg.Add(n * 2)
-
-	go func() {
-		fmt.Println(strings.Repeat("~", 20))
-		for i := 0; i < n*2; i++ {
-			go func() {
-				defer wg.Done()
-				h.getBody(time.Second * 1)
-			}()
-		}
-		fmt.Println(strings.Repeat("~", 20))
-	}()
-
-	wg.Wait()
-	fmt.Printf("since %fs", time.Since(now).Seconds())
+	time.Sleep(time.Second * 5)
 }
 
 func printAlloc() {
