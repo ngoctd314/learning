@@ -7,7 +7,8 @@ import (
 )
 
 func main() {
-	fmt.Println('a', 'z', '.', '+', '@')
+	n := 6
+	fmt.Println(n * (n + 1) / 2)
 }
 
 func cnt(n int) int {
