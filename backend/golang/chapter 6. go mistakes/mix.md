@@ -12,4 +12,4 @@ func fn(a, b int) int {}
 
 Function variable can pass as argument, can call as function, can re-assign.
 
-Function declaration can pass as argument, call call as function, but can re-assign. Because function declaration is not addressable.
+Function declaration can pass as argument, call call as function, but can't re-assign. Because function declaration is not addressable.
