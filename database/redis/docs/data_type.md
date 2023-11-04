@@ -409,4 +409,4 @@ Sorted sets are implemented via a dual-ported data structure containing both a s
 
 **Operating on ranges**
 
-
+**lexicographically scores**
