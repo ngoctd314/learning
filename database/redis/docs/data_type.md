@@ -347,4 +347,66 @@ Most set operations, including adding removing, and checking whether an item is 
 
 Sets membership checks on large datasets (or on streaming data) can use a lot of memory. If you're concerned about memory usage and don't need perfect precision, consider a Bloom-filter or Cuckoo filter as an alternative to a set.
 
+## Redis hashes
+
+Introduction to Redis hashes type structured as collections of field-value pairs. You can use hashes to present basic objects and to store groups of counters, among other things.
+
+```py
+res1 = r.hset("bike:1", mapping={
+    "model": "Deimos",
+    "brand": "Ergonom",
+    "type": "Enduro bikes",
+    "price": 4972,
+})
+
+print(res1)
+
+res2 = r.hget("bike:1", "model")
+print(res2)
+```
+
+While hashes are handy to represent objects, actually the number of fields you can put inside a hash has no practical limits (other than available memory), so you can use hashs in many different ways inside your application.
+
+The command HSET sets multiple fields of the hash, while HGET retrieves a single field. HMGET is similar to HGET but returns an array of values:
+
+```py
+res5 = r.hmget("bike:1", ["model", "price"])
+print(res5)
+```
+
+There are commands that are able to perform operations on individual fields as well, like HINCRBY:
+
+```py
+r.hincrby("bike:1", "price", 100)
+res4 = r.hget("bike:1", "price")
+print(res4)
+```
+
+It is worth noting that small hashes are encoded in special way in memory that make them very memory efficient. 
+
+**Performance**
+
+Most Redis hash commands are O(1)
+
+A few commands such as HKEYS, HVALS, and HGETALL - are O(n), where n is the number of field value pairs.
+
+**Limits**
+
+Every hash can store up to 4,294,967,295 (2^32 - 1) field-value pairs. In practice, you hashes are limited only by the overall memory on the VMs hosting your Redis deployment.
+
+## Sorted set
+
+A Redis sorted set is a collection of unique strings (members) ordered by an associated score. When more than one string has the same score, the strings are ordered lexicographically. Some use cases for sorted sets include:
+
+- Leaderboards. For example, you can use sorted sets to easily maintain ordered lists of the highest scores in a massive online game.
+- Rate limiters. In particular, you can use a sorted set to build a sliding-window rate limiter to prevent excessive API requests.
+
+You can think of sorted sets as a mix between a Set and a Hash. Like sets, sorted sets are composed of unique, non-repeating string elements, so in some sense a sorted set is set as well. 
+
+However while elements inside sets are not ordered, every element in a sorted set is associated with a floating point value, called the score (this is why the type is also similar to a hash, since every element is mapped to a value).
+
+Sorted sets are implemented via a dual-ported data structure containing both a skip list and a hash table, so every time we add an element Redis perform an O(log(N)) operation. That's good, but when we ask for sorted elements Redis does not have to do any work at all, it's already sorted. Note that the ZRANGE order is low to high, while the ZREVRANGE order is high to low.
+
+**Operating on ranges**
+
 
