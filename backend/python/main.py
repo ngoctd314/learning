@@ -1,38 +1,21 @@
-class Bag:
+import collections
+
+Card = collections.namedtuple("Card", ["rank", "suit"])
+
+
+class FrenchDeck:
+    ranks = [str(n) for n in range(2, 11)] + list("JQKA")
+    suits = "spades diamonds clubs hearts".split()
+
     def __init__(self):
-        self.data = []
+        self._cards = [Card(rank, suit) for suit in self.suits for rank in self.ranks]
 
-    def add(self, x):
-        self.data.append(x)
+    def __len__(self):
+        return len(self._cards)
 
-    def addtwice(self, x):
-        self.add(x)
-        self.add(x)
-
-
-class Parent:
-    def __init__(self):
-        self.name = "parent"
+    def __getitem__(self, position):
+        return self._cards[position]
 
 
-class Child(Parent):
-    def __init__(self):
-        pass
-
-
-class Mapping:
-    def __init__(self, iterable):
-        self.items_list = []
-        self.__update(iterable)
-
-    def update(self, iterable):
-        for item in iterable:
-            self.items_list.append(item)
-
-    __update = update  # private copy of original update() method
-
-
-import os
-
-if __name__ == "__main__":
-    print(os.getcwd())
+deck = FrenchDeck()
+print(deck.__len__())
