@@ -7,8 +7,7 @@ import (
 )
 
 func main() {
-	n := 6
-	fmt.Println(n * (n + 1) / 2)
+	fmt.Println(2 << 1)
 }
 
 func cnt(n int) int {
