@@ -2,14 +2,12 @@ package main
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
-	"log"
-	"net"
 	"net/http"
 	"runtime"
 	"time"
+	"unicode/utf8"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -74,23 +72,13 @@ func (h) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	httpclient := &http.Client{
-		Transport: &http.Transport{
-			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-				log.Println("re-dial")
-				return net.Dial(network, addr)
-			},
-			DisableKeepAlives: false,
-			MaxConnsPerHost:   100,
-			MaxIdleConns:      1000,
-			IdleConnTimeout:   time.Second * 10,
-		},
+	s := "hêllo"
+	for i := range s {
+		fmt.Printf("position %d: %c\n", i, s[i])
 	}
-	for i := 0; i < 10; i++ {
-		go httpclient.Get("http://localhost:8080")
-
-	}
-	time.Sleep(time.Second * 5)
+	fmt.Printf("len=%d\n", len(s))
+	fmt.Println(len([]rune(s)))
+	fmt.Println(utf8.RuneCountInString(s))
 }
 
 func printAlloc() {
