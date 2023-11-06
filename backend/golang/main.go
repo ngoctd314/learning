@@ -2,12 +2,13 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"runtime"
+	"strings"
 	"time"
-	"unicode/utf8"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -72,13 +73,70 @@ func (h) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	s := "hêllo"
-	for i := range s {
-		fmt.Printf("position %d: %c\n", i, s[i])
+	s := store{}
+	s.handleLog()
+	runtime.GC()
+	printAlloc()
+
+	runtime.KeepAlive(s)
+}
+
+type store struct {
+	data []string
+}
+
+func (s *store) handleLog() error {
+	log := make([]byte, 1024*1024*1024)
+	logStr := string(log)
+
+	if len(logStr) < 36 {
+		return errors.New("log is not correctly formatted")
 	}
-	fmt.Printf("len=%d\n", len(s))
-	fmt.Println(len([]rune(s)))
-	fmt.Println(utf8.RuneCountInString(s))
+	s.data = append(s.data, strings.Clone(logStr[:1]))
+
+	return nil
+}
+
+func getBytes(reader io.Reader) ([]byte, error) {
+	b, err := io.ReadAll(reader)
+	if err != nil {
+		return nil, err
+	}
+	// call sanitize
+	return bytes.TrimSpace(b), nil
+}
+
+func concat(values ...string) string {
+	total := 0
+	for i := 0; i < len(values); i++ {
+		total += len(values[i])
+	}
+
+	sb := strings.Builder{}
+	sb.Grow(total)
+	for _, value := range values {
+		_, _ = sb.WriteString(value)
+	}
+
+	return sb.String()
+}
+
+func concat1(values ...string) string {
+	s := ""
+	for _, value := range values {
+		s += value
+	}
+
+	return s
+}
+
+func concat2(values ...string) string {
+	sb := strings.Builder{}
+	for _, value := range values {
+		_, _ = sb.WriteString(value)
+	}
+
+	return sb.String()
 }
 
 func printAlloc() {
@@ -89,5 +147,5 @@ func printAlloc() {
 
 }
 func bToMb(b uint64) uint64 {
-	return b / 1024
+	return b / 1024 / 1024
 }

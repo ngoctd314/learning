@@ -11,48 +11,13 @@
 
 [#37. Inaccurate string iteration]("./5.%20Strings.md#37-inaccurate-string-iteration")
 
-Iterating on a string is a common operation for developers.
+[#40. ]("./5.%20Strings.md#40-useless-string-conversions")
 
-Let's look at a concrete example. Here, we want to print the different runes in a string and their corresponds positions:
+[#41. Substrings and memory leaks]("./5.%20Strings.md#41-substrings-and-memory-leaks")
 
-```go
-s := "hêllo"
-for i := range s {
-    fmt.Printf("position %d: %c\n", i, s[c])
-}
-```
-
-```txt
-position 0: h
-position 1: Ã
-position 3: l
-position 4: l
-position 5: o
-len=6
-```
-
-This code doesn't do what we want. Let's highlight three points:
-
-- The second rune is Ã in the output instead of ê.
-- We jumped from position 1 to position 3: what is at position 2?.
-- len returns a count of 6, whereas s contains only 5 runes.
-
-Len returns the number of bytes in a string, not the number of runes. Because we assigned a string literal to s, s is a UTF-8 string. Meanwhile, the special character ê isn't encoded in a single byte; it requires 2 bytes. Therefore, calling len(s) returns 6.
-
-```go
-fmt.Println(len([]rune(s)))
-fmt.Println(utf8.RuneCountInString(s))
-```
-
-When convert a slice of runes using []rune(s). Introduces a run-time overhead compared to the previous one. Indeed, converting a string into a slice of runes requires allocating an additional slice and converting the bytes into runes: an O(n) time complexity with n the number of bytes in the string. Therefore if we want to iterate over all the runes, we should use: 
-
-```go
-for i, v := range s {
-    fmt.Println(i, v) // v will be rune
-}
-```
-
-**A possible optimization to access a specific rune**
-
-One optimization is possible if a string is composed of single-byte runes:
-
+- Understanding that a rune corresponds to the concept of a Unicode code point and that it can be composed of multiple bytes should be part of the Go developer's core knowledge to work accurately with strings.
+- Iterating on a string with the range operator iterates on the runes with the index corresponding to the starting index of the rune's byte sequence. To access a specific rune index (such as the third rune), convert the string into a []rune.
+- Strings.TrimRight/strings. TrimLeft removes all the trailing/leading runes contained in a given set, whereas strings. Trimsuffix/strings TrimPrefix returns a string without a provided suffix/prefix.
+- Concatenating a list of strings should be done with strings.Builder to prevent allocating a new string during each iteration.
+- Remembering that the bytes package offers the same operations as the strings package can help avoid extra byte/string conversions.
+- Using copies instead of subtrings can prevent memory leaks, as the string returned by a substring operation will be backed by the same byte array.
