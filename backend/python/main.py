@@ -11,7 +11,7 @@ class FrenchDeck:
         self._cards = [Card(rank, suit) for suit in self.suits for rank in self.ranks]
 
     def __len__(self):
-        return len(self._cards)
+        return 10
 
     def __getitem__(self, position):
         return self._cards[position]
@@ -19,3 +19,7 @@ class FrenchDeck:
 
 deck = FrenchDeck()
 print(deck.__len__())
+print(len(deck))
+print(deck[-1])
+
+
