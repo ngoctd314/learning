@@ -72,13 +72,32 @@ func (h) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(fmt.Sprintf("forward body: %s", string(data))))
 }
 
-func main() {
-	s := store{}
-	s.handleLog()
-	runtime.GC()
-	printAlloc()
+type slice []int
 
-	runtime.KeepAlive(s)
+func (s *slice) add(element int) {
+	*s = append(*s, element)
+}
+
+type customer struct {
+	data *data
+}
+
+type data struct {
+	balance float64
+}
+
+func (c customer) add(operation float64) {
+	c.data.balance += operation
+}
+
+func main() {
+	c := customer{
+		data: &data{
+			balance: 0,
+		},
+	}
+	c.add(50)
+	fmt.Println(c.data.balance)
 }
 
 type store struct {
