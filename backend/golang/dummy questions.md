@@ -1,7 +1,5 @@
 # Dummy questions
 
-## Deadlock
-
 ### 1. Make main goroutine Deadlock after t seconds
 
 ```go

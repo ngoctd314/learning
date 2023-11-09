@@ -21,3 +21,13 @@
 - Concatenating a list of strings should be done with strings.Builder to prevent allocating a new string during each iteration.
 - Remembering that the bytes package offers the same operations as the strings package can help avoid extra byte/string conversions.
 - Using copies instead of subtrings can prevent memory leaks, as the string returned by a substring operation will be backed by the same byte array.
+
+[# 45. Returning a nil receiver]("")
+
+- A nil receiver is allowed, and an interface converted from a nil pointer isn't a nil interface. When we have to return an interface, we should return not a nil pointer but a nil value directly. Generally, having a nil pointer isn't a desirable state and means a probable bug.
+- A nil pointer is different a nil interface.
+
+[# 46. Using a filename as a function input]("")
+
+- When we call defer on a function or method, the call's arguments are evaluated immediately. If we want to mutate the arguments provided to defer afterward, we can use pointers or closures. For a method, the receiver is also evaluated immediately; hence, the behavior depends on whether the receiver is a value or a pointer.
+
