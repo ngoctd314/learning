@@ -23,10 +23,12 @@ func (p *person) print() {
 }
 
 func main() {
-	p := person{id: "0"}
-	defer p.print()
-
-	p.id = "10"
+	defer func() {
+		fmt.Println(1)
+		defer func() {
+			fmt.Println(2)
+		}()
+	}()
 }
 
 func baz() error {
