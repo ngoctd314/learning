@@ -77,3 +77,11 @@ The map() function can be used to apply any function to each element of an itera
 To initialize tuples, arrays, and other types of sequences, you could also start from a listcomp, but a genexp (generator expression) saves memory because it yields items one by one using the iterator protocol instead of building a whole list just to feed another constructor.
 
 ### Tuples Are Not Just Immutable Lists
+
+**Tuples as Records**
+
+Tuples hold records: each item in the tuple holds the data for one field, and the position of the item gives its meaning.
+
+In general, using _ as a dummy variable is just a convention. It's just a strange but valid variable name. However, in a match/case statement, _ is a wildcard that matches any value but is not bound to a value.
+
+
