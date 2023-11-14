@@ -100,7 +100,7 @@ func validateCoordinates(lat, lng float32) error {
 
 func baz() error {
 	var status string
-	defer notify(status)
+	defer notify()
 	defer incrementCounter(status)
 
 	if err := foo(); err != nil {

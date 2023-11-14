@@ -102,3 +102,35 @@
 - Errors should always be handled. In the case of errors returned by defer calls, the very least we should do is ignore them explicitly. If this isn't enough, we can handle the error directly by logging it or propagating it up to the caller.
 
 
+[#55. Mixing up concurrency and parallelism]
+
+Even after years of concurrent programming, developers may not clearly understanding the differences between concurrency and parallelism.
+
+In this coffee shop, one waiter is in charge of accepting orders and preparing them using a single coffee machine. Customers give their orders and then wait for their coffee.
+
+```go
+coffeMachine := func(order string) any{
+    return nil
+} 
+waiter := func(order string) any {
+    return coffeMachine(order)
+}
+
+for _, customer := range customers {
+    waiter(customer.order)    
+}
+```
+
+If the waiter is having a hard time serving all the customers and the coffee shop wants to speed up the overall process, one idea might be to have a second waiter and a second coffee machine. A customer in the queue would wait for a waiter to be available.
+
+In this new process, every part of the system is independent. The coffee shop should serve consumers twice as fast. This is a parallel implementation of a coffee shop.
+
+If we want to scale, we can keep duplicating waiters and coffee machines over and over. However, this isn't the onl possible coffee shop design. Another approach might be to split the work done by the waiters and have one in charge of accepting orders and another one who grinds the coffee beans, which are then brewed in a single machine. Also, instead of blocking the customer queue until a customer is served, we could introduce another queue for customers waiting for their orders. (two queues: order queue, waiting queue).
+
+With this new design, we don't make things parallel. But the overall struct is affected: we split a given role into two roles, and we introduce another queue. Unlike parallelism, which is about doing the same thing multiple times at once, concurrency is about structure.
+
+Assuming one thread represents the waiter accepting orders and another represents the coffee machine, we have introduced yet another thread to grind the coffee beans. Each thread is independent but has to coordinate with others. Here, the waiter thread accepting orders has to communicate which coffee beans to grind. Meanwhile, the coffee-grinding threds must communicate with the coffee machine thread.
+
+What if we want to increase throughput by serving more customers per hour? Because grinding beans takes longer than accepting orders, a possible change could be to hire another coffee-grinding waiter. 
+
+
