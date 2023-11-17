@@ -45,6 +45,18 @@ func getTransactionAmount(transactionID string) (float32, error) {
 	return amount, nil
 }
 
+func assignOnly1() {
+	a := 10
+	_ = a
+}
+
+func assignOnly10() {
+	var a int
+	a = 1
+	a = 2
+	_ = a
+}
+
 var tmperr = transientError{err: errors.New("record not found")}
 
 func getTransactionAmountFromDB(transitionID string) (float32, error) {
