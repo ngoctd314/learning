@@ -70,34 +70,34 @@
 - When we call defer on a function or method, the call's arguments are evaluated immediately. If we want to mutate the arguments provided to defer afterward, we can use pointers or closures. For a method, the receiver is also evaluated immediately; hence, the behavior depends on whether the receiver is a value or a pointer.
 - Passing a pointer to a defer function and wrapping a call inside a closure are two possible solutions to overcome the immediately evaluation of arguments and receivers. 
 
-[#48. Panicking]("")
+[#48. Panicking]("./7.%20Error%20management.md#48-panicking")
 
 - mysql.Register is called in init(), which limits error handling. For all these reasons, the designer made the function panic in case of an error.
 - Another use case in which to panic is when our application requires a dependency but fails to initialize it.   
 - Using panic is an option to deal with errors in Go. However, it should only be used sparingly in unrecoverable conditions: for example, to signal a programmer error or when you fail to load a mandatory dependency.
 
-[#49. Ignoring when to wrap an error]("")
+[#49. Ignoring when to wrap an error]("./7.%20Error%20management.md#49-ignore-when-to-wrap-an-error")
 
 - When handling an error, we can decide to wrap it. Wrapping is about adding context to an error and/or marking an error as specific type. If we need to mark an error, we should create a custom error type. However, if we just want to add extra context, we should use fmt.Errorf() with the %w directive as it doesn't require creating a new error type. Yet, error wrapping creates potential coupling as it makes the source error available for the caller. If we want to prevent it, we shouldn't use error wrapping but error transformation, for example, use fmt.Errorf with the %v directive.
 
-[#50. Checking an error type inaccurately]("")
+[#50. Checking an error type inaccurately]("./7.%20Error%20management.md#50-checking-an-error-type-inaccurately")
 
 - If we rely on Go 1.13 error wrapping, we must use errors.As to check whether an error is a specific type. This way, regardless of whether the error is returned directly by the function we call or wrapped our main error and see if one of the errors is a specific type.
 
-[#51. Checking an error value inaccurately]("")
+[#51. Checking an error value inaccurately]("./7.%20Error%20management.md#51-checking-an-error-value-inaccurately")
 
 - If we use error wrapping in our application with the %w directive and fmt.Errorf, checking an error against a specific value should be done using errors.Is instead of ==. Thus, event if the sentinel error is wrapped, errors.Is can recursively unwrap it and compare each error in the chain against the provided value.
 
-[#52. Handling an error twice]("")
+[#52. Handling an error twice]("./7.%20Error%20management.md#52-handling-an-error-twice")
 
 - Handling an error should be done only once. 
 - Logging an error is handling an error. Hence, we should either log or return an error.
 
-[#53. Not handling an error]("")
+[#53. Not handling an error]("./7.%20Error%20management.md#53-not-handling-an-error")
 
 - Ignoring an error in Go should be the exception. In many cases, we may still favor logging them, even at a low log level. But if we are sure that an error can and should be ignored, we must do so explicit by assigning it to the bank identifier. This way, a future reader will understanding that we ignored the error intentionally.
 
-[#54. Not handling defer errors]("")
+[#54. Not handling defer errors]("./7.%20Error%20management.md#54-not-handling-defer-errors")
 
 - Errors should always be handled. In the case of errors returned by defer calls, the very least we should do is ignore them explicitly. If this isn't enough, we can handle the error directly by logging it or propagating it up to the caller.
 
