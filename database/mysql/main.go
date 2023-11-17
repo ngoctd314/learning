@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -17,9 +19,14 @@ var (
 	ctx       = context.Background()
 )
 
+type nameCharTable struct {
+	NameChar    sql.NullString `db:"name_char"`
+	NameVarchar sql.NullString `db:"name_varchar"`
+}
+
 func init() {
-	// conn, err := sqlx.Connect("mysql", "root:secret@(192.168.49.2:30300)/mysql")
-	conn, err := sqlx.Connect("postgres", "user=admin password=secret host=192.168.49.2 port=30303 dbname=db sslmode=disable")
+	conn, err := sqlx.Connect("mysql", "root:secret@(192.168.49.2:30300)/learn")
+	// conn, err := sqlx.Connect("postgres", "user=admin password=secret host=192.168.49.2 port=30303 dbname=db sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -27,7 +34,18 @@ func init() {
 }
 
 func main() {
-	seed()
+	// _, err := mysqlConn.Exec("INSERT INTO datatype (name_char, name_varchar) VALUES (?, ?)", "  ngoctd   ", "  ngoctd     ")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	//
+	// var result []nameCharTable
+	// if err := mysqlConn.Select(&result, "SELECT * FROM datatype"); err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println(result)
+	t, _ := time.Parse("2006-01-02 15:04:05", "1969-12-31 07:00:00")
+	fmt.Println(time.Now().After(t))
 }
 
 type Data struct {
