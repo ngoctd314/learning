@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -33,19 +32,15 @@ func init() {
 	mysqlConn = conn
 }
 
+type dtText struct {
+	Name string `db:"name"`
+}
+
+func fn() {
+	print("fn")
+}
+
 func main() {
-	// _, err := mysqlConn.Exec("INSERT INTO datatype (name_char, name_varchar) VALUES (?, ?)", "  ngoctd   ", "  ngoctd     ")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	//
-	// var result []nameCharTable
-	// if err := mysqlConn.Select(&result, "SELECT * FROM datatype"); err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Println(result)
-	t, _ := time.Parse("2006-01-02 15:04:05", "1969-12-31 07:00:00")
-	fmt.Println(time.Now().After(t))
 }
 
 type Data struct {

@@ -224,3 +224,7 @@ func main() {
 	time.Sleep(time.Millisecond * 2)
 }
 ```
+
+## Column in MySQL name VARCHAR(10), query this column in Golang, max len(name) can be?
+
+40
