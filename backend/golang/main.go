@@ -1,143 +1,89 @@
 package main
 
 import (
-	"database/sql"
-	"errors"
 	"fmt"
-	"log"
 	"runtime"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
-const (
-	StatusSuccess  = "success"
-	StatusErrorFoo = "error_foo"
-	StatusErrorBar = "error_bar"
-)
-
-type person struct {
-	id string
+type Foo struct {
+	a int64
+	b int64
 }
 
-func (p *person) print() {
-	fmt.Println(p.id)
-}
-
-type transientError struct {
-	err error
-}
-
-func (t transientError) Error() string {
-	return fmt.Sprintf("transient error: %v", t.err)
-}
-
-func getTransactionAmount(transactionID string) (float32, error) {
-	if len(transactionID) != 5 {
-		return 0, fmt.Errorf("id is invalid: %s", transactionID)
+func sumFoo(foos []Foo) int64 {
+	var total int64
+	for i := 0; i < len(foos); i++ {
+		total += foos[i].a
 	}
 
-	amount, err := getTransactionAmountFromDB(transactionID)
-	if err != nil {
-		return 0, fmt.Errorf("failed to get transaction %s: %w", transactionID, err)
+	return total
+}
+
+type Bar struct {
+	a []int64
+	b []int64
+}
+
+func sumBar(bar Bar) int64 {
+	var total int64
+	for i := 0; i < len(bar.a); i++ {
+		total += bar.a[i]
 	}
-
-	return amount, nil
-}
-
-func assignOnly1() {
-	a := 10
-	_ = a
-}
-
-func assignOnly10() {
-	var a int
-	a = 1
-	a = 2
-	_ = a
-}
-
-var tmperr = transientError{err: errors.New("record not found")}
-
-func getTransactionAmountFromDB(transitionID string) (float32, error) {
-	if len(transitionID) == 5 {
-		return 0, tmperr
-	}
-	return 5.0, nil
-}
-
-func f() {
-	notify()
-}
-
-func notify() error {
-	return nil
+	return total
 }
 
 func main() {
-	var r *sql.Rows
-	r.Close()
-
+	var a [100]int
+	for i := 0; i < 100; i++ {
+		a[i] = i
+	}
+	sum := 0
+	for i := 0; i < 7; i++ {
+		sum += a[i]
+	}
 }
 
-type Route struct{}
-
-func GetRoute(srcLat, srcLng, dstLat, dstLng float32) (Route, error) {
-	err := validateCoordinates(srcLat, srcLng)
-	if err != nil {
-		log.Println("failed to validate source coordinates")
-		return Route{}, err
-	}
-	err = validateCoordinates(dstLat, dstLng)
-	if err != nil {
-		log.Println("failed to validate target coordinates")
-		return Route{}, err
+func hitCache() int {
+	var a [1000]int
+	for i := 0; i < 1000; i++ {
+		a[i] = i
 	}
 
-	return Route{}, nil
+	sum := 0
+	for i := 0; i < 70; i++ {
+		sum += a[i]
+	}
+	return sum
 }
 
-func validateCoordinates(lat, lng float32) error {
-	if lat > 90.0 || lat < -90.0 {
-		log.Printf("invalid latitude: %f", lat)
-		return fmt.Errorf("invalid latitude: %f", lat)
-	}
-	if lng > 180.0 || lng < -180.0 {
-		log.Printf("invalid longitude: %f", lng)
-		return fmt.Errorf("invalid longitude: %f", lng)
+func withoutHitCache() int {
+	var a [1000]int
+	for i := 0; i < 1000; i++ {
+		a[i] = i
 	}
 
-	return nil
-}
-
-func baz() error {
-	var status string
-	defer notify()
-	defer incrementCounter(status)
-
-	if err := foo(); err != nil {
-		status = StatusErrorFoo
-		return err
+	sum := 0
+	for i := 0; i < 70; i++ {
+		sum += a[i+10]
 	}
-	if err := bar(); err != nil {
-		status = StatusErrorBar
-		return err
+	return sum
+}
+
+func sum2(s []int64) int64 {
+	var total int64
+	for i := 0; i < len(s); i += 2 {
+		total += s[i]
 	}
-	status = StatusSuccess
-
-	return nil
+	return total
 }
-
-func bar() error {
-	return errors.New("is bar")
-}
-
-func foo() error {
-	return errors.New("is foo")
-}
-
-func incrementCounter(status string) {
-	fmt.Println("incrementCounter", status)
+func sum8(s []int64) int64 {
+	var total int64
+	for i := 0; i < len(s); i += 8 {
+		total += s[i]
+	}
+	return total
 }
 
 func printAlloc() {
