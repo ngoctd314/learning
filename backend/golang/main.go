@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"runtime"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -34,15 +35,16 @@ func sumBar(bar Bar) int64 {
 	return total
 }
 
+// 202311211415
 func main() {
-	var a [100]int
-	for i := 0; i < 100; i++ {
-		a[i] = i
-	}
-	sum := 0
-	for i := 0; i < 7; i++ {
-		sum += a[i]
-	}
+	nowInt := time.Now().Unix()
+	fmt.Println(nowInt)
+	nowInt -= nowInt % 5
+	fmt.Println(nowInt)
+	nowInt -= nowInt % 300
+	fmt.Println(nowInt)
+	now := time.Unix(int64(nowInt), 0)
+	fmt.Println(now)
 }
 
 func hitCache() int {
