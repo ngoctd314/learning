@@ -7,7 +7,13 @@ import (
 )
 
 func main() {
-	fmt.Printf("%b", 14)
+	// 10
+	fmt.Println(2 << 1) // 100
+	fmt.Println(2 >> 1) //   1
+	fmt.Println(4 << 1) // 100 => 1000 => 8
+	fmt.Println(4 >> 1) // 010 => 2
+	print(2 | 3)        // 010 011
+
 }
 
 func cnt(n int) int {
