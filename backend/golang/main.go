@@ -3,89 +3,122 @@ package main
 import (
 	"fmt"
 	"runtime"
-	"time"
+	"sync"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type Foo struct {
+type Input struct {
 	a int64
 	b int64
 }
 
-func sumFoo(foos []Foo) int64 {
-	var total int64
-	for i := 0; i < len(foos); i++ {
-		total += foos[i].a
-	}
-
-	return total
+type Result struct {
+	sumA int64
+	sumB int64
 }
 
-type Bar struct {
-	a []int64
-	b []int64
-}
+func count(inputs []Input) Result {
+	wg := sync.WaitGroup{}
+	wg.Add(2)
 
-func sumBar(bar Bar) int64 {
-	var total int64
-	for i := 0; i < len(bar.a); i++ {
-		total += bar.a[i]
-	}
-	return total
+	result := Result{}
+	go func() {
+		for i := 0; i < len(inputs); i++ {
+			result.sumA += inputs[i].a
+		}
+		wg.Done()
+	}()
+
+	go func() {
+		for i := 0; i < len(inputs); i++ {
+			result.sumB += inputs[i].b
+		}
+		wg.Done()
+	}()
+
+	wg.Wait()
+
+	return result
 }
 
 // 202311211415
 func main() {
-	nowInt := time.Now().Unix()
-	fmt.Println(nowInt)
-	nowInt -= nowInt % 5
-	fmt.Println(nowInt)
-	nowInt -= nowInt % 300
-	fmt.Println(nowInt)
-	now := time.Unix(int64(nowInt), 0)
-	fmt.Println(now)
-}
+	n := 10000000
+	wg := sync.WaitGroup{}
+	wg.Add(n)
+	for i := 0; i < n; i++ {
+		go func() {
+			defer wg.Done()
 
-func hitCache() int {
-	var a [1000]int
-	for i := 0; i < 1000; i++ {
-		a[i] = i
+			rs := count([]Input{
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+				{a: 1, b: 1},
+			})
+			if rs.sumA != rs.sumB || rs.sumA != 60 || rs.sumB != 60 {
+				fmt.Println(rs.sumA, rs.sumB)
+			}
+		}()
 	}
-
-	sum := 0
-	for i := 0; i < 70; i++ {
-		sum += a[i]
-	}
-	return sum
-}
-
-func withoutHitCache() int {
-	var a [1000]int
-	for i := 0; i < 1000; i++ {
-		a[i] = i
-	}
-
-	sum := 0
-	for i := 0; i < 70; i++ {
-		sum += a[i+10]
-	}
-	return sum
-}
-
-func sum2(s []int64) int64 {
-	var total int64
-	for i := 0; i < len(s); i += 2 {
-		total += s[i]
-	}
-	return total
-}
-func sum8(s []int64) int64 {
-	var total int64
-	for i := 0; i < len(s); i += 8 {
-		total += s[i]
-	}
-	return total
+	wg.Wait()
 }
 
 func printAlloc() {

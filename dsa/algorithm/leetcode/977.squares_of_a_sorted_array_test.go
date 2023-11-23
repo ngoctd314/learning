@@ -14,13 +14,13 @@ func Test_sortedSquares(t *testing.T) {
 		args args
 		want []int
 	}{
-		// {
-		// 	name: "Test 1",
-		// 	args: args{
-		// 		nums: []int{-4, -1, 0, 3, 10},
-		// 	},
-		// 	want: []int{0, 1, 9, 16, 100},
-		// },
+		{
+			name: "Test 1",
+			args: args{
+				nums: []int{-4, -1, 0, 3, 10},
+			},
+			want: []int{0, 1, 9, 16, 100},
+		},
 		// {
 		// 	name: "Test 2",
 		// 	args: args{

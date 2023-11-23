@@ -1,73 +1,61 @@
 package leetcode
 
-import "fmt"
-
 func sortedSquares(nums []int) []int {
-	fmid := func() int {
-		res := -1
+	ij := func() (int, int) {
 		lo, hi := 0, len(nums)-1
 		for lo <= hi {
 			mid := (lo + hi) / 2
-			fmt.Println(lo, hi, mid)
-			if mid != len(nums)-1 {
-				if nums[mid]*nums[mid] <= nums[mid+1]*nums[mid+1] {
-					hi = mid - 1
-					res = mid
-				} else {
-					lo = mid + 1
-				}
+			if nums[mid] >= 0 && nums[mid-1] < 0 {
+				return mid - 1, mid
+			}
+			if nums[mid] < 0 {
+				lo = mid + 1
 			} else {
-				return mid
+				hi = mid - 1
 			}
 		}
-		if res == -1 {
-			return len(nums) - 1
-		}
-		return res
+
+		return 0, 0
 	}
 
-	mid := fmid()
-
-	rs := make([]int, 0, len(nums))
-	if mid == 0 {
-		for _, v := range nums {
-			rs = append(rs, v*v)
-		}
-		return rs
-	}
-	if mid == len(nums)-1 {
-		for i := mid; i >= 0; i-- {
+	l := len(nums)
+	rs := make([]int, 0, l)
+	if nums[0] <= 0 && nums[l-1] <= 0 {
+		for i := l - 1; i >= 0; i-- {
 			rs = append(rs, nums[i]*nums[i])
 		}
 		return rs
 	}
-
-	rs = append(rs, nums[mid]*nums[mid])
-	i, j := mid-1, mid+1
-	pi, pj := 0, 0
-
-	for i >= 0 && j < len(nums) {
-		if pi == 0 {
-			pi = nums[i] * nums[i]
+	if nums[0] >= 0 {
+		for i := 0; i < l; i++ {
+			rs = append(rs, nums[i]*nums[i])
 		}
-		if pj == 0 {
-			pj = nums[j] * nums[j]
+		return rs
+	}
+	i, j := ij()
+	var previ, prevj int
+	for i >= 0 && j < l {
+		if previ == 0 {
+			previ = nums[i] * nums[i]
 		}
-		if pj < pi {
-			rs = append(rs, pj)
-			pj = 0
-			j++
-		} else {
-			rs = append(rs, pi)
-			pi = 0
+		if prevj == 0 {
+			prevj = nums[j] * nums[j]
+		}
+		if previ < prevj {
+			rs = append(rs, previ)
+			previ = 0
 			i--
+		} else {
+			rs = append(rs, prevj)
+			prevj = 0
+			j++
 		}
 	}
 	for i >= 0 {
 		rs = append(rs, nums[i]*nums[i])
 		i--
 	}
-	for j < len(nums) {
+	for j < l {
 		rs = append(rs, nums[j]*nums[j])
 		j++
 	}

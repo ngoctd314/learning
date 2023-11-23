@@ -63,5 +63,32 @@ func Benchmark_sumOfStructSlice(b *testing.B) {
 	}
 }
 
+func Benchmark_linkedlist(b *testing.B) {
+	n := &node{
+		next: &node{
+			next: &node{
+				next: &node{
+					next: &node{
+						value: 5,
+					},
+					value: 4,
+				},
+				value: 3,
+			},
+			value: 2,
+		},
+		value: 1,
+	}
+	for i := 0; i < b.N; i++ {
+		linkedlist(n)
+	}
+}
+func Benchmark_sum2(b *testing.B) {
+	n := []int64{1, 2, 3, 4, 5}
+	for i := 0; i < b.N; i++ {
+		sum2(n)
+	}
+}
+
 // Benchmark_hitCache-12    	20667152	        66.39 ns/op	       0 B/op	       0 allocs/op
 // Benchmark_withoutHitCache-12    	16307011	        70.10 ns/op	       0 B/op	       0 allocs/op
