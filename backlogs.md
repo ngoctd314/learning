@@ -5,3 +5,5 @@
 2. Auth system with grpc
 
 3. Feature flag
+
+4. https://www.12factor.net/codebase
