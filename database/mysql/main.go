@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"sync"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -41,6 +43,26 @@ func fn() {
 }
 
 func main() {
+	now := time.Now()
+	n := 100
+	var wg sync.WaitGroup
+	wg.Add(n)
+	for i := 0; i < n; i++ {
+		go func() {
+			defer wg.Done()
+			mysqlConn.Exec("UPDATE hit_counter_v1 SET cnt = cnt + 1 WHERE slot = RAND() * 100;")
+			// mysqlConn.Exec("UPDATE hit_counter_v1 SET cnt = cnt + 1")
+		}()
+	}
+	wg.Wait()
+
+	fmt.Printf("after %fs", time.Since(now).Seconds())
+	// after 0.179017s%
+	// after 0.180205s%
+	// after 0.185315s%
+	// after 0.043060s%
+	// after 0.018858s%
+
 }
 
 type Data struct {
