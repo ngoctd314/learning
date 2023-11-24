@@ -18,35 +18,30 @@ func reverseVowels(s string) string {
 		'O': {},
 		'U': {},
 	}
-	sl := []byte{}
-	sr := []byte{}
+	rs := []byte(s)
 	for i < j {
-		flag := false
-		if _, ok := set[s[i]]; ok {
-			for j > i {
-				if _, ok := set[s[j]]; ok {
-					flag = true
-					break
-				} else {
-					sr = append(sr, s[j])
-				}
-				j--
-			}
-			if flag {
-				sl = append(sl, s[j])
-				sr = append(sr, s[i])
+		for i < j {
+			if _, ok := set[rs[i]]; !ok {
+				i++
 			} else {
-				sl = append(sl, s[i])
+				break
 			}
-			j--
-		} else {
-			sl = append(sl, s[i])
 		}
-		i++
-	}
-	if i == j {
-		sl = append(sl, s[i])
+
+		for i < j {
+			if _, ok := set[rs[j]]; !ok {
+				j--
+			} else {
+				break
+			}
+		}
+
+		if i < j {
+			rs[i], rs[j] = rs[j], rs[i]
+			i++
+			j--
+		}
 	}
 
-	return string(sl) + string(sr)
+	return string(rs)
 }
