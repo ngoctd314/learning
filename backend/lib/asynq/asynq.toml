@@ -1,0 +1,4 @@
+# Redis configuration
+[redis]
+  addr = "192.168.49.2"  # Replace with your Redis host and port
+  db   = 0
