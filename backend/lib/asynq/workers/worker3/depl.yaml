@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: depl-worker3-service
+spec:
+  selector:
+    matchLabels:
+      app: worker3-service
+  template:
+    metadata:
+      labels:
+        app: worker3-service
+    spec:
+      containers:
+        - name: worker3-service
+          image: ngoctd/asynq-worker3:latest
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 8082
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: worker3-service
+spec:
+  selector:
+    app: worker3-service
+  ports:
+    - port: 8082
+      targetPort: 8082

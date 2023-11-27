@@ -227,4 +227,23 @@ func main() {
 
 ## Column in MySQL name VARCHAR(10), query this column in Golang, max len(name) can be?
 
-40
+40 or more
+
+```go
+/*
+CREATE TABLE `varchar_go` (
+
+	`name` varchar(10) DEFAULT NULL
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+*/
+func main() {
+	rows, _ := mysqlConn.Query("SELECT name from varchar_go")
+	defer rows.Close()
+	for rows.Next() {
+		var name string
+		rows.Scan(&name)
+		fmt.Println(len(name))
+	}
+}
+```
