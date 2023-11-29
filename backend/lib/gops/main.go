@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"sync"
+	"time"
 
 	"github.com/google/gops/agent"
 )
@@ -19,8 +20,7 @@ func main() {
 	for i := 0; i < 10; i++ {
 		go func() {
 			defer wg.Done()
-			for i := 0; i < 1e11; i++ {
-			}
+			time.Sleep(time.Hour)
 		}()
 	}
 	wg.Wait()
