@@ -32,40 +32,8 @@ func init() {
 	mysqlConn = conn
 }
 
-type dtText struct {
-	Name string `db:"name"`
-}
-
-func fn() {
-	print("fn")
-}
-
-/*
-CREATE TABLE `varchar_go` (
-
-	`name` varchar(10) DEFAULT NULL
-
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-*/
 func main() {
-	rows, _ := mysqlConn.Query("SELECT name from varchar_go")
-	defer rows.Close()
-	for rows.Next() {
-		var name string
-		rows.Scan(&name)
-		fmt.Println(len(name))
-	}
-}
 
-type Data struct {
-	Meta []byte `db:"meta"`
-}
-
-type Meta struct {
-	ID   int            `db:"id" json:"id"`
-	From string         `db:"from" json:"from"`
-	To   string         `db:"to" json:"to"`
-	Data map[string]int `db:"data" json:"data"`
 }
 
 func seed() {
