@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
-	"fmt"
 	"log"
 	"math/rand"
 
@@ -33,32 +31,29 @@ func init() {
 }
 
 func main() {
+	seed()
+}
 
+type Data struct {
+	StoreID int `db:"store_id"`
+	FilmID  int `db:"film_id"`
 }
 
 func seed() {
 	var in [][]Data
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 100; i++ {
 		var tmp []Data
-		for j := 0; j < 1000; j++ {
-			meta, _ := json.Marshal(Meta{
-				ID:   i*j + j,
-				From: fmt.Sprintf("from-%d-%d", i, j),
-				To:   fmt.Sprintf("to-%d-%d", i, j),
-				Data: map[string]int{
-					"rand1000": rand.Intn(1000),
-					"rand2000": rand.Intn(2000),
-				},
-			})
+		for j := 0; j < 100; j++ {
 			tmp = append(tmp, Data{
-				Meta: meta,
+				StoreID: rand.Intn(10000),
+				FilmID:  rand.Intn(10000),
 			})
 		}
 		in = append(in, tmp)
 	}
 
 	for _, v := range in {
-		_, err := mysqlConn.NamedExec("INSERT INTO test_jsons (meta) VALUES (:meta) ", v)
+		_, err := mysqlConn.NamedExec("INSERT INTO inventory (store_id, film_id) VALUES (:store_id, :film_id) ", v)
 		if err != nil {
 			log.Println(err)
 		}
