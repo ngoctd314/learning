@@ -1,0 +1,165 @@
+/usr/sbin/mysqld, Version: 8.0.33 (MySQL Community Server - GPL). started with:
+Tcp port: 3306  Unix socket: /var/run/mysqld/mysqld.sock
+Time                 Id Command    Argument
+# Time: 2023-12-05T02:34:37.794250Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    54
+# Query_time: 0.000095  Lock_time: 0.000000 Rows_sent: 1  Rows_examined: 1
+SET timestamp=1701743677;
+select connection_id();
+# Time: 2023-12-05T02:34:37.807413Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    55
+# Query_time: 0.000115  Lock_time: 0.000000 Rows_sent: 1  Rows_examined: 1
+SET timestamp=1701743677;
+select connection_id();
+# Time: 2023-12-05T02:34:37.827836Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    55
+# Query_time: 0.000684  Lock_time: 0.000002 Rows_sent: 13  Rows_examined: 53
+SET timestamp=1701743677;
+SHOW DATABASES;
+# Time: 2023-12-05T02:34:37.837631Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    55
+# Query_time: 0.000060  Lock_time: 0.000000 Rows_sent: 0  Rows_examined: 0
+SET timestamp=1701743677;
+SHOW TABLES;
+# Time: 2023-12-05T02:34:37.838926Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    55
+# Query_time: 0.000720  Lock_time: 0.000003 Rows_sent: 0  Rows_examined: 1
+SET timestamp=1701743677;
+select TABLE_NAME, COLUMN_NAME from information_schema.columns
+                                    where table_schema = 'None'
+                                    order by table_name,ordinal_position;
+# Time: 2023-12-05T02:34:37.840985Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    55
+# Query_time: 0.000219  Lock_time: 0.000001 Rows_sent: 6  Rows_examined: 6
+SET timestamp=1701743677;
+SELECT CONCAT("'", user, "'@'",host,"'") FROM mysql.user;
+# Time: 2023-12-05T02:34:37.841674Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    55
+# Query_time: 0.000555  Lock_time: 0.000002 Rows_sent: 0  Rows_examined: 1
+SET timestamp=1701743677;
+SELECT ROUTINE_NAME FROM INFORMATION_SCHEMA.ROUTINES
+    WHERE ROUTINE_TYPE="FUNCTION" AND ROUTINE_SCHEMA = "None";
+# Time: 2023-12-05T02:34:37.842576Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    55
+# Query_time: 0.000225  Lock_time: 0.000000 Rows_sent: 46  Rows_examined: 47
+SET timestamp=1701743677;
+SELECT name from mysql.help_topic WHERE name like "SHOW %";
+# Time: 2023-12-05T02:35:14.832303Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    54
+# Query_time: 0.002984  Lock_time: 0.000001 Rows_sent: 0  Rows_examined: 0
+SET timestamp=1701743714;
+show variables like 'query_cache_type';
+# Time: 2023-12-05T02:35:19.797395Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    54
+# Query_time: 0.002170  Lock_time: 0.000003 Rows_sent: 1  Rows_examined: 1
+SET timestamp=1701743719;
+SHOW VARIABLES LIKE 'long_query_time';
+# Time: 2023-12-05T02:35:52.948263Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    54
+# Query_time: 0.000105  Lock_time: 0.000000 Rows_sent: 0  Rows_examined: 0
+SET timestamp=1701743752;
+select * from account_devices;
+# Time: 2023-12-05T02:35:55.125882Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    54
+# Query_time: 0.000179  Lock_time: 0.000000 Rows_sent: 0  Rows_examined: 0
+use auth;
+SET timestamp=1701743755;
+# administrator command: Init DB;
+# Time: 2023-12-05T02:35:55.131853Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    56
+# Query_time: 0.000126  Lock_time: 0.000000 Rows_sent: 1  Rows_examined: 1
+SET timestamp=1701743755;
+select connection_id();
+# Time: 2023-12-05T02:35:55.134818Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    56
+# Query_time: 0.000600  Lock_time: 0.000002 Rows_sent: 13  Rows_examined: 53
+SET timestamp=1701743755;
+SHOW DATABASES;
+# Time: 2023-12-05T02:35:55.136354Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    56
+# Query_time: 0.000801  Lock_time: 0.000002 Rows_sent: 50  Rows_examined: 152
+SET timestamp=1701743755;
+SHOW TABLES;
+# Time: 2023-12-05T02:35:55.138063Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    56
+# Query_time: 0.001415  Lock_time: 0.000001 Rows_sent: 381  Rows_examined: 1678
+SET timestamp=1701743755;
+select TABLE_NAME, COLUMN_NAME from information_schema.columns
+                                    where table_schema = 'auth'
+                                    order by table_name,ordinal_position;
+# Time: 2023-12-05T02:35:55.139939Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    56
+# Query_time: 0.000128  Lock_time: 0.000001 Rows_sent: 6  Rows_examined: 6
+SET timestamp=1701743755;
+SELECT CONCAT("'", user, "'@'",host,"'") FROM mysql.user;
+# Time: 2023-12-05T02:35:55.140430Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    56
+# Query_time: 0.000375  Lock_time: 0.000001 Rows_sent: 0  Rows_examined: 2
+SET timestamp=1701743755;
+SELECT ROUTINE_NAME FROM INFORMATION_SCHEMA.ROUTINES
+    WHERE ROUTINE_TYPE="FUNCTION" AND ROUTINE_SCHEMA = "auth";
+# Time: 2023-12-05T02:35:55.140705Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    56
+# Query_time: 0.000161  Lock_time: 0.000000 Rows_sent: 46  Rows_examined: 47
+SET timestamp=1701743755;
+SELECT name from mysql.help_topic WHERE name like "SHOW %";
+# Time: 2023-12-05T02:35:55.781525Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    54
+# Query_time: 0.000609  Lock_time: 0.000004 Rows_sent: 35  Rows_examined: 35
+SET timestamp=1701743755;
+select * from account_devices;
+# Time: 2023-12-05T03:37:57.162109Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    54
+# Query_time: 0.000367  Lock_time: 0.000003 Rows_sent: 35  Rows_examined: 35
+SET timestamp=1701747477;
+select * from account_devices;
+# Time: 2023-12-05T03:37:57.899841Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    54
+# Query_time: 0.000464  Lock_time: 0.000004 Rows_sent: 35  Rows_examined: 35
+SET timestamp=1701747477;
+select * from account_devices;
+# Time: 2023-12-05T03:38:01.625144Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    54
+# Query_time: 0.009445  Lock_time: 0.000010 Rows_sent: 0  Rows_examined: 0
+SET timestamp=1701747481;
+select * from account_groups;
+# Time: 2023-12-05T03:38:05.519151Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    54
+# Query_time: 0.000347  Lock_time: 0.000004 Rows_sent: 0  Rows_examined: 0
+SET timestamp=1701747485;
+select * from account_groups;
+# Time: 2023-12-05T03:38:06.118259Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    54
+# Query_time: 0.000242  Lock_time: 0.000003 Rows_sent: 0  Rows_examined: 0
+SET timestamp=1701747486;
+select * from account_groups;
+# Time: 2023-12-05T03:38:06.516277Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    54
+# Query_time: 0.000213  Lock_time: 0.000002 Rows_sent: 0  Rows_examined: 0
+SET timestamp=1701747486;
+select * from account_groups;
+# Time: 2023-12-05T03:38:09.817037Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    54
+# Query_time: 0.009748  Lock_time: 0.000015 Rows_sent: 30  Rows_examined: 30
+SET timestamp=1701747489;
+select * from account_factors;
+# Time: 2023-12-05T03:38:10.269237Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    54
+# Query_time: 0.000532  Lock_time: 0.000004 Rows_sent: 30  Rows_examined: 30
+SET timestamp=1701747490;
+select * from account_factors;
+# Time: 2023-12-05T03:38:10.668852Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    54
+# Query_time: 0.000478  Lock_time: 0.000004 Rows_sent: 30  Rows_examined: 30
+SET timestamp=1701747490;
+select * from account_factors;
+# Time: 2023-12-05T03:38:11.053220Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    54
+# Query_time: 0.000460  Lock_time: 0.000004 Rows_sent: 30  Rows_examined: 30
+SET timestamp=1701747491;
+select * from account_factors;
+# Time: 2023-12-05T03:38:11.442915Z
+# User@Host: root[root] @  [10.244.0.1]  Id:    54
+# Query_time: 0.000308  Lock_time: 0.000003 Rows_sent: 30  Rows_examined: 30
+SET timestamp=1701747491;
+select * from account_factors;

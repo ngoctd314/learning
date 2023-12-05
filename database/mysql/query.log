@@ -304,3 +304,43 @@ Time                 Id Command    Argument
 2023-12-04T11:32:38.805285Z	   47 Query	select * from account_credentials
 2023-12-04T11:32:39.783380Z	   47 Query	select * from account_credentials
 2023-12-04T11:32:40.306367Z	   47 Query	select * from account_credentials
+2023-12-05T02:24:56.469584Z	   51 Connect	root@10.244.0.1 on  using TCP/IP
+2023-12-05T02:24:56.469800Z	   51 Query	select connection_id()
+2023-12-05T02:24:56.505188Z	   52 Connect	root@10.244.0.1 on  using TCP/IP
+2023-12-05T02:24:56.509391Z	   52 Query	select connection_id()
+2023-12-05T02:24:56.509728Z	   52 Query	SHOW DATABASES
+2023-12-05T02:24:56.523962Z	   52 Query	select TABLE_NAME, COLUMN_NAME from information_schema.columns
+                                    where table_schema = 'None'
+                                    order by table_name,ordinal_position
+2023-12-05T02:24:56.524948Z	   52 Query	SELECT CONCAT("'", user, "'@'",host,"'") FROM mysql.user
+2023-12-05T02:24:56.525357Z	   52 Query	SELECT ROUTINE_NAME FROM INFORMATION_SCHEMA.ROUTINES
+    WHERE ROUTINE_TYPE="FUNCTION" AND ROUTINE_SCHEMA = "None"
+2023-12-05T02:24:56.526112Z	   52 Query	SELECT name from mysql.help_topic WHERE name like "SHOW %"
+2023-12-05T02:24:58.475846Z	   51 Init DB	auth
+2023-12-05T02:24:58.489175Z	   53 Connect	root@10.244.0.1 on auth using TCP/IP
+2023-12-05T02:24:58.489541Z	   53 Query	select connection_id()
+2023-12-05T02:24:58.489804Z	   53 Query	SHOW DATABASES
+2023-12-05T02:24:58.490682Z	   53 Query	SHOW TABLES
+2023-12-05T02:24:58.492032Z	   53 Query	select TABLE_NAME, COLUMN_NAME from information_schema.columns
+                                    where table_schema = 'auth'
+                                    order by table_name,ordinal_position
+2023-12-05T02:24:58.495960Z	   53 Query	SELECT CONCAT("'", user, "'@'",host,"'") FROM mysql.user
+2023-12-05T02:24:58.496262Z	   53 Query	SELECT ROUTINE_NAME FROM INFORMATION_SCHEMA.ROUTINES
+    WHERE ROUTINE_TYPE="FUNCTION" AND ROUTINE_SCHEMA = "auth"
+2023-12-05T02:24:58.496785Z	   53 Query	SELECT name from mysql.help_topic WHERE name like "SHOW %"
+2023-12-05T02:25:01.126960Z	   51 Query	select * from account_credentials
+2023-12-05T02:25:03.167957Z	   51 Query	select * from account_credentials
+2023-12-05T02:25:03.632831Z	   51 Query	select * from account_credentials
+2023-12-05T02:25:04.085538Z	   51 Query	select * from account_credentials
+2023-12-05T02:25:04.509325Z	   51 Query	select * from account_credentials
+2023-12-05T02:25:08.806330Z	   51 Query	select * from account_devices
+2023-12-05T02:25:09.276905Z	   51 Query	select * from account_devices
+2023-12-05T02:25:09.747322Z	   51 Query	select * from account_devices
+2023-12-05T02:25:10.188564Z	   51 Query	select * from account_devices
+2023-12-05T02:25:10.612654Z	   51 Query	select * from account_devices
+2023-12-05T02:25:11.038236Z	   51 Query	select * from account_devices
+2023-12-05T02:25:11.451363Z	   51 Query	select * from account_devices
+2023-12-05T02:25:11.843159Z	   51 Query	select * from account_devices
+2023-12-05T02:25:12.266878Z	   51 Query	select * from account_devices
+2023-12-05T02:25:12.668731Z	   51 Query	select * from account_devices
+2023-12-05T02:25:13.260706Z	   51 Query	select * from account_devices
