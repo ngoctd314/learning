@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"log"
 	"math/rand"
+	"mysql/srv1"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -22,6 +23,7 @@ type nameCharTable struct {
 }
 
 func init() {
+	srv1.Fn()
 	conn, err := sqlx.Connect("mysql", "root:secret@(192.168.49.2:30300)/learn")
 	// conn, err := sqlx.Connect("postgres", "user=admin password=secret host=192.168.49.2 port=30303 dbname=db sslmode=disable")
 	if err != nil {

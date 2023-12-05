@@ -1,0 +1,13 @@
+
+# 80ms user time, 10ms system time, 37.22M rss, 46.67M vsz
+# Current date: Mon Dec  4 18:09:41 2023
+# Hostname: ngoctd10
+# Files: query.log
+# Overall: 0 total, 1 unique, 0 QPS, 0x concurrency ______________________
+# Attribute          total     min     max     avg     95%  stddev  median
+# ============     ======= ======= ======= ======= ======= ======= =======
+# Query size        15.50k  15.50k  15.50k  15.50k  15.50k       0  15.50k
+
+# Profile
+# Rank        Query ID    Response time Calls       R/Call      V/M   Item
+# =========== =========== =========== =========== =========== ===== ======
