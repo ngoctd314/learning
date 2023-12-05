@@ -1,0 +1,5 @@
+#type: Array; default: 95%
+#Limit output to the given percentage or count
+#related: --group-by
+limit=2
+log=out.txt

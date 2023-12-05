@@ -247,3 +247,5 @@ func main() {
 	}
 }
 ```
+
+## Scan sql query to map (without knowing about struct)?

@@ -133,6 +133,24 @@ Assuming one thread represents the waiter accepting orders and another represent
 
 What if we want to increase throughput by serving more customers per hour? Because grinding beans takes longer than accepting orders, a possible change could be to hire another coffee-grinding waiter. 
 
+[#82. Not categorizing tests]("")
+
+Categorizing tests is a best practice for a successful testing strategy. In this section, we've seen three ways to categorize tests:
+
+- Using build tags at the test file level.
+- Using environment variables to make a specific test.
+- Based on the test pace using short mode.
+
+We can also combine approaches: for example, using build tags or environment variables to classify a test (for example, as a unit or integration test) and short mode if our project contains long-running unit tests. 
+
+[#83. Not enabling the -race flag]("")
+
+[#84. Not using test execution modes]("")
+
+[#85. Not using table-driven tests]("")
+
+[#86. Sleeping in unit tests]("")
+
 [#91. Not understanding CPU caches]("")
 
 
