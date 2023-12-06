@@ -11,6 +11,8 @@ sysbench comes with the following bundled benchmarks:
 - threads: a thread-based scheduler benchmark
 - mutex: a POSIX mutex benchmark
 
+The sysbench tool can run a variety of "tests" (benchmarks). It was designed to test not only database performance, but also how we a system is likely to perform as a database server. It fact, Peter and Vadim originally designed it to run benchmarks specifically relevant to MySQL performance, even though they aren't actually all MySQL benchmarks. We'll start with some tests
+
 ## Usage
 
 ```bash

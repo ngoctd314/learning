@@ -23,3 +23,5 @@ https://github.com/google/pprof
 9. gorm
 
 10. user time - system time
+
+11. epoll and kqueue
