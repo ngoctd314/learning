@@ -1,9 +1,13 @@
 <?php
 
-$name = "admin";
-$user = 2;
-$online = true;
+class MyClass
+{
+    public const CONST_VALUE = 'A constant value';
+}
 
-echo "Hello {$name}\n";
-echo "There are {$user} users online\n";
-echo "Online status: {$online}\n";
+$classname = 'MyClass';
+
+echo $classname::CONST_VALUE;
+echo MyClass::CONST_VALUE;
+
+
