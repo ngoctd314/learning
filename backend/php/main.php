@@ -1,9 +1,12 @@
 <?php
 
-$name = "admin";
-$user = 2;
-$online = true;
+function foo()
+{
+    function bar()
+    {
+        echo "I don't exist until foo() is called\n";
+    }
+}
 
-echo "Hello {$name}\n";
-echo "There are {$user} users online\n";
-echo "Online status: {$online}\n";
+foo();
+bar();

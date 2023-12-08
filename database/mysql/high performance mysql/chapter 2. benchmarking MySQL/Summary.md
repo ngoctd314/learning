@@ -19,4 +19,4 @@ In what ways is a benchmark's workload unrealistic? There are many artificial di
 
 Everyone who uses MySQL has reasons to learn the basics of benchmarking it. Bench-marking is not just a practical activity for solving business problems, it's also highly educational. Learning how to frame a problem in such a way that a benchmark can help provide an answer is analogous to working from word problems to setting up equations in a match course.
 
-If you haven't done so yet, we recommend at least getting familiar with sysbench. Learn how to use its oltp and fileio benchmarks, if nothing else. The oltp benchmark is very handy for quickly comparing different systems. Filesystem and disk benchmarks. 
+If you haven't done so yet, we recommend at least getting familiar with sysbench. Learn how to use its oltp and fileio benchmarks, if nothing else. The oltp benchmark is very handy for quickly comparing different systems. Filesystem and disk benchmarks, on the other hand, are invaluable for troubleshooting and isolating misbehaving components when there are system performance problems.
