@@ -689,3 +689,39 @@ $classname = 'MyClass';
 echo $classname::CONST_VALUE;
 echo MyClass::CONST_VALUE;
 ```
+
+**Static Keyword**
+
+Declaring class properties or methods as static makes them accessible without needing an instantiation of the class. There can also be accessed statically within an instantiated class object.
+
+```php
+<?php
+
+class Foo
+{
+    public static function aStaticMethod()
+    {
+        echo "aStaticMethod\n";
+    }
+}
+
+Foo::aStaticMethod();
+$classname = 'Foo';
+$classname::aStaticMethod();
+```
+
+**Static properties**
+
+Static properties are accessed using the Scope Resolution Operator(::) and cannot be accessed through the object operator(->).
+
+It's possible to reference the class using a variable. The variable's value cannot be a keyword (e.g self, parent and static).
+
+**Class Abstraction**
+
+PHP has abstract classes and methods. Classes defined as abstract cannot be instantiated, and any class that contains at least one abstract method must also be abstract. Methods defined as abstract simply declare the method's signature; they cannot define the implementation.
+
+**Object Interfaces**
+
+Object Interfaces allow you to create code which specifies which methods a class must implement, without having to define how these methods are implemented, without having to define how these methods are implemented. Interfaces share a namespace with classes and traits, so the may not use the same name.
+
+

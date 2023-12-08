@@ -1,37 +1,31 @@
 package main
 
 import (
+	"sync"
+	"time"
+
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type Handler struct {
-	n         int
-	publisher publisher
+type Event struct {
+	Timestamp time.Time
+	Data      string
 }
 
-type publisher interface {
-	Publish([]any)
+type Cache struct {
+	mu     sync.RWMutex
+	events []Event
 }
 
-func (h Handler) getBestFoo(someInputs int) any {
-	foos := getFoos()
-	best := foos[0]
+func (c *Cache) TrimOlderThan(since time.Duration) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
-	go func() {
-		if len(foos) > h.n {
-			foos = foos[:h.n]
+	t := time.Now().Add(-since)
+	for i := 0; i < len(c.events); i++ {
+		if c.events[i].Timestamp.After(t) {
+			c.events = c.events[i:]
+			return
 		}
-		h.publisher.Publish(foos)
-	}()
-
-	return best
-}
-
-func getFoos() []any {
-	ar := []int{1, 2, 3}
-	var rs []any
-	for _, v := range ar {
-		rs = append(rs, v)
 	}
-	return rs
 }

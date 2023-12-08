@@ -1,13 +1,12 @@
 <?php
 
-class MyClass
+function foo()
 {
-    public const CONST_VALUE = 'A constant value';
+    function bar()
+    {
+        echo "I don't exist until foo() is called\n";
+    }
 }
 
-$classname = 'MyClass';
-
-echo $classname::CONST_VALUE;
-echo MyClass::CONST_VALUE;
-
-
+foo();
+bar();
