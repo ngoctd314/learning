@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"math/rand"
 	"mysql/srv1"
@@ -33,7 +34,11 @@ func init() {
 }
 
 func main() {
-	seed()
+	a := 1
+	defer func() {
+		fmt.Println(a)
+	}()
+	a = 2
 }
 
 type Data struct {
