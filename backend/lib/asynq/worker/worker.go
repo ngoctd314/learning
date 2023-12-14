@@ -90,3 +90,7 @@ func errorLoggingMiddleware(h asynq.Handler) asynq.Handler {
 		return nil
 	})
 }
+
+func HandleResourceIntensiveTask(ctx context.Context, task *asynq.Task) error {
+	return nil
+}
