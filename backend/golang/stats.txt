@@ -1,0 +1,12 @@
+goos: linux
+goarch: amd64
+pkg: go-learn
+cpu: 12th Gen Intel(R) Core(TM) i7-1255U
+BenchmarkAtomicStoreInt64
+BenchmarkAtomicStoreInt64-12    	316694254	         3.785 ns/op
+BenchmarkAtomicStoreInt64-12    	314646039	         3.754 ns/op
+BenchmarkAtomicStoreInt32
+BenchmarkAtomicStoreInt32-12    	313492513	         3.828 ns/op
+BenchmarkAtomicStoreInt32-12    	318533756	         3.787 ns/op
+PASS
+ok  	go-learn	6.337s
