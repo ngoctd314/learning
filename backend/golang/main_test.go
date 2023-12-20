@@ -83,3 +83,38 @@ func Benchmark_count3(b *testing.B) {
 		count3(inputs)
 	}
 }
+
+func add(s [2]int64) [2]int64 {
+	const n = 1_000_000
+	for i := 0; i < n; i++ {
+		s[0]++
+		if s[0]%2 == 0 {
+			s[1]++
+		}
+	}
+
+	return s
+}
+
+func add1(s [2]int64) [2]int64 {
+	const n = 1_000_000
+	for i := 0; i < n; i++ {
+		v := s[0]
+		if v%2 != 0 {
+			s[1]++
+		}
+		s[0] = v + 1
+	}
+	return s
+}
+
+func Benchmark_add(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		add([2]int64{})
+	}
+}
+func Benchmark_add1(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		add1([2]int64{})
+	}
+}

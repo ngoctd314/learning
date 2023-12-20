@@ -22,33 +22,19 @@ func foo() {
 		acc += i
 	}
 }
-func add(s [2]int64) [2]int64 {
-	const n = 1_000_000
-	for i := 0; i < n; i++ {
-		s[0]++
-		if s[0]%2 == 0 {
-			s[1]++
-		}
-	}
 
-	return s
+type Foo struct {
+	b1 byte
+	_  [7]byte // Added by compiler
+	i  int64
+	b2 byte
+	_  [7]byte // Added by the compiler
 }
 
 func main() {
-	var n int64 = 1000000
-	inputs := make([]Input, 0, n)
-	for i := int64(0); i < n; i++ {
-		inputs = append(inputs, Input{
-			a: 1,
-			b: 1,
-		})
-	}
-	for i := 0; i < 1000; i++ {
-		rs := count1(inputs)
-		if rs.sumA != n || rs.sumB != n {
-			fmt.Println(rs)
-		}
-	}
+	var i int32
+	var j int64
+	fmt.Println(i, j)
 }
 
 type Input struct {
