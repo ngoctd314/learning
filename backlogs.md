@@ -25,3 +25,5 @@ https://github.com/google/pprof
 10. user time - system time
 
 11. epoll and kqueue
+
+12. Hazard (computer architecture)
