@@ -54,3 +54,24 @@ algorithm block_nested_loop_join is
                     if r and s satisfy the join condition then
                         yield tuple <r,s>
 ```
+
+## EXPLAIN EXTENDED mysql
+
+The `EXPLAIN EXTENDED` statement in MySQL is used to obtain extra information about how MySQL executes a query. It provides additional details beyond the standard `EXPLAIN` output, including the access plan, how the optimizer resolves aliases, and more.
+
+Here's an example of how you can use `EXPLAIN EXTENDED`
+
+```sql
+EXPLAIN EXTENDED
+SELECT * FROM your_table WHERE your_condition;
+```
+
+After executing this query, you can then use the following command to view the extended information:
+
+```sql
+SHOW WARNINGS;
+```
+
+The extended information will be displayed as part of the warning messages.
+
+

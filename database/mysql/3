@@ -34,19 +34,19 @@ func init() {
 }
 
 func main() {
-	rs, err := mysqlConn.Query("SELECT * FROM people LIMIT 1")
+	rs, err := mysqlConn.Query("SELECT * FROM people LIMIT 1000")
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	time.Sleep(time.Second * 10)
+	time.Sleep(time.Second * 5)
 	for rs.Next() {
 		var a, b, c, d any
 		if err := rs.Scan(&a, &b, &c, &d); err != nil {
 			log.Println(err)
 			continue
 		}
-		fmt.Println(a, b, c, d)
+		log.Println(a, b, c, d)
 	}
 }
 
