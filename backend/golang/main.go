@@ -32,9 +32,8 @@ type Foo struct {
 }
 
 func main() {
-	var i int32
-	var j int64
-	fmt.Println(i, j)
+	fmt.Println(fmt.Sprint(rune('a')))
+	fmt.Println(string(rune('a')))
 }
 
 type Input struct {
