@@ -153,4 +153,16 @@ We can also combine approaches: for example, using build tags or environment var
 
 [#91. Not understanding CPU caches]("")
 
+- Understanding how to use CPU caches is important for optimizing CPU-bound applications because the L1 cache is about 50 to 100 times faster than the main memory
 
+- Being conscious of the cache line concept is critical to understanding how to organize data in the data-intensive applications. A CPU doesn't fetch memory word by word; instead, it usually copies a memory block to a 64-bytes cache line. To get the most out of each individual cache line, enfore spatial locality.
+
+- Make code preditable for the CPU can also be an efficient way to optimize certain functions. For example, a unit or constant stride is predictable for the CPU, but a non-unit stride (for example, a linked list) isn't predictable.
+
+- To avoid a critial stride, hence utilizing only a tiny portion of the cache, be aware that caches are partitioned.
+
+- Knowing that lower levels of CPU caches aren't shared across all the cores helps avoid performance-degrading patterns such as false sharing while writing concurrency code. Sharing memory is an illusion.
+
+- Use instruction-level parallelism (ILP) to optimize specific parts of your code to allow a CPU to execute as many parallel instructions as possible. Identifying data hazards is one of the main steps.
+
+- You can avoid common mistakes by remembering that in Go, basic types are aligned with their own size. For example, keep in mind that reorganizing the fields of a struct by size in descending order can lead to more compact structs (less memory allocation and potentially a better spatial locality).
