@@ -318,3 +318,74 @@ In the `EXPLAIN FORMAT=JSON` output in MySQL, the `cost_info` section provides i
 - `eval_cost`: The `eval_cost` field represents the cost of evaluating expressions during the query execution. It includes the cost of evaluating conditions, expressions, and other computations.
 - `prefix_cost`: The `prefix_cost` field in the sum of the `read_cost` and `eval_cost`. It represents the total cost associated with the access method and expression evaluation.
 - `data_read_per_join`: This field indicates the estimated amount of data read per join. It provides information about the volumne of data that needs to be read and processed during the execution of the query.
+
+## Extra
+
+The Extra column of EXPLAIN output contains additional information about how MySQL resolves the query. The following list explains the values that can appear in this column. Each item also indicates for JSON-formatted output which property displays the Extra value. For some of these, there is a specific property.
+
+If you want to make your queries as fast as possible, look out for Extra column values of Using filesort and Using temporary, or, in JSON-formatted EXPLAIN output, for using_filesort and using_temporary_table properties equal to true.
+
+- Backward index scan (JSON: backward_index_scan)
+
+The optimizer is able to use a descending index on an InnoDB table. Shown together with Using index.
+
+```sql
+CREATE TABLE tbl (id int unsigned AUTO_INCREMENT PRIMARY KEY, cnt int);
+INSERT INTO tbl (cnt) VALUES (3), (1), (2), (9), (10);
+
+EXPLAIN SELECT * FROM tbl ORDER BY cnt DESC;
++----+-------------+-------+------------+-------+---------------+---------+---------+--------+------+----------+----------------------------------+
+| id | select_type | table | partitions | type  | possible_keys | key     | key_len | ref    | rows | filtered | Extra                            |
++----+-------------+-------+------------+-------+---------------+---------+---------+--------+------+----------+----------------------------------+
+| 1  | SIMPLE      | tbl   | <null>     | index | <null>        | idx_cnt | 5       | <null> | 5    | 100.0    | Backward index scan; Using index |
++----+-------------+-------+------------+-------+---------------+---------+---------+--------+------+----------+----------------------------------+
+```
+
+- Distinct(JSON property: distinct)
+
+MySQL is looking for distinct values, so it stops searching for more rows for the current row combination after it has found the first matching row.
+
+
+- Full scan on NULL key???
+
+This occurs for subquery optimization as a fallback strategy when the optimizer cannot use an index-lookup access method.
+
+- Impossible HAVING(JSON property:message)
+
+The HAVING clause is always false and cannot select any rows.
+
+- Impossible WHERE 
+
+- LooseScan (m...n) (JSON property: message)
+
+- no matching row in const table (JSON property:message)
+
+For a query with a join, there was an empty table or a table with no rows satisfying a unique index condition.
+
+- Not exists(JSON property:message)
+
+MySQL was able to do a LEFT JOIN optimization
+
+- Using filesort(JSON property: using_filesort)
+
+MySQL must do an extra pass to find out how to retrieve the rows in sorted order. The sort is done by going through all rows according to the join type and sorting the sort key and pointer to the row for all rows that match the *WHERE* clause. The keys then are sorted and the rows are retrieved in sorted order. 
+
+- Using index (JSON property:using_index)
+
+The column information is retrieved from the table using only information in the index tree without having to do an additional seek to read the actual row. This strategy can be used when the query uses only columns that are part of a single index.
+
+- Using index condition (JSON property:using_index_condition)
+
+Tables are read by accessing index tuples and testing them first to determine whether to read full table rows. In this way, index information is used to defer ("push down") reading full table rows unless it is necessary.
+
+- Using where (JSON property:attached_condition)
+
+A WHERE clause is used to restrict which rows to match against the next table or send to the client. Unless you specifically intend to fetch or examine all rows from the table, you may have something wrong in your query if the Extra value is not Using where and the table join type is ALL or index.
+
+Using where has no direct counterpart in JSON-formatted output; the attached_condition property contains any WHERE condition used.
+
+- Using temporary (JSON property:using_temporary_table)
+
+To resolve the query, MySQL needs to create a temporary table to hold the result. This typically happens if the query contains GROUP BY and ORDER BY clauses that list column differently.
+
+- Using sort_union(...), Using  union(...), Using intersect(...) (JSON property:message)
