@@ -4,4 +4,14 @@ Index Condition Pushdown (ICP) is an optimization for the case where MySQL retri
 
 Applicability of the Index Condition Pushdown optimization is subject to these conditions:
 
+```sql
+CREATE TABLE tbl (id int AUTO_INCREMENT PRIMARY KEY, a int, b int, key idx(a));
+INSERT INTO tbl (a, b) VALUES (1, 1), (2, 2), (3, 1), (4, 1), (1, 3), (2, 2), (3, 4);
 
+EXPLAIN SELECT * FROM tbl WHERE a = 1 AND b = 3;
++----+-------------+-------+------------+------+---------------+-----+---------+-------+------+----------+-------------+
+| id | select_type | table | partitions | type | possible_keys | key | key_len | ref   | rows | filtered | Extra       |
++----+-------------+-------+------------+------+---------------+-----+---------+-------+------+----------+-------------+
+| 1  | SIMPLE      | tbl   | <null>     | ref  | idx           | idx | 5       | const | 2    | 14.29    | Using where |
++----+-------------+-------+------------+------+---------------+-----+---------+-------+------+----------+-------------+
+```
