@@ -5,9 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"math/rand"
 	"runtime"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -25,7 +23,7 @@ type nameCharTable struct {
 }
 
 func init() {
-	conn, err := sqlx.Connect("mysql", "root:secret@(192.168.49.2:30300)/learn?parseTime=true")
+	conn, err := sqlx.Connect("mysql", "root:secret@(192.168.49.2:30300)/learn_explain?parseTime=true")
 	// conn, err := sqlx.Connect("postgres", "user=admin password=secret host=192.168.49.2 port=30303 dbname=db sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
@@ -33,46 +31,27 @@ func init() {
 	mysqlConn = conn
 }
 
+type tmp1 struct {
+	Data any
+}
+
 func main() {
-	rs, err := mysqlConn.Query("SELECT * FROM people LIMIT 1")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	time.Sleep(time.Second * 10)
-	for rs.Next() {
-		var a, b, c, d any
-		if err := rs.Scan(&a, &b, &c, &d); err != nil {
-			log.Println(err)
-			continue
-		}
-		fmt.Println(a, b, c, d)
-	}
 }
 
 type Data struct {
-	Indexed    int `db:"indexed"`
-	NonIndexed int `db:"non_indexed"`
+	ID  int `db:"id"`
+	Cnt int `db:"cnt"`
 }
 
-func seed() {
-	var in [][]Data
-	for i := 0; i < 100; i++ {
-		var tmp []Data
-		for j := 0; j < 100; j++ {
-			tmp = append(tmp, Data{
-				Indexed:    rand.Intn(10000),
-				NonIndexed: rand.Intn(100),
-			})
-		}
-		in = append(in, tmp)
+func seed(k int) {
+	var in []Data
+	for i := (1 + 1000*k); i <= (1000 + 1000*k); i++ {
+		in = append(in, Data{Cnt: i})
 	}
 
-	for _, v := range in {
-		_, err := mysqlConn.NamedExec("INSERT INTO test_index (indexed, non_indexed) VALUES (:indexed, :non_indexed) ", v)
-		if err != nil {
-			log.Println(err)
-		}
+	_, err := mysqlConn.NamedExec("INSERT INTO tbl (cnt) VALUES (:cnt) ", in)
+	if err != nil {
+		log.Println(err)
 	}
 }
 func printAlloc() {

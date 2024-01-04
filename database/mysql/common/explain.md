@@ -345,7 +345,6 @@ EXPLAIN SELECT * FROM tbl ORDER BY cnt DESC;
 
 MySQL is looking for distinct values, so it stops searching for more rows for the current row combination after it has found the first matching row.
 
-
 - Full scan on NULL key???
 
 This occurs for subquery optimization as a fallback strategy when the optimizer cannot use an index-lookup access method.
@@ -370,6 +369,24 @@ MySQL was able to do a LEFT JOIN optimization
 
 MySQL must do an extra pass to find out how to retrieve the rows in sorted order. The sort is done by going through all rows according to the join type and sorting the sort key and pointer to the row for all rows that match the *WHERE* clause. The keys then are sorted and the rows are retrieved in sorted order. 
 
+```sql
+CREATE TABLE tbl (id int AUTO_INCREMENT PRIMARY KEY, a int);
+INSERT INTO tbl (a) VALUES (1), (2), (3), (4);
+EXPLAIN SELECT * FROM tbl ORDER BY a;
++----+-------------+-------+------------+------+---------------+--------+---------+--------+------+----------+----------------+
+| id | select_type | table | partitions | type | possible_keys | key    | key_len | ref    | rows | filtered | Extra          |
++----+-------------+-------+------------+------+---------------+--------+---------+--------+------+----------+----------------+
+| 1  | SIMPLE      | tbl   | <null>     | ALL  | <null>        | <null> | <null>  | <null> | 4    | 100.0    | Using filesort |
++----+-------------+-------+------------+------+---------------+--------+---------+--------+------+----------+----------------+
+
+EXPLAIN SELECT * FROM tbl ORDER BY id;
++----+-------------+-------+------------+-------+---------------+---------+---------+--------+------+----------+--------+
+| id | select_type | table | partitions | type  | possible_keys | key     | key_len | ref    | rows | filtered | Extra  |
++----+-------------+-------+------------+-------+---------------+---------+---------+--------+------+----------+--------+
+| 1  | SIMPLE      | tbl   | <null>     | index | <null>        | PRIMARY | 4       | <null> | 4    | 100.0    | <null> |
++----+-------------+-------+------------+-------+---------------+---------+---------+--------+------+----------+--------+
+```
+
 - Using index (JSON property:using_index)
 
 The column information is retrieved from the table using only information in the index tree without having to do an additional seek to read the actual row. This strategy can be used when the query uses only columns that are part of a single index.
@@ -388,4 +405,23 @@ Using where has no direct counterpart in JSON-formatted output; the attached_con
 
 To resolve the query, MySQL needs to create a temporary table to hold the result. This typically happens if the query contains GROUP BY and ORDER BY clauses that list column differently.
 
+```sql
+CREATE TABLE tbl (id int AUTO_INCREMENT PRIMARY KEY, a int);
+INSERT INTO tbl (a) VALUES (1), (2), (3), (4);
+EXPLAIN SELECT count(*) FROM tbl GROUP BY a;
+
++----+-------------+-------+------------+------+---------------+--------+---------+--------+------+----------+-----------------+
+| id | select_type | table | partitions | type | possible_keys | key    | key_len | ref    | rows | filtered | Extra           |
++----+-------------+-------+------------+------+---------------+--------+---------+--------+------+----------+-----------------+
+| 1  | SIMPLE      | tbl   | <null>     | ALL  | <null>        | <null> | <null>  | <null> | 4    | 100.0    | Using temporary |
++----+-------------+-------+------------+------+---------------+--------+---------+--------+------+----------+-----------------+
+```
+
 - Using sort_union(...), Using  union(...), Using intersect(...) (JSON property:message)
+
+
+## Select type
+
+Dependent Subquery
+
+https://saiyan.ghtk.vn/patterns/585
