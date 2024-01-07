@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"runtime"
+	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -36,20 +37,27 @@ type tmp1 struct {
 }
 
 func main() {
+	seed(0)
 }
 
 type Data struct {
-	ID  int `db:"id"`
-	Cnt int `db:"cnt"`
+	ID       int    `db:"id"`
+	Zipcode  string `db:"zipcode"`
+	Lastname string `db:"lastname"`
+	Address  string `db:"address"`
 }
 
 func seed(k int) {
 	var in []Data
 	for i := (1 + 1000*k); i <= (1000 + 1000*k); i++ {
-		in = append(in, Data{Cnt: i})
+		in = append(in, Data{
+			Zipcode:  strconv.Itoa(i * 10000),
+			Lastname: fmt.Sprintf("%detrunia%d", i, i),
+			Address:  fmt.Sprintf("%dMain Street%d", i, i),
+		})
 	}
 
-	_, err := mysqlConn.NamedExec("INSERT INTO tbl (cnt) VALUES (:cnt) ", in)
+	_, err := mysqlConn.NamedExec("INSERT INTO people (zipcode, lastname, address) VALUES (:zipcode, :lastname, :address) ", in)
 	if err != nil {
 		log.Println(err)
 	}

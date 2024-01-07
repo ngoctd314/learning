@@ -6,7 +6,7 @@ In this chapter, we'll take a quick look under the hood of the Docker Engine.
 
 The Docker engine is the core software that runs and manages containers. We often refer to simply as Docker, or the Docker platform. If you know a thing or two about VMware, it might be useful to think of it as being like ESXi in the VMware world.
 
-![high level Docker Engine]()
+![high level Docker Engine](./assets/docker_overview.png)
 
 ## Docker Engine - The Deep Dive
 
@@ -19,7 +19,7 @@ The Docker daemon was a monolithic binary. It contains all of the code for the D
 
 The LXC component provided the daemon with access to the fundamental building-blocks of containers such as kernel namespaces and control groups (cgroups).
 
-![docker with LXC]()
+![docker with LXC](./assets/docker_lxc.png)
 
 ## Getting rid of LXC
 
@@ -88,7 +88,7 @@ Despite its name, containerd cannot actually create containers. It uses runc to 
 
 runc interfaces with the OS kernel to pull together all of the constructs necessary to create a container (in Linux these include namespaces and cgroups). The container process is started as a child-process of runc.
 
-![detach containerd]()
+![detach containerd](./assets/containerd.png)
 
 ## One huge benefit of this model
 
