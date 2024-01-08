@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"math/rand"
 	"runtime"
-	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -32,36 +32,27 @@ func init() {
 	mysqlConn = conn
 }
 
-type tmp1 struct {
-	Data any
+type Data struct {
+	ID      int `db:"id"`
+	OrderID int `db:"order_id"`
+	UserID  int `db:"user_id"`
 }
 
 func main() {
-	seed(0)
-}
-
-type Data struct {
-	ID       int    `db:"id"`
-	Zipcode  string `db:"zipcode"`
-	Lastname string `db:"lastname"`
-	Address  string `db:"address"`
-}
-
-func seed(k int) {
 	var in []Data
-	for i := (1 + 1000*k); i <= (1000 + 1000*k); i++ {
+	for j := 1; j <= 1000; j++ {
 		in = append(in, Data{
-			Zipcode:  strconv.Itoa(i * 10000),
-			Lastname: fmt.Sprintf("%detrunia%d", i, i),
-			Address:  fmt.Sprintf("%dMain Street%d", i, i),
+			OrderID: rand.Intn(100000),
+			UserID:  rand.Intn(50),
 		})
 	}
-
-	_, err := mysqlConn.NamedExec("INSERT INTO people (zipcode, lastname, address) VALUES (:zipcode, :lastname, :address) ", in)
+	_, err := mysqlConn.NamedExec("INSERT INTO tbl_ref (order_id, user_id) VALUES (:order_id, :user_id) ", in)
 	if err != nil {
 		log.Println(err)
 	}
+
 }
+
 func printAlloc() {
 	var m runtime.MemStats
 
