@@ -137,4 +137,59 @@ Multi-stage builds are all about optimizing builds without adding complexity. An
 
 With multi-stage builds, we have a single Dockerfile containing multiple FROM instructions. Each FROM instruction is a new build stage that can easily COPY artefacts from previous stages.
 
+```dockerfile
+FROM node:latest AS storefront
+WORKDIR /usr/src/atsea/app/react-app
+COPY react-app .
+RUN npm install
+RUN npm run build
 
+FROM maven:latest AS appserver
+WORKDIR /usr/src/atsea
+COPY pom.xml
+RUN mvn -B -f pom.xml -s /usr/share/maven/ref/settings-docker.xml dependency\:resolve
+COPY . .
+RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml package -DskipTests
+
+FROM java:8-jdk-alpine AS production
+RUN adduser -Dh /home/gordon gordon
+WORKDIR /static
+COPY --from=storefront /usr/src/atsea/app/react-app/build/ .
+WORKDIR /app
+COPY --from=appserver /usr/src/atsea/target/AtSea-0.0.1-SNAPSHOT.jar .
+ENTRYPOINT ["java", "-jar", "/app/AtSea-0.0.1-SNAPSHOT.jar"]
+CMD ["--spring.profiles.active=progress"]
+```
+
+The first thing to note is that the Dockerfile has three FROM instructions. Each of these constitutes a distinct build stage. Internally they're numbered form the top starting at 0.
+
+Stage 0 is called storefront Stage 1 is called appServer Stage 2 is called production.
+
+The storefront stage pulls the node:latest image which is over 600MB in size. It sets the working directory, copies in some app code, and uses two RUN instructions to perform some npm magic. This adds three layers and considerable size. The result is an even bigger image containing lots of build stuff and not very much app code.
+
+The appserver stage pulls the maven:latest image which is over 700MB in size. It adds four layers of content via two COPY instructions and two RUN instructions. This produces another very large image with lots of build tools and very title actual production code.
+
+The production stage stars by pulling the java:8-jdk-alpine image. This image is approximately 150MB - considerably smaller than the node and maven images used by the previous build stages.
+
+Example with Go
+
+```sh
+➜  code docker image ls
+REPOSITORY                    TAG       IMAGE ID       CREATED        SIZE
+web                           latest    2ea365236e13   1 second ago   14MB
+<none>                        <none>    e47ad39e604b   8 hours ago    323MB
+```
+
+## Containerizing an app - The commands
+
+- docker image build is the command that reads a Dockerfile and containerizes an application. The -t flag tags the image, the -f flag lets you specify the name and location of the Dockerfile. With the -f flag it is possible to use a Dockerfile with an arbitrary name.
+
+- The FROM Dockerfile instruction in a Dockerfile specifies the base image for the new image you will build. It is usually the first instruction in a Dockerfile.
+
+- The RUN Dockerfile instruction allows you to run commands inside the image which create new layers. Each RUN instruction creates a single new layer.
+
+- The COPY Dockerfile instruction adds files into the image as a new layer. It is common to use the COPY instruction to copy your application code into an image.
+
+- The EXPOSE Dockerfile instruction documents the network port that the application uses.
+
+- The ENTRYPOINT Dockerfile instruction sets the default application to run when the image is started as a container.
