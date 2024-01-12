@@ -6,7 +6,7 @@ Applicability of the Index Condition Pushdown optimization is subject to these c
 
 - ICP is used for the range, ref, eq_ref, and ref_or_null access methods when there is a need to access full table rows.
 - ICP can be used for InnoDB and MyISAM tables, including partitioned InnoDB and MyISAM tables.
-- For InnoDB tables, ICP is used only secondary indexes. The goal of ICP is to reduce the number of full-rows reads and thereby reduce I/O operations. 
+- For InnoDB tables, ICP is used only secondary indexes. The goal of ICP is to reduce the number of full-rows reads and thereby reduce I/O operations. For InnoDB clustered indexes, the complete record is already read into the InnoDB buffer. Using ICP in this case does not reduce I/O.
 - ICP is not supported with secondary indexes created on virtual generated columns. InnoDB supports secondary indexes on virtual generated columns.
 - Conditions that refer to subqueries cannot be pushed down.
 - Conditions that refer to stored functions cannot be pushed down. Storage engines cannot invoke stored functions.
