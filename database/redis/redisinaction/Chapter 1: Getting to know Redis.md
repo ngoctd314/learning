@@ -16,4 +16,68 @@ Even though Redis is able to perform well, due to its in-memory design there are
 
 ### 1.1.3 Why Redis?
 
+If you've used
 
+## What Redis data structures look like
+
+Redis allows us to store keys that map to any one of five different data structures types: STRINGs, LISTs, SETs, HASHes, and ZSETs. Each of the five different structures have some shared commands (DEL, TYPE, RENAME, and others), as well as some commands that can only be used by one or two of the structures.
+
+|Structure type|What it contains|Strucutre read/write ability|
+|-|-|-|
+|STRING|Strings, integers, or floating-point values|Operate on the whole string, parts, increment/decrement the integers and floats|
+|LIST|Linked list of strings|Push or pop items from both ends, trim based on offsets, read individual or multiple items, find or remove items by value|
+|SET|Unordered collection of unique string|Add, fetch, or remove individual items, check membership, intersect, union, difference, fetch random items|
+|HASH|Unordered hash table of keys to values|Add, fetch, or remove individual item, fetch the whole hash|
+|ZSET (sorted set)|Ordered mapping of string members to floating-point scores, ordered by score|Add, fetch, or remove individual values, fetch items based on score ranges or member value|
+
+### Strings in Redis
+
+In Redis, STRINGS are similar to strings that we see in other languages or other key-value stores. Generally, when you show diagram 
+
+### Lists in Redis
+
+In the world of key-value stores, Redis is unique in that it supports a linked-list structure. LISTS in Redis store an ordered sequence of strings, and like STRINGs.
+
+|Command|What it does|
+|-|-|
+|RPUSH|Pushes the value onto the right end of the list|
+|LRANGE|Fetches a range of values from the list|
+|LINDEX|Fetches an item at a given position in the list|
+|LPOP|Pop the value from the left and of the list and returns it|
+
+### Sets in Redis
+
+In Redis, SETs are similar to LISTs in that they're a sequence of strings, but unlike LISTs, Redis SETs use a hash table to keep all strings unique.
+
+Because, Redis SETs are unordered, we can't push and pop items from the ends like we did with LISTs. Instead, we add and remove items by value with the SADD and SREM commands. We can also find out whether an item is in the SET quickly SISMEMBER, or fetch the entire set with SMEMBERS.
+
+|Command|What it does|
+|-|-|
+|SADD|Adds the item to the set|
+|SMEMBERS|Returns the entire set of items|
+|SISMEMBER|Checks if an item is in the set|
+|SREM|Removes the item from the set, if it exists|
+
+### Hashes in Redis
+
+Whereas LISTs and SETs in Redis hold sequences of items, Redis HASHes store a mapping of keys to values. The values that can be stored in HASHES are the same as what can be stored as normal STRINGs: strings themselves, or if a value can be interpreted as a number, that value can be incremented or decremented.
+
+|Command|What it does|
+|-|-|
+|HSET|Stores the value at the key in the hash|
+|HGET|Fetches the value at the given hash key|
+|HGETALL|Fetches the entire hash|
+|HDEL|Removes a key from the hash, if it exists|
+
+### Sorted sets in Redis
+
+Like Redis HASHes, ZSETs also hold a type of key and value. The keys (called members) are unique, and the values (called scores) are limited to floating-point numbers. ZSETs have the unique property in Redis of being able to be accessed by member (like a HASH), but items can also be accessed by the sorted order and values of the scores.
+
+|Command|What it does|
+|-|-|
+|ZADD|Adds member with the given score to the ZSET|
+|ZRANGE|Fetches the items in the ZSET from their positions in sorted order|
+|ZRANGEBYSCORE|Fetches items in the ZSET based on a range of scores|
+|ZREM|Removes the item from the ZSET, if it exists|
+
+## Hello Redis
