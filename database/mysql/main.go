@@ -6,62 +6,107 @@ import (
 	"fmt"
 	"log"
 	"runtime"
-	"strconv"
+	"sync"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
 var (
-	mysqlConn *sqlx.DB
-	ctx       = context.Background()
+	conn *sql.DB
+	ctx  = context.Background()
 )
 
-type nameCharTable struct {
-	NameChar    sql.NullString `db:"name_char"`
-	NameVarchar sql.NullString `db:"name_varchar"`
-}
-
 func init() {
-	conn, err := sqlx.Connect("mysql", "root:secret@(192.168.49.2:30300)/learn_explain?parseTime=true")
-	// conn, err := sqlx.Connect("postgres", "user=admin password=secret host=192.168.49.2 port=30303 dbname=db sslmode=disable")
+	var err error
+	conn, err = sql.Open("mysql", "root:secret@(192.168.49.2:30300)/learn_lock?parseTime=true")
 	if err != nil {
 		log.Fatal(err)
 	}
-	mysqlConn = conn
-}
-
-type tmp1 struct {
-	Data any
 }
 
 func main() {
-	seed(0)
-}
+	guard1, guard2 := make(chan struct{}, 1), make(chan struct{}, 1)
 
-type Data struct {
-	ID       int    `db:"id"`
-	Zipcode  string `db:"zipcode"`
-	Lastname string `db:"lastname"`
-	Address  string `db:"address"`
-}
+	releaseProcess1 := func() {
+		guard1 <- struct{}{}
+	}
+	blockProcess1 := func() {
+		<-guard1
+	}
+	releaseProcess2 := func() {
+		guard2 <- struct{}{}
+	}
+	blockProcess2 := func() {
+		<-guard2
+	}
 
-func seed(k int) {
-	var in []Data
-	for i := (1 + 1000*k); i <= (1000 + 1000*k); i++ {
-		in = append(in, Data{
-			Zipcode:  strconv.Itoa(i * 10000),
-			Lastname: fmt.Sprintf("%detrunia%d", i, i),
-			Address:  fmt.Sprintf("%dMain Street%d", i, i),
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	// process 1
+	go func() {
+		blockProcess1()
+
+		defer wg.Done()
+		tx, _ := conn.BeginTx(ctx, &sql.TxOptions{
+			Isolation: sql.LevelReadCommitted,
 		})
-	}
+		_, err := tx.Exec("INSERT INTO tbl (created_at) VALUES (?)", time.Now())
+		if err != nil {
+			tx.Rollback()
+			log.Println(err)
+			return
+		}
+		tx.Commit()
 
-	_, err := mysqlConn.NamedExec("INSERT INTO people (zipcode, lastname, address) VALUES (:zipcode, :lastname, :address) ", in)
-	if err != nil {
-		log.Println(err)
-	}
+		releaseProcess2()
+	}()
+
+	// process 2
+	go func() {
+		defer wg.Done()
+		tx, _ := conn.BeginTx(ctx, &sql.TxOptions{
+			Isolation: sql.LevelReadCommitted,
+		})
+		rows, err := tx.Query("SELECT created_at FROM tbl")
+		if err != nil {
+			tx.Rollback()
+			log.Println(err)
+			return
+		}
+		for rows.Next() {
+			var dest time.Time
+			if err := rows.Scan(&dest); err != nil {
+				log.Println(err)
+			}
+			fmt.Println("phase 1", dest)
+		}
+		releaseProcess1()
+
+		blockProcess2()
+		rows, err = tx.Query("SELECT created_at FROM tbl")
+		if err != nil {
+			tx.Rollback()
+			log.Println(err)
+			return
+		}
+		for rows.Next() {
+			var dest time.Time
+			if err := rows.Scan(&dest); err != nil {
+				log.Println(err)
+			}
+			fmt.Println("phase 2", dest)
+		}
+
+		tx.Commit()
+	}()
+
+	wg.Wait()
+
 }
+
 func printAlloc() {
 	var m runtime.MemStats
 

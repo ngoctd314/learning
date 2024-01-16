@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-option go_package = ".;pb";
-
-package pb;
-
-message GreetRequest { string name = 1; }
-
-message GreetReply { string text = 1; }
