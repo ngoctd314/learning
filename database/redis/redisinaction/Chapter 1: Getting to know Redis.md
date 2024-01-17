@@ -81,3 +81,116 @@ Like Redis HASHes, ZSETs also hold a type of key and value. The keys (called mem
 |ZREM|Removes the item from the ZSET, if it exists|
 
 ## Hello Redis
+
+### Voting on articles
+
+1000 articles are submitted each day. Of those, 1000 articles, about 50 of them are interesting enough that we want them to be in the top 100 articles for at least one day. All of those 50 articles will receive at least 200 up votes.
+
+When dealing with scores that do down over time, we need to be posting time, the current time, or both relevant to the overall score. To keep thing simple, we'll say that the score of an item is a function of the time that the article was posted, plus a constant multiplier times the number of votes that the article has received.
+
+The time we'll use the number of seconds since January 1, 1970, in the UTC time zone, which is commonly referred to as Unix time. We'll use Unix time because it can be fetched easily in most programming languages and so every platform that we may use Redis on. For our constant, we'll take the number of seconds in a day (86400) divided by the number of votes required (200) to last a full day, which gives use 432 "points" added to the score per vote.
+
+To actually build this, we need to start thinking of structures to use in Redis. For starters, we need to store article information like the title, the link to the article, who posted it, the time it was posted, and the number of votes received. We can use a Redis HASH to store this information.
+
+```go
+type Article struct {
+    Title string
+    Link string
+    Poster string
+    Time int64
+    Votes int
+}
+```
+
+**USING THE COLON CHARACTER AS A SEPARATOR** Throughout this and other chapters, you'll find that we use the colon character (:) as a separator between parts of names.
+
+To store a sorted set of articles themselves, we'll use a ZSET, which keeps items ordered by the item scores.
+
+|Article|Score|
+|-|-|
+|article:100408|1332065417.47|
+|article:100635|1332075503.49|
+|article:100716|1332082035.26|
+
+In order to prevent users from voting for the same article more than once, we need to store a unique listing of users who have voted for each article. For this, we'll use a SET for each article, and store the number IDs for all users who have voted on the given article.
+
+For the sake of memory use over time, we'll say that after a week users can no longer vote on an article and its score is fixed. After that week, has passed, we'll delete the SET of users who have voted on the article.
+
+|Voted:100408|
+|-|
+|user:234487|
+|user:253378|
+|user:364680|
+
+```py
+import time
+import redis
+from redis.client import Redis
+
+conn = redis.Redis(host="192.168.49.2", port=30301, decode_responses=True)
+
+
+ONE_WEEK_IN_SECONDS = 7 * 86400
+VOTE_SCORE = 432
+
+
+def article_vote(conn: Redis, user, article: str):
+    cutoff = time.time() - ONE_WEEK_IN_SECONDS
+    time_article = conn.zscore("time:", article)
+    if time_article is not None and time_article < cutoff:
+        return
+
+    article_id = article.partition(":")[-1]
+    if conn.sadd("voted:" + article_id, user):
+        conn.zincrby("score:", VOTE_SCORE, article)
+        conn.hincrby(article, "votes", 1)
+```
+
+**REDIS TRANSACTIONS** In order to be correct, technically our SADD, ZINCRBY, and HINCRBY calls should be in a transaction. But since we don't cover transactions until chapter 4, we won't worry about them for now.
+
+## Posting and fetching articles
+
+To post an article, we first create an article ID by incrementing a counter with INCR. We then create the voted SET by adding the poster's ID to the SET with SADD. To ensure that the SET is removed after one week, we'll give it an expiration time with the EXPIRE command, which lets Redis automatically delete it.
+
+```py
+def post_article(conn: Redis, user, title, link):
+    article_id = str(conn.incr("article:"))
+
+    voted = "voted:" + article_id
+    conn.sadd(voted, user)
+    conn.expire(voted, ONE_WEEK_IN_SECONDS)
+
+    now = time.time()
+    article = "article:" + article_id
+    conn.hmset(
+        article, {"title": title, "link": link, "poster": user, "time": now, "votes": 1}
+    )
+    conn.zadd("score:", {article: now + VOTE_SCORE})
+    conn.zadd("time:", {article: now})
+
+    return article_id
+```
+
+Okay, so we can vote, and we can post articles. But what about fetching the current top-scoring or most recent articles? For that, we can use ZRANGE to fetch the article IDs, and then we make calls to HGETALL to fetch information about each article. The only tricky part is that we must remember that ZSETs are sorted in ascending order by their score. But we can fetch items based on the reverse order with ZREVRANGEBYSCORE. 
+
+```py
+ARTICLES_PER_PAGE = 25
+
+
+def get_articles(conn: Redis, page: int, order="score:"):
+    start = (page - 1) * ARTICLES_PER_PAGE
+    end = start + ARTICLES_PER_PAGE - 1
+
+    ids = conn.zrevrange(order, start, end)
+    articles = []
+    for id in ids:
+        article_data = conn.hgetall(id)
+        article_data["id"] = id
+        articles.append(article_data)
+
+    return articles
+```
+
+## Grouping articles
+
+To offer groups requires two steps. The first step is to add information about which articles are in which groups, and the second is to actually fetch articles from a group. We'll use a SET for each group, which stores the article IDs of all articles in that group.

@@ -1,10 +1,22 @@
 # An introduction to Concurrency
 
-When most people use the word "concurrent", they're usually referring to a process that occurs simultaneously with one or more processes.
+Concurrency is an interesting word because it means different things to different things to different people in our field. In addition to "concurrency", you may heard the words "asynchronous", "parallel" or "threaded" bandied about.
+
+When most people use the word "concurrent", they're usually referring to a process that occurs simultaneously with one or more processes. It is also usually implied that all of these processes are making progress at about the same time. Under this definition, an easy way to think about this are people. 
+
+We'll take a broad look at some of the reasons concurrency became such an important topic in cs, why concurrency is difficult and warants careful study, and - most importantly - the idea that despite these challenges, Go can make programs clearer and faster by using its concurrency primitives.
+
+As with most paths toward understanding, we'll begin with a bit of history.
 
 ## Moore's Law, Web Scale, and the Mess We're In
 
+For problems that are embarrassingly parallel, it is recommended that you write your application so that it can scale horizontally. This means thay you can take instances of your program, run it on more CPUs, or machines, and this will cause the runtime of the system to improve. Embarrassingly parallel problems fit this model so well because it's very easy to structure your program in such a way that you can send chunks of a problem to different instances of your application.
+
 ## Why is concurrency hard?
+
+Concurrent code is notoriously difficult to get right. It usually takes a few iterations to get it working as expected, and even then it's not uncommon for bugs to exist in code for years before some change in timing (heavier disk utilization, more users logged into the system, etc) causes a previously undiscovered bug to rear its head. Indeed, for this very book, I've gotten as many eyes as possible on the code to try and mitigate this. 
+
+Fortunately everyone runs into the same issues when working with concurrent code. Because of this, computer scientists have been  able to lable the common issues, which allows us to dicuss how they arise, why and how to solve them.
 
 ### Race conditions
 
@@ -31,6 +43,8 @@ There are three possible outcomes to running this code:
 
 Just a few lines of incorrect code can introduce tremendous variability into your program.
 
+Most of the time, data races are introduced because the developers are thinking about the problem sequentially. They assume  that because a line of code falls before another that it will run first. They assume the goroutine above will be scheduled and execute before the data variable is read in the if statement.
+
 ```go
 var data int
 go func() { data++ }()
@@ -40,7 +54,11 @@ if data == 0 {
 }
 ```
 
-Have we solved our data race? No. In fact, it's still possible for all three outcomes to arise from this program, just increasingly unlikely. The longer we sleep in between invoking our goroutine and checking the value of data, the closer our program gets to achieving correctless.
+Have we solved our data race? No. In fact, it's still possible for all three outcomes to arise from this program, just increasingly unlikely. The longer we sleep in between invoking our goroutine and checking the value of data, the closer our program gets to achieving correctness - but this probability asymptotically approaches logical correctness; it will never be logically correct.
+
+In addition to this, we've now introduced an inefficiency into our algorithm. We now have to sleep for one second to make it more likey we won't see our data race. If we utilized the correct tools, we might not have to wait at all, or the wait could be only a microsecond.
+
+The takeaway here is that you should always target logical correctness. Introducing sleeps into your code can be a handy way to debug concurrent programs, but they are not a solution.
 
 Race conditions are one of the most insidious types of concurrency bugs because they may not show up until years after the code has been placed into production. They are usually precipiated by a change in the environment the code is executing in, or an unprecedented occurrence. 
 
@@ -64,13 +82,33 @@ It may look atomic, but a brief analysis reveals several operations:
 
 While each of these operations alone is atomic, the combination of the three may not be, depending on your context. This reveals an interesting property of atomic operations: combining them does not necessarily produce a larger atomic operation. Making the operation atomic is dependent on which  context you'd like it to be atomic within. If your context is a goroutine that doesn't expose i to other goroutines, the this code is atomic.
 
-So why do we care? Atomicity is important because if something is atomic, implicitly it is safe within concurrent contexts. This allow us to compose logically correct programs, and-as we'll later see - can even serve as a way to optimize concurrent programs.
+So why do we care? **Atomicity is important because if something is atomic, implicitly it is safe within concurrent contexts.** This allow us to compose logically correct programs, and-as we'll later see - can even serve as a way to optimize concurrent programs.
 
 Most statements are not atomic, let alone functions, methods, and programs. If atomicity is the key to composing logically correct programs, and most statements aren't atomic, how do we reconcile these two statements? We can force atomicity by employing various techniques.
 
 ### Memory Access Synchronization
 
-The following code is not idiomatic GO (don't suggest you attempt to solve your data race problems like this), but it very simply demonstrates memory access synchronization.
+Let's say we have a data race: two concurrent processes are attempting to access the same area of memory, and the way they accessing the memory is not atomic , you previous example of a simple data race will do nicely with a few modifications:
+
+```go
+var data int
+go func() { data++ }()
+if data == 0 {
+    fmt.Println("the value is 0.")
+} else {
+    fmt.Printf("the value is %v.\n", data)
+}
+```
+
+In fact, there's a name for a section of your program that needs exclusive access to a shared resource. This is called a critical section. In this example, we have three critical sections:
+
+- Our goroutine, which is incrementing the data  variables.
+- Our if statement, which checks whether the value of data is 0.
+- Our fmt.Printf statement, which retrieves the value of data for output.
+
+There are various ways to guard your program's critical sections, and Go has some better ideas on how to deal with this, but one way  to solve this problem is to synchronize access to the memory between your critical sections.
+
+The following code is not idiomatic GO (don't suggest you attempt to solve your data race problems like this), but it very simply demonstrates memory access synchronization. If any of the  types, functions, or methods in this example are foreign to you, that's OK.
 
 ```go
 var memoryAccess sync.Mutex
@@ -94,18 +132,20 @@ In this example we've created a convention for developers to follow. Anytime dev
 
 You may have noticed that while we have solved our data race, we haven't actually solved our race condition! The order of operations in this program is still non-deterministic; we've just narrowed the scope of the non-deterministic a bit.
 
-Sychronizing access to the memory in this manner also has performance ramifactions. Calls to Lock you see can make our program slow. Every time we perform one of these operations, our program pauses for a period of time.
+Sychronizing access to the memory in  this manner also has performance ramifactions. We'll save the details for later when we examine the sync package in the section, but the calls to Lock you see can make our program slow. Every time we perform one of these operations, our program pauses for a period of time. This brings up two questions:
 
 - Are my critical sections entered and exited repeatedly?
-- What size should my critical section be?
+- What size should my critical sections be?
 
 Answering these two questions in the context of your program is an art, and this adds to the difficulty in synchronizing access to the memory.
+
+Synchronizing access to the memory also shares some problems with other techniques of modeling concurrent problems.
 
 ### Deadlocks, Livelocks, AbandonLock and Starvation
 
 **Deadlock**
 
-A deadlocked program is one in which all concurrent process are waiting on one another. In this state, the program will never recover without outside intervention.
+A deadlocked program is one in which all concurrent processes are waiting on one another. In this state, the program will never recover without outside intervention.
 
 If that sounds grim, it's because it is! The Go runtime attempts to do its part and will detect some deadlocks (all goroutines must be blocked, or "asleep"), but this doesn't do much to help you prevent deadlocks.
 
@@ -176,7 +216,7 @@ Let's examine our contrived program and determine if it meets all four condition
 
 Yep, we definitely have a deadlock on our hands.
 
-These laws allow us to prevent deadlocks too. If we ensure that at least one of these conditions is not true, we can prevent deadlocks from occurring. Unfortunately, in practice these conditions can be hard to reason about, and therefore difficulty to prevent.
+These laws allow us to prevent deadlocks too. If we ensure that at least one of these conditions is not true, we can prevent deadlocks from occurring. Unfortunately, in practice these conditions can be hard to reason about, and therefore difficulty to prevent. The web is strewn with questions from developers like you and me wondering why a snippet of code is deadlocking. Usually it's pretty obvious once someone points it out, but often it requires another set of eyes.
 
 **Livelock**
 
