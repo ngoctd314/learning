@@ -1,10 +1,10 @@
-# CSP 
+# Modeling You Code: Communicating Sequential Process
 
 ## The different between concurrency and parallelism
 
-The fact that concurrency is different from parallelism is often overlooked or misunderstood.
+The fact that concurrency is different from parallelism is often overlooked or misunderstood. In conversations between many developers, the two terms are often used interchangeably to mean "somthing that runs at the same time as something else." Sometimes using the word "parallel" in this context is correct, but usually if the developers are discussing code, they really ought to be using the work "concurrent".
 
-Concurrency is a property of the code; parallelism is a property of the running program.
+**Concurrency is a property of the code; parallelism is a property of the running program.**
 
 That's kind of an interesting distinction. Don't we usually think about these two things the same way. We write our code so that it will execute in parallel. Right?
 
@@ -46,9 +46,35 @@ The third and final interesting thing is that parallelism is a function of time,
 
 A lot of things must be read again.
 
+**Is This Really a Silly Example?**
+
+Using individual computers seems like a contrived example to make a point, but personal computers weren't always so ubiquitous! Up until the late 1970s, mainframes were the norm, and the common context developers used when thinking about problems concurrently was a program's process.
+
+Now that many developers are working with distributed systems, it's shifting back the other way! We're now begining to think in terms of hypervious, containers, and virtual machines as our concurrent contexts.
+
+We can reasonably expect one process on a machine to remain unaffected by a process on another machine (assuming they're not part of the same distributed system), but can we expect two processes on the same machine to not affect the logic of one another? Process A may overwrite some files process B is reading, or in an insecure OS, process A may even corrupt memory process B is reading. Doing so intentionally is how many exploits work. 
+
+Threads are still there, of course, but we find that we rarely have to think about our problem space in terms of OS threads. Instead, we model things to goroutines and channels, and occasionally shared memory. This leads to some interesting properties that we explore in the section.
+
 ## What is CSP?
 
 CSP stands for Communicating Sequential Processes, which is both a technique and the name of the paper that introduced it.
+
+Memory access synchronization isn't inherently bad. We'll see later in the chapter (in Go's Philosophy on Concurrency) that sometimes sharing memory is appropriate in certain situations, even in Go. However, the shared memory model can be difficult to utilize correctly - especially in large or complicated programs. It's for this reason that concurrency is considered one of Go' strengths: it has been built from the start with priciples from CSP in mind and therefore it is easy to read, write and reason about.
+
+## How This Helps You
+
+If we were to draw a comparison between concepts in the two ways of abstracting concurrent code, we'd probably compare the goroutine to a thread, and a channel to a mutex (these primitives only have a passing resemblance, but hopefully the comparison helps you get your bearings).
+
+Goroutines free us from having to think about our problem space in terms of paralelism and instead allow us to model problems closer to their natural level concurency.
+
+Let's say I need to build a web server that fields requests on an endpoint. Setting aside fw for a moment, in a language that only offers a thread abstraction, I would probably be ruminating on the following questions:
+
+- Does my language naturally support threads, or will I have to pick a library?
+- Where should my thread confinement boundaries be?
+- How heavy are threads in this os?
+- How do the operating systems my program will be running in handle threads differently?
+- I should create a pool of workers to constrain the number of threads I create. How do I find the optimal number?
 
 ## Go's Philosophy on Concurrency
 

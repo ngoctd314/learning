@@ -224,6 +224,10 @@ Livelocks are programs that are actively performing concurrent operations, but t
 
 Have you ever been in hallway walking toward another person? She moves to one side, but you're just done the same. So you move to the other side, but she's also done the same. Imagine this going on forever, and you understand livelocks.
 
+This example demonstrates a very common reason livelocks are written: two or more concurrent processes attempting to prevent a deadlock without condition. If the people in the hallway had agreed with one another that only one person would move, there would be nolivelock: one person would stand still, the other would move to the other side, and they'd continue walking.
+
+Livelocks are a subset of large set of problems call starvation. We'll look at that next.
+
 **Starvation**
 
 Starvation is any situation where a concurrent process cannot get all the resources it needs to perform work.
@@ -285,4 +289,58 @@ func main() {
 
 The greedy worker greedily holds onto the shared lock for entirely of its work loop, whereas the polite worker attempts to only lock when it needs to. Both wokers do the same amount of simulated work (sleeping for three nanoseconds), but as you can see in the same amount of time, the greedy worker got almost twice the amount of work done!
 
+Note our technique here for identifying the starvation: a metric. Starvation makes for a good argument for recording and sampling metrics. One of the ways you can detect and solve starvation is by logging when working is accomplished, and then determining if your rate of work is as high as you expect it.
 
+**Finding a Balance**
+
+It is worth mentioning that the previous code example can also serve as an example of the performance ramifactions of memory access synchronization. Because synchronizing access to the memory is expensive, it might be advantageous to broaden our lock beyond our critical sections. On the other hand, by doing so - as we saw we run the risk or starving other concurrent processes.
+
+When it comes time to performance tune your application, to start with, I highly recommend you constrain memory access synchronization only to critical sections; if the synchronization becomes a performance problem, you can always broaden the scope.
+
+## Determining Concurrency Safety
+
+Finally, we come to the most difficult aspect of developing concurrent code, the thing that underlies all the other problems: people. Behind every line of code is at least one person.
+
+What techniques do you use to create a solution that is both easy to use and modify? What is the right level of concurrency for this problem? Although there are ways to think about these problems is structured ways, it remain an art.
+
+As a developer interfacing with existing code, it's not always obvious what code is utilizing concurrency, and how to utilize the code safely.
+
+```go
+func CalculatePi(begin, end int64, pi *Pi) {
+}
+```
+
+Calculting pi with a large precision is something that is best done concurrently, but this example raises a lot of questions:
+
+- How do I do so with this function?
+
+- Am i reponsible for instantiating multiple concurrent invocations of this function?
+
+- It looks like all instance of the function are going to be operating directly on the instance of Pi whose address I pass in; am I responsible for synchronizing access to that memory, or does the Pi type handle this for me?
+
+One function raises all these questions. Imagine a program of any moderate size, and you can begin to understand the complexities concurrency can pose.
+
+```go
+// Internally, CalculatePi will create FLOOR((end-begin)/2) concurrent
+// process which recursively call CalculatePi. Synchronization of writes to pi are
+// handled internally by the Pi struct.
+func CalculatePi(begin, end int64, pi *Pi)
+```
+
+We now understand that we can call the function plainly and not worry about concurrency or synchronization. Importantly, the comment covers these aspects: 
+
+- Who is responsible for the concurrency?
+- How is the problem space mapped onto concurrency primitives?
+- Who is responsible for the synchronization?
+
+When exposing functions, methods, and variables in problem spaces that involve concurrency, do your colleagues and future self a favor: err on the side of verbose comments, and try and cover these three aspects.
+
+The good news is that Go has made progress in making these types of problems easier to solve. The language itself factors readability and simplicity. The way it encourages modeling your concurrent code encourages correctness, composability, and scalability.
+
+## Simplicity in the Face of Complexity
+
+So far, I've painted a pretty grim picture. Concurrency is certainly a difficult area in computer science, but i want to leave you with hope: these problems aren't intractable, and with Go's concurrency primitives, you can more safely and clearly express your concurrent algorithms. The runtime and communication difficulties we've discussed are by no means solved by Go, but they have been made significantly easier. Go's concurrency primitives can a actually make it easier to model problem domains and express algorithm more clearly.
+
+Go's concurrent, low-latency, garbage collector. These is often debate among developers as to whether garbage collectors are a good thing to have in a language. Detractors suggest that garbage collectors prevent work in any problem domain that requires real-time performance or a deterministic profile that pausing all activity in a program to clean up garbage simpliy isn't acceptable. While there is some merit to this, the excellent work that has been done on Go's gc has dramatically reduced the audience that needs to concern them.
+
+For example, say you write a web server, and you'd like every connection accepted to be handled concurrently with every other connection. In some languages, before your web server begins accepting connections, you'd likely have to create a collection of threads, commonly called a thread pool, and then map incoming connections onto threads. Then, within each thread you've created, you'd need to loop over all the connections on that thread to ensure they were all receiving some CPU time. In addition, you' have to write your connection-handling logic to be pausable so that it shares fairly with the other connections.

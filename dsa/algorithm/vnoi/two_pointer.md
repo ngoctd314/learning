@@ -49,3 +49,9 @@ func twoSum(arr []int, acc int) [2]int {
 	return rs
 }
 ```
+
+## 3. Sub array
+
+Cho dãy số nguyên dương a có n phần tử. Hãy tìm độ dài đoạn con dài nhất trong dãy sao cho tổng các phần tử trong đoạn này không quá s.
+
+

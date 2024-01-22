@@ -13,7 +13,7 @@ The MySQL query optimizer has different strategies available to evaluate subquer
 - Materialization
 - EXISTS strategy
 
-For a derived table, the optimizer has these choices(which also apply to view references and common table expressions):
+For a derived table, the optimizer has these choices (which also apply to view references and common table expressions):
 
 - Merge the derived table into the outer query block
 - Materialize the derived table to an internal temporary table
