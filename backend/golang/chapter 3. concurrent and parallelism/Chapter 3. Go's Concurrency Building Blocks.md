@@ -16,6 +16,6 @@ func sayHello() {
 }
 ```
 
-Anonymous functions work too! Here's an example that does the same thing as the previous example; however
+Anonymous functions work too! Here's an example that does the same thing as the previous example; however, instead of creating a goroutine from a function, we create a goroutine from an anonymous function:
 
 How do goroutine actually work? Are they OS threads? Green threads? How many can we create?
