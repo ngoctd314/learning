@@ -1,3 +1,0 @@
-# Overview
-
-Many factors determine MySQL performance, but indexes are special because performance cannot be achieved without them. You can remove other factors - queries, schemas, data, and so on - and still achieve performance, but removing indexes limits performance to brute force: relying on the speed and capacity of hardware. If this book were titled Brute Force MySQL Performance, the contents would be as long as the title: "Buy better, faster hardware". You laugh, but just a few days ago I met with a team of developers who had been improving performance in the cloud by purchasing faster hardware until stratospheric costs compelled them to ask, "How else can we improve performance?" 
