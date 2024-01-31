@@ -102,7 +102,7 @@ There are table locks and row locks. The server (MySQL) manages tables and table
 
 There are metadata locks managed by the server that control access to schemas, tables, stored programs, and more. Whereas table locks and row locks control access to table data, metadata locks control access to table structures (columns, indexes, and so on) to prevent changes while queries are accessing the tables. Every query acquires a metadata lock on every table that it accesses. Metadata locks are released at the end of the transaction, not the query.
 
-By constrast, lock time from the slow query log includes all lock waits: metadata, table, and row. Lock time from either source does not indicate which type of lock wait. From the Performace Schema, it's certainly metadata lock wait; and from the slow query log, it's probably row lock wait, but metadata lock wait is possibility too.
+By constrast, lock time from the slow query log includes all lock waits: metadata, table, and row. Lock time from either source does not indicate which type of lock wait. From the Performance Schema, it's certainly metadata lock wait; and from the slow query log, it's probably row lock wait, but metadata lock wait is possibility too.
 
 Locks are primarily used for writes (INSERT, UPDATE, DELETE, REPLACE) because rows must be locked before the can be written. Response time for writes depends, in part, on lock time. The amount of time needed to accquire row locks depends on concurrency: how many queries are accessing the same (or nearby) rows at the same time.
 
@@ -663,10 +663,139 @@ This chapter examined data with respect to performance and argued that reducing 
 
 ## Chapter 4. Access Patterns 
 
-<a href="#efficient-mysql-performance" 
-   style="position: fixed; 
-   bottom: 10px; right: 10px;">
-    <img src="https://cdn0.iconfinder.com/data/icons/flat-round-arrow-arrow-head/512/Green_Arrow_Head_Top-512.png" style="width: 40px"/>
-</a>
+### MySQL Does Nothing
+
+### Performance Destablizes at the Limit
+
+### Toyota and Ferrari
+
+### Data Access Patterns
+
+Data access patterns describe how an application uses MySQL to access data.
+
+The term data access patterns (or access patterns for short) is commonly used but rarely explained. Let's change that by clarifying three details about access patterns:
+
+- It's so common to discuss access patterns in the plural that they begin to blur together. But it's important to realize that they are not an undifferentiated blob. An application has many access patterns.
+
+Indirect query optimization by changing access patterns.
+
+#### Read/Write
+
+Does the access read or write data?
+
+Read access is clear: SELECT. Write is less clear when you consider the fine details. For example, INSERT is write access, but INSERT...SELECT is read and write access. Likewise, UPDATE and DELETE should use a WHERE clause, which makes them read and write access, too. For simplicity: INSERT, UPDATE, and DELETE are always considered write access.
+
+The read/write trait is one of the most fundamental and ubiquitous because scaling reads and writes requires different application changes. Scaling reads is usually accomplished by offloading reads, which I cover later. Scaling write is more difficult, but enqueuing writes is one technique.
+
+Although this trait is quite simple, it's important because knowing if an application is read-heavy or write-heavy quickly focuses your attention on relevant application changes. Using a cache, for example, is not relevant for a write-heavy application. Furthermore, other data stores are optimized for reads or writes, and there is a write-optimized storage engine for MySQL: MyRocks.
+
+#### Throughput
+
+What is the throughput (is QPS) and variation of the data access?
+
+First of all, throughput is not performance.
+
+#### Data Age
+
+What is the age of the data accessed?
+
+Age is relative to access order, not time. If an application inserts one million rows in 10 minutes, the first row is the oldest because it was the last row accessed, not because it's 10 minutes old. If the application updates the first row, then it becomes the newest because it was the most recent row accessed. And if the application never accessed the first row again, but it continues to access other rows, then the first rows becomes older and older.
+
+This trait is important because it affects the working set. Recall from "Working set size" that the working set is frequently used index values and the primary key rows to which they refer - which is a long way of saying frequently accessed data - and it's usually a small percentage of the table size. MySQL keeps as much data in memory as possible, and data age affects whether or not the data in memory is part of the working set. 
+
+The working set is a small amount of data: from the dashed line to the top. And memory is smaller than both: from the solid line to the top. Data is made young when accessed. And when data is not accessed, it becomes old and is eventually evicted from memory.
+
+[data age](../assets/data_age.png)
+
+Since accessing data keeps it young and in memory, the working set stays in memory because it's frequently accessed. This is how MySQL is very fast with a littel memory and a lot of data.
+
+Frequently accessing old data is problematic in more than one way. To explain why, I must delve into technical details beyond the scope of this section. Data is loaded into free pages (in memory): pages that don't already contain data. (A page is a 16 KB unit of logical storage inside InnoDB.) MySQL uses all available memory, but it also keeps a certain number of free pages. When there are free pages, which is normal, the problem is only that reading data from storage is slow. When there are zero free pages, which is abnormal, the problem worsens threefold.
+
+Data age is nearly impossible to measure. Fortunately, you only need to estimate the age of the data accessed, which you can do with your understanding of the application, the data, and the access pattern.
+
+Remember: old data is relative to access, not time. The profile of a user who last logged in a week ago isn't necessarily old by time, but their profile data is relatively old because millions of other profile data have since been accessed, which means their profile data was evicted from memory.
+
+#### Data Model
+
+#### Transaction Isolation
+
+What transaction isolation does the access require?
+
+Isolation is one of four ACID properties.
+
+The access has isolation whether it needs it or not.
+
+When I ask engineers this question, the answer falls into one of three categories:
+
+**None**
+
+No, the access does not require any isolation. It would execute correctly on a nontransactional storage engine. Isolation is just useless overhead, but it doesn't cause any problems or noticeably impact performance.
+
+**Default**
+
+Presumably, the access require isolation, but it's unknown or unclear which level is required. The application works correctly with the default transaction isolation level for MySQL: REPEATABLE READ. Careful thought would be required to determine if another isolation level - or no  isolation - would work correctly.
+
+**Specific**
+
+Yes, the access requires a specific isolation level because it's part of a transaction that executes concurrently with other transactions that access the same data. Without the specific isolation level, the access could see incorrect versions of the data, which would be a serious problem for the application.
+
+#### Read Consistency
+
+Does the read access require strong or eventual consistency?
+
+Strong consistency (or strongly consistent reads) means that a read returns the most current value. Reads on the source MySQL instance (not replicas) are strongly consistent value. A long-running transaction can be read an old value, but it's technically the current value with respect to the transaction isolation level.
+
+Eventual consistency (or eventually consistent reads) means that a read return an old value, but eventually it will return the current value. Reads on MySQL replicas are eventually consistent because of replication lag: the delay between when data is of eventually is roughly is roughly equal to replication lag, which should be less than a second. Replicas used to serve read access are called read replicas.
+
+In the work of MySQL, it's common for all access to use the source instance, which makes all reads strongly consistent by default. But it's also common for reads not to require strong consistency, especially when replication lag is subsecond. When eventual consistency is acceptable, offloading reads.
+
+#### Concurrency
+
+Is the data accessed concurrently?
+
+Zero concurrency means that the access does not read (or write) the same data at the same time. If it reads (or writes) the same data at different times, that's also zero concurrency. For example, an access pattern that inserts unique rows has zero concurrency.
+
+High concurrency means that the access frequently reads (or writes) the same data at the same time.
+
+#### Row Access
+
+How are rows accessed? There are three types of row access:
+
+*Point access*
+A single row
+
+*Range access*
+Ordered rows between two values
+
+*Random access*
+Several rows in any order
+
+Row access is also important when planning how to shard. Effective sharding requires that access patterns use a single shard. Point access works best with sharding: one row, one shard. Range and random access work with sharding but require careful planning to avoid negating the benefits of sharding by accessing too many shards.
+
+#### Result Set
+
+Does the access group, sort, or limit the result set?
+
+This trait is easy to answer: does the access have a GROUP BY, ORDER BY, or LIMIT clause? Each of those clauses affects if and how the access might be changed or run on another data store.
+
+### Application Changes
+
+You must change the application to change its data access patterns. The changes presented in this section are common, not exhaustive. They are highly effective but also highly dependent on the application: some could work, others might not.
+
+#### Audit the code
 
 
+
+#### Offload Reads
+
+#### Enqueue Writes
+
+#### Partition Data
+
+#### Don't Use MySQL
+
+### Better, Faster Hardware?
+
+### Summary
+
+## Chapter 5. Sharding
