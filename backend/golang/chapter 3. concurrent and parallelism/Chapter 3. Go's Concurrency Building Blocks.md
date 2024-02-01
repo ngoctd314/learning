@@ -61,6 +61,156 @@ fmt.Println(salutation)
 
 What do you think the value of salutation will be: "hello" or "welcome"? Let's run it and find out:
 
+```txt
 welcome
+```
+
+It turns out that goroutines execute within the same address space they were created in, and so our program prints out whe word "welcome". Let's try another example:
+
+```go
+var wg sync.WaitGroup
+for _, salutation := range []string{"hello", "greetings", "good day"} {
+    wg.Add(1)
+    go func() {
+        defer wg.Done()
+        fmt.Println(salutation)
+    }()
+}
+wg.Wait()
+```
 
 This is an interesting side note about how Go manages memory. The Go runtime is observant enough to know that a reference to the salutation variable is still being held, and therefore will transfer the memory to the heap so that the goroutines can continue to access it.
+
+Usually on my machine, the loop exits before any goroutines begin running, so salutation is transferred to the heap holding a reference to the last value in my string slice, "good day." And so I usually see "good day" printed three times. The proper way to write this loop is to pass a copy salutation into the closure so that by the time the goroutine is run, it will be operating on the data from its iteration of the loop.
+
+```go
+var wg sync.WaitGroup
+for _, salutation := range []string{"hello", "greetings", "good day"} {
+    wg.Add(1)
+    go func(salutation string) {
+        defer wg.Done()
+        fmt.Println(salutation)
+    }(salutation)
+}
+wg.Wait()
+```
+
+Because goroutines operate within the same address space as each other, and simply host functions, utilizing goroutines is a natural extension to writing nonconcurrent code. Go's compiler nicely takes care of pinning variables in memory so that goroutines don't accidentally access freed memory, which allows developers to focus on their problem space instead of memory management; however, it's not a blank check.
+
+Since multiple goroutines can operate against the same address space, we still have to worry about synchronization. As we've discussed, we can choose either to synchronize access to the shared memory the goroutines access, or we can use CSP primitives to share memory by communication.
+
+A few kilobytes per goroutine; that isn't bad at all! Let's try and verify that for our-selves. But before we do, we have to cover one interesting thing about goroutines: the garbage collector does nothing to collect goroutines that have been abandoned some-how. If I write the following:
+
+```go
+go func() {
+    // <operation that will block forever>
+    ch := make(chan struct{})
+    ch <- struct{}{}
+}()
+// Do work
+```
+
+The goroutine here will hang around until the process exits.
+
+```go
+memConsumed := func() uint64 {
+    runtime.GC()
+    var s runtime.MemStats
+    runtime.ReadMemStats(&s)
+    return s.Sys
+}
+
+var c <-chan interface{}
+var wg sync.WaitGroup
+noop := func() { wg.Done(); <-c }
+const numGoroutines = 10
+wg.Add(numGoroutines)
+before := memConsumed()
+for i := numGoroutines; i > 0; i-- {
+    go noop()
+}
+wg.Wait()
+after := memConsumed()
+fmt.Printf("%.3fkb\n", float64(after-before)/1000)
+fmt.Println(runtime.NumGoroutine())
+```
+
+It looks like the documentation is correct! There are just empty goroutines that don't do anything, but it still gives us an idea of the number of goroutines we can likely create.
+
+|NumGoroutine|Mem|
+|-|-|
+|11|65 Kb|
+|101|327 Kb|
+|1001|4784 Kb|
+|10001|30474 Kb|
+|100001|262300 Kb|
+
+Something that might dampen our spirits is context switching, which is when some-thing hosting a concurrent process must save its state to switch to running a different concurrent process. If we have too many concurrent processes, we can spend all of our CPU time context switching between them and never get any real work done. At the OS level, with threads, this can be quite costly. The OS thread must save things like register values, lookup tables, and memory maps to successfully be able to switch back to the current thread when it is time.
+
+```go
+func BenchmarkContextSwitch(b *testing.B) {
+	var wg sync.WaitGroup
+	begin := make(chan struct{})
+	c := make(chan struct{})
+
+	var token struct{}
+	seender := func() {
+		defer wg.Done()
+		<-begin
+		for i := 0; i < b.N; i++ {
+			c <- token
+		}
+	}
+	receiver := func() {
+		defer wg.Done()
+		<-begin
+		for i := 0; i < b.N; i++ {
+			<-c
+		}
+	}
+	wg.Add(2)
+	go seender()
+	go receiver()
+	b.StartTimer()
+	close(begin)
+	wg.Wait()
+}
+```
+
+```txt
+cpu: 12th Gen Intel(R) Core(TM) i7-1255U
+BenchmarkContextSwitch
+BenchmarkContextSwitch   9263320               131.6 ns/op
+PASS
+ok      go-learn        1.353s
+```
+
+131.6 ns per context switch. It's difficult to make any claims about how many goroutines will cause too much context switching, but we can comfortably say that the upper limit is likely not to be any kind of barrier to using goroutines.
+
+## The sync package
+
+### WaitGroup
+
+### Mutex and RWMutex
+
+Mutex stands for "mutual exclusion" and is a way to guard critical sections of your program.
+
+### Cond
+
+The comment for the Cond type really does a great job os describing its purpose:
+
+a rendezvous point for goroutines waiting for or annoucing the occurrence of an event.
+
+
+
+### Once
+
+### Pool
+
+## Channels
+
+## The select statement
+
+## The GOMAXPROCS Level
+
+## Conclusion

@@ -780,15 +780,78 @@ This trait is easy to answer: does the access have a GROUP BY, ORDER BY, or LIMI
 
 ### Application Changes
 
-You must change the application to change its data access patterns. The changes presented in this section are common, not exhaustive. They are highly effective but also highly dependent on the application: some could work, others might not.
+You must change the application to change its data access patterns. The changes presented in this section are common, not exhaustive. They are highly effective but also highly dependent on the application: some could work, others might not. Consequently, each change is an idea that needs further discussion and planning with your team.
+
+All changes except the first have a subtle commonality: they require additional infrastructure. I point that out to mentally prepare you for the fact that, in additional to code changes, you will need infrastructure changes, too.
+
+You might wonder: if these changes are so powerful, why not make them first - before optimizing queries and data? Since the focus of this book if efficient MySQL performance, I planned the journey to end with application changes because they require the most effort.
 
 #### Audit the code
 
+You might be surprised by how long code can exist and run without any human looking at it. In a certain sense, that's sign of good code: it just works and doesn't cause problem. But "doesn't cause problems" does not necessarily mean that the code is efficient or even required.
 
+With respect to queries, look for the following:
+
+- Queries that are no longer needed
+- Queries that execute too frequently
+- Queries that retry too fast or too often
+- Large or complex queries - can they be simplified?
+
+To make query auditing easier, add application metadata to queries in /* SQL comments */. For example, SELECT .../* file:app.go line:75 */ reveals where the query originated in the application source code.
 
 #### Offload Reads
 
+By default, a single MySQL instance called the source serves all reads and writes. In production, the source should have at least one replica: another MySQL instance that replicates all writes from the source.
+
+Performance can be improved by offloading reads from the source. This technique uses MySQL replicas or cache servers to serve reads. 
+
+Data read from a replica or cache is not guaranteed to be current (the lastest value) because there is inherent and unavoidable delay in MySQL replication and writing to a cache. Consequently, data from replicas and caches is eventually consistent: it becomes current after a (hopefully very) short delay. Only data on the source is current (transaction isolation levels notwithstanding). Therefore, before serving reads from replica or cache, the following must be true: reading data that is out-of-date (eventually consistent) is acceptable, and it will not cause problems for the application or it users.
+
+In addition to the requirement that eventual consistency is acceptable, offloaded reads must not be part of a multi-statement transaction. Multi-statement transactions must be executed on the source.
+
+Always ensure that offload reads are acceptable with eventual consistency and not part of a multi-statement transaction.
+
+Last point before we discuss using MySQL replicas versus cache servers: do not offload all reads. Offloading reads improves performance by not wasting time on the source for work that a replica or cache accomplish.
+
+**MySQL replica**
+
+Using MySQL replicas to serve reads is common because every production MySQL setup should already have at least one replica, and more than two replicas is common. With the infrastructure (the replicas) already in place, you only have to modify the code to use the replicas for offloaded reads instead of the source.
+
+Before stating why replicas are preferable to cache servers, there's one important issue to settle: can the application use the replicas? Since replicas are used for high availability, whoever manages MySQL might not intend for replicas to serve reads. Be sure to find out because, if not replicas might be taken offline without notice for maintenance.
+
+Presuming your replicas can be used to serve reads, they are preferable to cache servers for three reasons:
+
+*Availability*
+
+Since replicas are the foundation of high availability, they should have the same availability as the source - 99.95% or 99.99% availability, for example.
+
+*Flexibility*
+
+In the previous section, I said that you should start by offloading slow (time-consuming) reads. For caches, this is especially true because the cache server most likely has limited CPU and memory - resources not to be wasted on trivial reads. By contrast, replicas used for high availability should have the same hardware as the source, so they have resources to spare. Offloading trivial reads to a replica doesn't matter as much, hence the flexibility when choosing what to offload. On the off chance that you have pure read replicas - replicas not used for high availability - with less powerful hardware, then don't waste resources on trivial reads. This is more common in the cloud because it's easy to provision read replicas with large storage but small CPU and memory (to save money).
+
+*Simplicity*
+
+The application doesn't have to do anything to keep replicas in sync with the source - that's intrinsic to being a replica. With a cache, the application must manage updates, invalidation, and (possibly) eviction. But the real simplicity is that replicas don't require any query changes: the application can execute the exact same SQL statements on a replica.
+
+**Cache server**
+
+A cache server is not encumbered with SQL, transactions, or durable storage. That makes it incredibly faster than MySQL, but it also takes more work in the application to use properly. As mentioned in the previous section, the application must manage cache updates, invalidation, and (possibly) eviction. Moreover, the application needs a data model that works with the cache, which is usually a key-value model.
+
+If you hear that MySQL has a built-in query cache: forget it and never use it. It was deprecated as of MySQL 5.7.20 and removed as of MySQL 8.0.
+
+Caching is ideal for data that's frequently accessed but infrequently changed. This is not a consideration for MySQL replicas because all changes replicate, but a cache stores only what the application puts in it.
+
 #### Enqueue Writes
+
+Use a queue to stabilize write throughput.
+
+Using a queue allows the application to process changes (writes) at stable rate.
+
+The real power of enqueuing writes and stable write throughput is that they allow the application to respond gracefully and predictably to a thundering herd: a flood of requests that overwhelms the application, or the database, or both. For example, imagine that the application normally processes 20,000 changes per second. But it goes offline for five seconds, which results in 100,000 pending changes. The moment the application comes back online, it's hit with the 100,000 pending changes.
+
+With a queue, the thundering herd does not affect MySQL: it goes into the queue, and MySQL processes the changes as usual. The only difference is that some changes happen later than usual. As long as write throughput is stable, you can increase the number of queue consumers to process the queue more quickly.
+
+Without a queue, experience teaches that one of two things will happen. Either you'll be super lucky and MySQL will handle the thundering herd hits.
 
 #### Partition Data
 

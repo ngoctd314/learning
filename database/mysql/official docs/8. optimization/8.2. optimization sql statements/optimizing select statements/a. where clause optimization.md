@@ -37,4 +37,3 @@ TODO: claim
 - If you use the SQL_SMALL_RESULT modifier, MySQL uses an in-memory temporary table.
 
 - Each table index is queried, and the best is used unless the optimizer belives that it is more efficient to use a table scan. At one time, a scan was used based on whether the best index spanned more than 30% or the table, but a fixed percentage no longer determines the choice between using an index or a scan.
-
