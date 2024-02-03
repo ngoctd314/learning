@@ -201,11 +201,155 @@ The comment for the Cond type really does a great job os describing its purpose:
 
 a rendezvous point for goroutines waiting for or annoucing the occurrence of an event.
 
+The sync.Cond type provides an efficient way to do notifications among goroutines.
 
+Each sync.Cond value holds a sync.Locker field with name L. The field value is often a value of type *sync.Mutex or *sync.RWMutex.
+
+The *sync.Cond type has three methods, Wait(), Signal() and BroadCast().
+
+Each sync.Cond value also maintains a FIFO (first in first out) waiting goroutine queue. For an addressable sync.Cond value c.
+
+- c.Wait() must be called when c.L is locked, otherwise, a c.Wait() will cause panic. A c.Wait() call will
+
+1. first push the current caller goroutine into the waiting goroutine queue maintained by c.
+
+2. then call c.L.Unlock() to unlock/unhold the lock c.L.
+
+3. then make the current caller goroutine enter blocking state.
+
+(The caller goroutine will be unblocked by another goroutine through calling c.Signal() or c.Broadcast() later.)
+
+Once the caller goroutine is unblocked and enters running state again, c.L.Lock() will be called (in the resumed c.Wait() call)
+
+- a c.Signal() call will unblock the first goroutine in (and remove it from) the waiting goroutine queue maintained by c, if the queue is not empty.
+
+- a c.BroadCast() call will unblock all the goroutines in (and remove it from) the waiting goroutine queue maintained by c, if the queue is not empty.
+
+c.Signal() and c.Broadcast() are often used to notify the status of a condition is changed. Generally, c.Wait() should be called in a loop of checking whether or not a condition has got satisfied.
+
+In an idiomatic sync.Cond use case, generally, one goroutine waits for changes of a certain condition, and some other goroutines change the condition and send notifications. Here is an example:
+
+```go
+func main() {
+	rand.Seed(time.Now().UnixNano())
+
+	const N = 10
+	var values [N]string
+
+	cond := sync.NewCond(&sync.Mutex{})
+
+	for i := 0; i < N; i++ {
+		d := time.Second * 1
+		go func(i int) {
+			time.Sleep(d) // simultate a workload
+			// Changes must be made when
+			// cond.L is locked
+			cond.L.Lock()
+			values[i] = string('a' + rune(i))
+
+			// Notify when cond.L lock is locked.
+			cond.Broadcast()
+			cond.L.Unlock()
+
+			// cond.Broadcast can also be put
+			// here, when cond.L lock is unlocked
+			// cond.Broadcast()
+		}(i)
+	}
+
+	// This function must be called when cond.L is locked
+	checkCondition := func() bool {
+		fmt.Println(values)
+		for i := 0; i < N; i++ {
+			if values[i] == "" {
+				return false
+			}
+		}
+		return true
+	}
+
+	cond.L.Lock()
+	for !checkCondition() {
+		// Must be called when cond.L is locked
+		cond.Wait()
+	}
+	cond.L.Unlock()
+}
+```
 
 ### Once
 
+```go
+func main() {
+	var count int
+
+	increment := func() {
+		count++
+	}
+
+	var once sync.Once
+
+	var increments sync.WaitGroup
+	increments.Add(100)
+	for i := 0; i < 100; i++ {
+		go func() {
+			defer increments.Done()
+			once.Do(increment)
+		}()
+	}
+	increments.Wait()
+	fmt.Printf("Count is %d\n", count)
+}
+```
+
+sync.Once is a type that utilizes some sync primitives internally to ensure that only one call to Do ever calls the function passed in - even on different goroutines. This is indeed because we wrap the call to increment in a sync.Once Do method.
+
+There are a few things to note about utilizing sync.Once. Let's take a look at another example; what do you think it will print?
+
+```go
+func main() {
+	var count int
+	increment := func() { count++ }
+	decrement := func() { count-- }
+
+	var once sync.Once
+	once.Do(increment)
+	once.Do(decrement)
+
+	fmt.Printf("count: %d\n", count)
+}
+```
+
+Is it surprising that the output displays 1 and not 0? This is because sync.Once only counts the number of times Do is called, not how many times unique functions passed into Do are called.
+
 ### Pool
+
+Pool is a concurrent-safe implementation of the object pool pattern. 
+
+At a high level, the pool pattern is a way to create and make available a fixed number, or pool, of things for use. It's commonly used to constrain the creation of things that are expensive (database connections) so that only a fixed number of them are ever created, but an indeterminate number of operations can still request access to these things. In the case go Go's sync.Pool, this data type can be safely used by multiple goroutines.
+
+```go
+func main() {
+	cnt := 0
+	myPool := &sync.Pool{
+		New: func() interface{} {
+			cnt++
+			fmt.Println("Creating new instance", cnt)
+			return struct{}{}
+		},
+	}
+	myPool.Get()
+	instance := myPool.Get()
+	myPool.Put(instance)
+	myPool.Get()
+}
+```
+
+So why use a pool and not just instantiate objects as you go? Go has a garbage collector, so the instantiated objects will be automatically cleaned up. What's the point?
+
+```go
+
+```
 
 ## Channels
 

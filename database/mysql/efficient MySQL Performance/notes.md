@@ -855,10 +855,43 @@ Without a queue, experience teaches that one of two things will happen. Either y
 
 #### Partition Data
 
+Data is valuable to you, but it's dead weight to MySQL. If you cannot delete or archive data, then you should at least partition (physically separate) the data.
+
+The type of data partitioning that is most useful, more common, and easier for application developers to implement is separating hot and cold data: frequently and infrequently accessed data, respectively. Separating hot and cold data is combination of partition and archiving. It partitions by access, and it archives by moving the infrequently accessed (cold) data out of the access path of the frequently accessed (hot) data. 
+
 #### Don't Use MySQL
 
 ### Better, Faster Hardware?
 
+When is the correct time to scale up hardware?
+
+That question is difficult to answer because it depends on a combination of factors: queries, indexes, data, access patterns, and how those utilize the current hardware.
+
+*Hardware upgrade checklist*
+
+1. Check all
+
+- Response time is too high
+- Slow queries have been optimized
+- Data has been deleted or archieved
+- Access patterns have been reviewed and optimized
+
+2. Check at least two
+
+- CPU utilization is greater than 80%.
+- Threads running greater than number of CPU cores.
+- Memory is less than 10% of total data size.
+- Storage IOPS utilization is greater than 80%.
+
 ### Summary
+
+This chapter centered on data access patterns that determine how you can change the application to use MySQL efficiently. The important takeaway points are:
+
+- MySQL does nothing but execute application queries.
+- Database performance destabilizes at a limit that is less than 100% of hardware capacity.
+- Some applications have far greater MySQL performance because every detail is engineered for high performance.
+- Access patterns describe how an application uses MySQL to access data.
+- You must change the application to change its data access patterns.
+- Scale up hardware to improve performance after exhausting other solutions.
 
 ## Chapter 5. Sharding
