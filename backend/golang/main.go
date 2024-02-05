@@ -2,37 +2,38 @@ package main
 
 import (
 	"fmt"
-	"sync"
-
-	_ "github.com/go-sql-driver/mysql"
+	"time"
 )
 
-func main() {
-	var numCalcsCreated int
-	calcPool := &sync.Pool{
-		New: func() interface{} {
-			numCalcsCreated += 1
-			mem := make([]byte, 1024)
-			return &mem
-		},
-	}
-	// Seed the pool with 4KB
-	calcPool.Put(calcPool.New())
-	calcPool.Put(calcPool.New())
-	calcPool.Put(calcPool.New())
-	calcPool.Put(calcPool.New())
+// _ "github.com/go-sql-driver/mysql"
 
-	const numWorkers = 1024 * 1024
-	var wg sync.WaitGroup
-	wg.Add(numWorkers)
-	for i := numWorkers; i > 0; i-- {
+func main() {
+	doWork := func(done <-chan any, strings <-chan string) <-chan any {
+		completed := make(chan any)
 		go func() {
-			defer wg.Done()
-			mem := calcPool.Get().(*[]byte)
-			defer calcPool.Put(mem)
-			// Assume something interesting, but quick is being done with this memory
+			defer fmt.Println("doWork exited.")
+			defer close(completed)
+			for {
+				select {
+				case s := <-strings:
+					fmt.Println(s)
+				case <-done:
+					return
+				}
+			}
 		}()
+
+		return completed
 	}
-	wg.Wait()
-	fmt.Printf("%d calculators were created.", numCalcsCreated)
+	done := make(chan interface{})
+	terminated := doWork(done, nil)
+	go func() {
+		// Cancel the operation after 1 second
+		time.Sleep(time.Second)
+		fmt.Println("Canceling doWork goroutine ...")
+		close(done)
+	}()
+	<-terminated
+	// Perhaps more work is done here
+	fmt.Println("Done.")
 }
