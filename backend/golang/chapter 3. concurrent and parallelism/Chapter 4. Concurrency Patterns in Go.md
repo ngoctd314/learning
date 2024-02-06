@@ -190,6 +190,152 @@ func main() {
 }
 ```
 
+You can see that despite passing in nil for our strings channel, our goroutine still exits successfully. Unlike the example before it, in this example we do join the two goroutines, and yet do not receive a deadlock. We create a third goroutine to cancel the goroutine within doWork after a second. We have successfully eliminated our goroutine leak!
 
+```go
+func main() {
+	newRandStream := func() <-chan int {
+		randStream := make(chan int)
+		go func() {
+			defer fmt.Println("newRandStream closure exited.")
+			defer close(randStream)
+			for {
+				randStream <- rand.Int()
+			}
+		}()
+		return randStream
+	}
+
+	randStream := newRandStream()
+	fmt.Println("3 random ints:")
+	for i := 1; i < 3; i++ {
+		fmt.Printf("%d: %d\n", i, <-randStream)
+	}
+}
+```
+
+You can see from the output that the deferred fmt.Println statement never gets run. After the third iteration of our loop, our goroutine blocks trying to send the next random integer to a channel that is no longer being read from. We have no way of telling the producer it can stop. The solution, just like for the receiving case, is to provide the producer goroutine with a channel informing it to exit:
+
+```go
+func main() {
+	newRandStream := func(done <-chan any) <-chan int {
+		randStream := make(chan int)
+		go func() {
+			defer fmt.Println("newRandStream closure exited.")
+			defer close(randStream)
+			for {
+				select {
+				case randStream <- rand.Int():
+				case <-done:
+					return
+				}
+			}
+		}()
+
+		return randStream
+	}
+
+	done := make(chan any)
+	randStream := newRandStream(done)
+	fmt.Println("3 random ints:")
+	for i := 1; i < 3; i++ {
+		fmt.Printf("%d: %d\n", i, <-randStream)
+	}
+	close(done)
+
+	// Simulate ongoing work
+	time.Sleep(time.Second)
+}
+```
+
+If a goroutine is responsible for creating a goroutine, it is also responsible for ensuring it can stop the goroutine.
 
 ## The or-channel
+
+At times you may find yourself wanting to combine one or more done channels into a single done channel that closes if any of its component channels close. It is perfectly acceptable
+
+```go
+func main() {
+	sig := func(after time.Duration) <-chan interface{} {
+		c := make(chan interface{})
+		go func() {
+			defer close(c)
+			time.Sleep(after)
+		}()
+		return c
+	}
+	start := time.Now()
+	<-or(sig(time.Second), sig(time.Hour), sig(time.Hour), sig(time.Hour))
+	fmt.Printf("done after %v, nums goroutines: %d\n", time.Since(start), runtime.NumGoroutine())
+	fmt.Printf("nums generateNumGoroutine: %d, nums closedNumGoroutine %d", generateNumGoroutine.Load(), closedNumGoroutine.Load())
+}
+
+var (
+	generateNumGoroutine atomic.Int32
+	closedNumGoroutine   atomic.Int32
+)
+
+// Here we have our function, or, which takes in a variadic slice of channels and returns a single channel
+func or(channels ...<-chan interface{}) <-chan interface{} {
+	switch len(channels) {
+    // Since this is a recursive function, we must set up termination criteria. The first is that if the variadic slice is empty, we simply return a nil channel.
+    // This is consistant with the idea of passing in no channels; we wouldn't expect a composite channel to do anything.
+	case 0:
+		closedChan := make(chan interface{})
+		close(closedChan)
+		return closedChan
+        // return nil
+	case 1:
+        // Our second termination criteria states that if our variadic slice only contains one element, we just return that element.
+		return channels[0]
+	}
+
+	orDone := make(chan interface{})
+    // Here is the main body of the functions, and where the recursion happens. We create a goroutine so that we can wait for messages on our channels without blocking
+	go func() {
+		generateNumGoroutine.Add(1)
+
+		defer func() {
+			if r := recover(); r != nil {
+				log.Println(r)
+			}
+		}()
+		defer func() {
+			close(orDone)
+			closedNumGoroutine.Add(1)
+		}()
+		switch len(channels) {
+        // Because of how we're recursing, every recursive call to or will at least have two channels.
+        // As an optimization to keep the number of goroutines constrained.
+        // We place a special case here for calls to or with only two channels. 
+		case 2:
+			select {
+			case <-channels[0]:
+			case <-channels[1]:
+			}
+        // Here we recursively create an or-channel from all the channels in our slice after the third index
+        // and then select from this. This recurrence relation will destructure the rest of the slice into or-channels
+        // to form a tree from which the first signal will return. We also pass in the orDone channel so that when
+        // goroutines up the tree exit, goroutines down the tree also exit.
+		default:
+			select {
+			case <-channels[0]:
+			case <-channels[1]:
+			case <-channels[2]:
+			case <-or(append(channels[3:], orDone)...):
+			}
+		}
+
+	}()
+
+	return orDone
+}
+```
+
+## Error Handling
+
+## Pipelines
+
+## Fan-Out, Fan-In
+
+## The or-done-channel
