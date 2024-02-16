@@ -20,6 +20,8 @@ If a search term exceeds the index prefix length, the index is used to exclude n
 
 ## FULLTEXT Indexes
 
+FULLTEXT indexes are used for full-text searches. Only the InnoDB and MyISAM storage engines support FULL TEXT indexes and only for CHAR, VARCHAR, and TEXT columns. Indexing always takes place over the entire column and column prefix indexing is not supported.
+
 ## Spatial Indexes
 
 You can create indexes on spatial data types. MyISAM and InnoDB support R-tree indexes on spatial types. Other storage engines use B-trees for indexing spatial types.

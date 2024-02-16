@@ -334,8 +334,296 @@ func or(channels ...<-chan interface{}) <-chan interface{} {
 
 ## Error Handling
 
+In concurrent programs, error handling can be difficult to get right. Sometimes, we spend so much time thinking about how our various processes will be sharing information and coordinating, we forget to consider how they'll gracefully handle errored states.
+
+```go
+func main() {
+	done := make(chan interface{})
+	defer close(done)
+
+	urls := []string{"https://www.google.com", "https://badhost"}
+	for response := range checkStatus(done, urls...) {
+		fmt.Printf("Response: %v\n", response.Status)
+	}
+}
+
+func checkStatus(done <-chan interface{}, urls ...string) <-chan *http.Response {
+	responses := make(chan *http.Response)
+	go func() {
+		defer close(responses)
+		for _, url := range urls {
+			resp, err := http.Get(url)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			select {
+			case <-done:
+				return
+			case responses <- resp:
+			}
+		}
+	}()
+
+	return responses
+}
+```
+
+```go
+func main() {
+	done := make(chan interface{})
+	defer close(done)
+
+	urls := []string{"https://www.google.com", "https://badhost"}
+	for result := range checkStatus(done, urls...) {
+		if result.Error != nil {
+			fmt.Printf("error: %v", result.Error)
+			continue
+		}
+		fmt.Printf("Response: %v\n", result.Response.Status)
+	}
+}
+
+type Result struct {
+	Error    error
+	Response *http.Response
+}
+
+func checkStatus(done <-chan interface{}, urls ...string) <-chan Result {
+	results := make(chan Result, len(urls))
+	go func() {
+		defer close(results)
+		for _, url := range urls {
+			resp, err := http.Get(url)
+			result := Result{Error: err, Response: resp}
+			select {
+			case <-done:
+				return
+			case results <- result:
+			}
+		}
+	}()
+
+	return results
+}
+```
+
 ## Pipelines
+
+```go
+func main() {
+	ints := []int{1, 2, 3, 4}
+	for _, v := range add(multiply(ints, 2), 1) {
+		fmt.Println(v)
+	}
+}
+
+func multiply(values []int, multiplier int) []int {
+	multipliedValues := make([]int, len(values))
+	for i, v := range values {
+		multipliedValues[i] = v * multiplier
+	}
+
+	return multipliedValues
+}
+
+func add(values []int, additive int) []int {
+	addedValues := make([]int, len(values))
+	for i, v := range values {
+		addedValues[i] = v + additive
+	}
+
+	return addedValues
+}
+```
+
+Properties of a pipeline stage
+
+- A stage consumes and returns the same type.
+- A stage must be reified by the language so that it may be passed around.
+
+There are pros and cons to batch processing versus stream processing, which we'll discuss in just a bit. For now, notice that for the original data to remain unaltered each stage has to make a new slice of equal length to store the results of its calculations.
+
+```go
+multiply := func(value, multiplier int) int {
+    return value * multiplier
+} 
+
+add := func(value, additive int) int {
+    return value + additive
+}
+
+ints := []int{1, 2, 3, 4}
+for _, v := range ints {
+    fmt.Println(multiply(add(multiply(v, 2), 1), 2))
+}
+```
+
+### Best Practices for Constructing Pipelines
+
+```go
+func main() {
+	generator := func(done <-chan interface{}, integers ...int) <-chan int {
+		intStream := make(chan int)
+		go func() {
+			defer close(intStream)
+			for _, i := range integers {
+				select {
+				case <-done:
+					return
+				case intStream <- i:
+				}
+			}
+		}()
+
+		return intStream
+	}
+
+	mutiply := func(done <-chan interface{}, intStream <-chan int, mutiplier int) <-chan int {
+		mutipliedStream := make(chan int)
+		go func() {
+			defer close(mutipliedStream)
+			for i := range intStream {
+				select {
+				case <-done:
+					return
+				case mutipliedStream <- i * mutiplier:
+				}
+			}
+		}()
+
+		return mutipliedStream
+	}
+
+	add := func(done <-chan interface{}, intStream <-chan int, additive int) <-chan int {
+		addedStream := make(chan int)
+		go func() {
+			defer close(addedStream)
+			for i := range intStream {
+				select {
+				case <-done:
+					return
+				case addedStream <- i + additive:
+				}
+			}
+		}()
+
+		return addedStream
+	}
+
+	done := make(chan interface{})
+	defer close(done)
+	intStream := generator(done, 1, 2, 3, 4)
+	for i := range mutiply(done, add(done, intStream, 1), 2) {
+		fmt.Println(i)
+	}
+}
+```
+
+The generator function converts a descrete set of values into a stream of data on a channel. You'll see this frequently when working with pipelines because at the beginning of the pipeline, you'll always have some batch of data that you need to convert to a channel. 
+
+### Some Handy Generators
+
+```go
+repeat := func(done <-chan interface{}, values ...interface{}) <-chan interface{} {
+    valueStream := make(chan interface{})
+    go func() {
+        defer close(valueStream)
+        for {
+            for _, v := range values {
+                select {
+                case <-done:
+                    return
+                case valueStream <- v:
+                }
+            }
+        }
+    }()
+
+    return valueStream
+}
+```
+
+This function will repeat the values you pass to it infinitely until you tell it to stop. Let's take a look at another generic pipeline stage that is helpful when used in combination will repeat.
+
+```go
+take := func(done <-chan interface{}, valueStream <-chan interface{}, num int) <-chan interface{} {
+    takeStream := make(chan interface{})
+    go func() {
+        defer close(takeStream)
+        for i := 0; i < num; i++ {
+            select {
+            case <-done:
+                return
+            case takeStream <- <-valueStream:
+            }
+        }
+    }()
+    return takeStream
+}
+```
+
+This pipeline stage will only take the first num items off of its incoming valueStream and then exit.
+
+```go
+done := make(chan interface{})
+defer close(done)
+for num := range take(done, repeat(done, 1), 10) {
+    fmt.Printf("%v ", num)
+}
+```
+
+We can expand on this. Let's create another repeating generator, but this time, let's create one that repeatly calls a function.
+
+```go
+repeatFn := func(done <-chan interface{}, fn func() interface{}) <-chan interface{} {
+    valueStream := make(chan interface{})
+    go func() {
+        defer close(valueStream)
+        for {
+            select {
+            case <-done:
+                return
+            case valueStream <- fn():
+            }
+        }
+    }()
+
+    return valueStream
+}
+```
+
+You can see that type-specific stages are twice as fast, but only marginally faster in magnitude. Generally, the limiting factor on your pipeline will either be your generator, or one of the stages that is computationally intensive. If the generator isn't creating a stream from memory as with the repeat and repeatFn generators, you'll probably be I/O bound. Reading from disk or the network will likely performance overhead.
 
 ## Fan-Out, Fan-In
 
+So you've got a pipeline set up. Data is flowing through your system beautifully, tranforming as it makes its way through the stages you've chained together. It's like a beautiful stream; a beautiful, slow stream, and oh my god why is this taking so long?
+
+Sometimes, stages in your pipeline can be particularly computationally expensive. When this happens, upstream stages in your pipeline can become blocked while waiting for your expensive stages to complete. Not only that, but the pipeline itself can take a long time to execute as a whole. How can we address this?
+
+One of the interesting properties of pipelines is the ability they give you to operate on the stream of data using a combination of separate, often reorderable stages. You can even reuse stages of the pipeline multiple times. Wouldn't it be interesting to reuse a single stage of pipeline on multiple goroutines in an attempt to parallelize pulls from an upstream stage?
+
+Fan-out is a term to describe the process of starting multiple goroutines to handle input from the pipeline, and fan-in is a term to describe the process of combining multiple results into one channel.
+
+So what makes a stage of a pipeline suited for utilizing this pattern? You might consider fanning out one of your stages if both of the following apply:
+
+- It doesn't rely on values that the stage had calculated before.
+- It takes a long time to run.
+
+The property of order-independence is important because you have no guarantee in what order concurrent copies of your stage will run, nor in what order they will return.
+
+```go
+fanIn := func(done <- chan interface{}, channels ...<-chan interface{})
+```
+
 ## The or-done-channel
+
+## The tee-channel
+
+## The bridge-channel
+
+## Queuing
+
+## The context Package
+
+## Summary

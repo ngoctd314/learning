@@ -21,6 +21,10 @@ Design your tables to minimize their space on the disk. This can result in huge 
 
 ## Joins
 
+- In some circumstances, it can be benefical to split into two a table that is scanned very often. This is especially true if it is a dynamic-format table and it is possible to use a smaller static format table that can be used to find the relevant rows when scanning the table.
+- Declare columns with identical information in different tables with identical data types, to speed up joins based on the corresponding columns.
+- Keep column names simple, so that you can use the same name across different tables and simplify join queries. For example, in a table named customer, use a column name of name instead of customer_name. To make your names portable to other SQL servers, consider keeping them shorter 18 characters.
+
 ## Normalization
 
 - Normally, try to keep all data nonredundant (observing what is referred to in database theory as third normal form).

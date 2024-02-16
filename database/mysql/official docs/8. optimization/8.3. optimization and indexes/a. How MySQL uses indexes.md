@@ -1,5 +1,7 @@
 # How MySQL Uses Indexes
 
+Indexes are used to find rows with specific column values quickly. Without an index, MySQL must begin with the first row and then read through the entire table to find the relevant rows. If the table has an index for the columns in question, MySQL can quickly determine the position to seek to in the middle of the data file without having to look at all the data. This is much faster than reading every row sequentially.
+
 Most MySQL indexes (PRIMARY KEY, UNIQUE INDEX, and FULLTEXT) are stores in B-trees. Memory tables also support hash indexes; InnoDB use inverted lists for FULL TEXT indexes. 
 
 MySQL uses indexes for these operations:

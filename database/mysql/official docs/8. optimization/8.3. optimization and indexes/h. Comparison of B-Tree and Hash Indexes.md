@@ -29,6 +29,6 @@ To be able to use an index, a prefix of the index must be used in every AND grou
 Hash indexes have somewhat different characteristics from those just discussed:
 
 - They are used only for equality comparisons that use the = or <=> operators (but are very fast). They are not used for comparison operators such as < that find a range of values. Systems that rely on this type of single-value lookup are known as "key-value stores"; to use MySQL for such applications, use hash indexes wherever possible. 
-- The optimizer cannot use a hash index to speed up ORDEr BY operations. (This type of index cannot be used to search for the next entry in order).
+- The optimizer cannot use a hash index to speed up ORDER BY operations. (This type of index cannot be used to search for the next entry in order).
 - MySQL cannot determine approximately how many rows there are between two values.
 - Only whole keys can be used to search for a row.(With a B-tree, any leftmost prefix of the key can be used to find rows.)

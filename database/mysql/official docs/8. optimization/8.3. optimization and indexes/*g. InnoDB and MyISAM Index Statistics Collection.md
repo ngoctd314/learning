@@ -1,10 +1,10 @@
 # InnoDB and MyISAM Index Statistic Collection
 
-Storage engines collect statistic about tables for use by the optimizer. 
+Storage engines collect statistic about tables for use by the optimizer. Table statistics are based on value groups, where a value group is a set of rows with the same key prefix value.
 
 MySQL uses the average value group size in the following ways:
 
-- To estimate how many rows must be read for each ref access
+- To estimate how many rows must be read for each ref access.
 - To estimate how many rows a partial join produces; that is, the number of rows that an operation of this form produces:
 
 ```sql

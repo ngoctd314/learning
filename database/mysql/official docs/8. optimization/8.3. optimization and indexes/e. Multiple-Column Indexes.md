@@ -1,6 +1,6 @@
 # Multiple-Column Indexes
 
-MySQL can create composite indexes (that is, indexes on multiple columns). An index may consist of up to 16 columns.
+MySQL can create composite indexes (that is, indexes on multiple columns). An index may consist of up to 16 columns. For certain data types, you can index a prefix of the column.
 
 MySQL can use multiple-column indexes for queries that test all the columns in the index, or queries that test just the first column, the first two columns, the first three columns, and so on. If you specify the columns in the right order in the index definition, a single composite index can speed up several kinds of queries on the same table.
 
