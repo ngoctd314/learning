@@ -1,35 +1,60 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
-	"log"
+	"fmt"
 
 	"github.com/hibiken/asynq"
+	"github.com/redis/go-redis/v9"
 )
 
 const redisAddr = "192.168.49.2:30301"
 
 func main() {
-	client := asynq.NewClient(asynq.RedisClientOpt{Addr: redisAddr})
-	defer client.Close()
+	// client := redis.NewClusterClient(&redis.ClusterOptions{
+	// 	Addrs: []string{
+	// 		"10.110.69.77:6379",
+	// 		"10.110.69.75:6379",
+	// 		"10.110.69.76:6379",
+	// 	},
+	// 	Password: "7bX1UQDQc8Hf3tPpa6p9",
+	// })
+	client := redis.NewFailoverClient(&redis.FailoverOptions{
+		MasterName: "redis-cluster",
+		SentinelAddrs: []string{
+			"10.110.69.75:26379",
+			"10.110.69.76:26379",
+			"10.110.69.77:26379",
+		},
+		Password: "7bX1UQDQc8Hf3tPpa6p9",
+	})
+	ctx := context.Background()
+	client.SAdd(ctx, "key", "m5")
+	r := client.SMembers(ctx, "key")
+	fmt.Println(r.Result())
 
-	batchSize := 5
-	urlCount := 30
-	for i := 1; i <= urlCount; i += batchSize {
-		end := i + batchSize - 1
-		if end > urlCount {
-			end = urlCount
-		}
-		task, err := NewQualityURLTask([2]int{i, end})
-		if err != nil {
-			log.Fatalf("could not create task: %v", err)
-		}
-		info, err := client.Enqueue(task)
-		if err != nil {
-			log.Fatalf("could not enqueue task: %v", err)
-		}
-		log.Printf("enqueued task: id=%s queue=%s", info.ID, info.Queue)
-	}
+	client.Close()
+	// client := asynq.NewClient(&asynq.RedisFailoverClientOpt{
+	// 	MasterName: "master",
+	// 	SentinelAddrs: []string{
+	// 		"10.110.69.75:6379",
+	// 		"10.110.69.76:6379",
+	// 		"10.110.69.77:6379",
+	// 	},
+	// 	Password: "7bX1UQDQc8Hf3tPpa6p9",
+	// })
+	//
+	// defer client.Close()
+	//
+	// data, _ := json.Marshal(map[string]interface{}{"to": 123, "from": 456})
+	// task := asynq.NewTask("notifications:email", data)
+	//
+	// res, err := client.Enqueue(task)
+	// if err != nil {
+	// 	log.Fatal(29, err)
+	// }
+	// fmt.Printf("successfully enqueued: %+v\n", res)
 }
 
 type taskPayload struct {
@@ -37,6 +62,11 @@ type taskPayload struct {
 }
 
 const taskQualityURL = "monitor:quality-url"
+
+// 10.110.69.75:26379
+// 10.110.69.76:26379
+// 10.110.69.77:26379
+// auth: 7bX1UQDQc8Hf3tPpa6p9
 
 func NewQualityURLTask(ids [2]int) (*asynq.Task, error) {
 	payload, err := json.Marshal(taskPayload{IDs: ids})
