@@ -1,36 +1,41 @@
 package main
 
 import (
-	"sync"
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func BenchmarkContextSwitch(b *testing.B) {
-	var wg sync.WaitGroup
-	begin := make(chan struct{})
-	c := make(chan struct{})
+var r interface{}
 
-	var token struct{}
-	seender := func() {
-		defer wg.Done()
-		<-begin
-		for i := 0; i < b.N; i++ {
-			c <- token
-		}
+var p = new([100]int)
+
+func BenchmarkBoxPointer(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		r = p
 	}
-	receiver := func() {
-		defer wg.Done()
-		<-begin
-		for i := 0; i < b.N; i++ {
-			<-c
-		}
+}
+
+var m = map[string]int{"Go": 2009}
+
+func BenchmarkBoxMap(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		r = m
 	}
-	wg.Add(2)
-	go seender()
-	go receiver()
-	b.StartTimer()
-	close(begin)
-	wg.Wait()
+}
+
+var c = make(chan int, 100)
+
+func BenchmarkBoxChannel(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		r = c
+	}
+}
+
+var f = func(a, b int) int { return a + b }
+
+func BenchmarkBoxFunction(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		r = f
+	}
 }
