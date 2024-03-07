@@ -6,36 +6,18 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-var r interface{}
+var src = []int{1, 2, 3, 4, 5}
 
-var p = new([100]int)
-
-func BenchmarkBoxPointer(b *testing.B) {
+func Benchmark_Fn1(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		r = p
+		dst := make([]int, len(src))
+		copy(dst, src)
 	}
 }
 
-var m = map[string]int{"Go": 2009}
-
-func BenchmarkBoxMap(b *testing.B) {
+func Benchmark_Fn2(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		r = m
-	}
-}
-
-var c = make(chan int, 100)
-
-func BenchmarkBoxChannel(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		r = c
-	}
-}
-
-var f = func(a, b int) int { return a + b }
-
-func BenchmarkBoxFunction(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		r = f
+		dst := make([]int, len(src))
+		_ = copy(dst, src)
 	}
 }
