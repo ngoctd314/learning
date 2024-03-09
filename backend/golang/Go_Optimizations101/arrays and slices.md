@@ -134,3 +134,98 @@ func main() {
 ```
 
 ## Grow slices (enlarge slice capacities)
+
+## Try to grow a slice in one step
+
+As mentioned above, how slices grow in append calls is implementation specific, which means the result capacity of a slice growth is unspecified by Go  speficication.
+
+If we could predict the max length of a slice at coding time, we should allocate the slice with the max length as its capacity, to avoid some possible future allocations caused by more slice growths.   
+
+If a slice is short-lived, then we could allocate it with an estimated large enough capacity. There might be some memory wasted temporarily, but the memory will be  released soon. Even if estimated capacity is proved to be not large enough, there might still be several allocations saved.
+
+## Clone slices
+
+Since Go toolchain version 1.15, the most efficient way to clone a slice is the make+copy way:
+
+```go
+sCloned = make([]T, len(s))
+copy(sCloned, s)
+```
+
+For many cases, the make+copy way is a little faster than the following append way, because as mentioned above, an append call might allocate and zero some extra elements.
+
+```go
+sCloned = append([]T(nil), s...)
+```
+
+For example, in the following code, 8191 extra elements are allocated and zeroed.
+
+```go
+x := make([]byte, 1 << 15 + 1)
+y := append([]byte(nil), x...)
+println(cap(y) - len(x))
+```
+
+## Merge two slices
+
+There is not a universally perfect way to merge two slices into a new slice with the current official standard Go compiler (up to Go v1.19)
+
+If the element orders of the merged slice are important, we could use the following two ways to merge the slice x and y (assume the length of y is not zero).
+
+```go
+// The make+copy way
+merged = make([]T, len(x) + len(y))
+copy(merged, x)
+copy(merged[len(x)], y)
+```
+
+```go
+x := make([]int, 0, 10)
+y := make([]int, 2)
+
+z := append(x[:len(x):len(x)], y...)
+```
+
+The append way is clean but it is often a little slower, because the append function often allocates and zeroes some extra elements. But if the length of y is much larger than the length of x, then the append way is probably faster, because the elements within merged [len(x):] are (unnecessarily) zeroed in the make + copy way (then overridden by the elements of y). So, which way is more performant depends on specific situations.
+
+If the free elements slots in slice x are enough to hold all elements of slice y and it is allowed to let the result slice and x share elements, then append(x, y..) is the most performant way, for it doesn't allocated.
+
+## Merge more than two slices (into a new slice)
+
+## Insert a slice into another one
+
+## Don't use the second iteration variable in a for-range loop if high performance is demanded
+
+## Reset all elements of an array or slice
+
+## Specify capacity explicitly in subslice expression
+
+## Use index tables to save some comparisons
+
+In the following code, the bar function is more performant that the foo function.
+
+```go
+func foo(n int) {
+	switch n % 10 {
+	case 1, 2, 6, 7, 9:
+		fmt.Println("do something 1")
+	default:
+		fmt.Println("do something 2")
+	}
+}
+
+var indexTable = [10]bool{
+	1: true, 2: true, 6: true, 7: true, 9: true,
+}
+
+func bar(n int) {
+	switch {
+	case indexTable[n%10]:
+		fmt.Println("do something 1")
+	default:
+		fmt.Println("do something 2")
+	}
+}
+```
+
+The foo function needs to make one to five comparisons before entering a branch code block, whereas the bar function always needs only one index operation. This is why the bar function is more performant.
