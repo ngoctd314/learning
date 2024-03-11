@@ -1,30 +1,28 @@
 package main
 
-import "fmt"
+import (
+	"log"
+	"testing"
+)
 
-func foo(n int) {
-	switch n % 10 {
-	case 1, 2, 6, 7, 9:
-		fmt.Println("do something 1")
-	default:
-		fmt.Println("do something 2")
-	}
-}
+var debugOn = false
 
-var indexTable = [10]bool{
-	1: true, 2: true, 6: true, 7: true, 9: true,
-}
-
-func bar(n int) {
-	switch {
-	case indexTable[n%10]:
-		fmt.Println("do something 1")
-	default:
-		fmt.Println("do something 2")
+func debugPrint(s string) {
+	if debugOn {
+		log.Println(s)
 	}
 }
 
 func main() {
-	foo(12)
-	bar(13)
+	stat := func(f func()) int {
+		allocs := testing.AllocsPerRun(1, f)
+		return int(allocs)
+	}
+
+	var h, w = "hello", "world!"
+
+	var n = stat(func() {
+		debugPrint(w + h)
+	})
+	println(n)
 }
