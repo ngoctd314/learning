@@ -5,7 +5,7 @@ TestAcmeData:
 
 .PHONY: benchmark
 benchmark:
-	go test -benchmem -run=^$ -bench ^${name}\$ go-learn -v
+	go test -bench "^${name}" go-learn -benchmem -v
 
 .PHONY: run
 run:

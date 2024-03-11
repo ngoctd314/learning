@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	_ "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"gorm.io/gorm/logger"
 )
 
@@ -21,10 +21,25 @@ func main() {
 	}
 
 	// var result result
-	var user User
-	db.Model(&User{}).Select("users.name, emails.email").Joins("left join emails on emails.user_id = users.id").Scan(&user)
-	fmt.Println(user)
-	db.Model(nil).Pluck()
+	if err := db.Clauses(clause.OnConflict{DoUpdates: clause.Assignments(
+		map[string]interface{}{
+			"c": 12,
+		})},
+	).Create(&Tbl{A: 2, B: 1, C: 10}).Error; err != nil {
+		log.Println(err)
+	}
+
+}
+
+type Tbl struct {
+	ID int `gorm:"primaryKey"`
+	A  int
+	B  int
+	C  int
+}
+
+func (Tbl) TableName() string {
+	return "tbl"
 }
 
 type User struct {

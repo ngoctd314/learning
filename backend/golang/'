@@ -1,9 +1,0 @@
-# Goroutines and the Go Runtime
-
-## Work Stealing
-
-Go will handle multiplexing goroutines onto OS threads for you. The algorithm it uses to do this is known as a work stealing strategy.
-
-First, let's look at a naive strategy for sharing work across many processors, some thing called fair scheduling. In an effort to ensure all processors were equally utilized, we could evenly distribute the load between all available processors. Imagine there are  processors and x tasks to perform. In the fair scheduling strategy, each processor would get x/n tasks:
-
-There are problems with this approach. Go models concurrency using a fork-join model. In a fork-join paradigm, tasks are likely dependent on one another, and it turns out naively splitting them among processors will likely cause one of the processors to be underutilized. Not only that, but it can also lead to poor cache locality as tasks that require the same data are scheduled on other processors.
