@@ -1,0 +1,30 @@
+# Title of document
+
+Subtitle of document
+2 Jan 2006
+
+NgocTD
+SE, GHTK
+ngoctd@gmail.com
+@ngoctd
+
+## Title of Slide or Section
+## Section 1: Example formatting {#fmt}
+
+Some text
+
+### Sub-ss1
+
+## Section 2: Example formatting {#fmt}
+
+Formatting:
+
+_italic_
+// A comment that is completely ignored.
+: Speaker notes.
+**bold**
+`program`
+Markup—_especially italic text_—can easily be overused.
+_Why use scoped\_ptr_? Use plain **\*ptr** instead.
+
+Visit [the Go home page](https://golang.org/).

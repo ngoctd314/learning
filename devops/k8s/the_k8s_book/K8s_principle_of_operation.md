@@ -26,11 +26,6 @@ In the sports world we call this coaching. In the application world we call it o
 
 To make this happen, you start out with an app, package it up and give it to the cluster (Kubernetes). The cluster is made up of one or more masters and a bunch of nodes.
 
+## K8s as an orchestrator
 
-9 8 7 6 5 4 3 2 1
-
-0 1 2 3 4 5 6 7 8
-
-8 7 4 2 2 1
-
-1 3 5
+Orchestrator is just a fancy word for a system that takes care of deploying and managing applications
