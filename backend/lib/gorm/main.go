@@ -6,7 +6,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 	"gorm.io/gorm/logger"
 )
 
@@ -21,40 +20,16 @@ func main() {
 	}
 
 	// var result result
-	if err := db.Clauses(clause.OnConflict{DoUpdates: clause.Assignments(
-		map[string]interface{}{
-			"c": 12,
-		})},
-	).Create(&Tbl{A: 2, B: 1, C: 10}).Error; err != nil {
-		log.Println(err)
+	name := "test3"
+	u := User{Name: name, Email: "test@gmail.com", Cnt: 0}
+	if err := db.FirstOrCreate(&u, "name = ?", name).Error; err != nil {
+		log.Fatal(err)
 	}
-
-}
-
-type Tbl struct {
-	ID int `gorm:"primaryKey"`
-	A  int
-	B  int
-	C  int
-}
-
-func (Tbl) TableName() string {
-	return "tbl"
 }
 
 type User struct {
 	ID    int `gorm:"primaryKey"`
 	Name  string
-	Email Email `gorm:"embedded"`
-}
-
-type Email struct {
-	ID     int `gorm:"primaryKey"`
-	UserID int
-	Email  string
-}
-
-type result struct {
-	Name  string
-	Email string
+	Email string `gorm:"embedded"`
+	Cnt   int
 }
