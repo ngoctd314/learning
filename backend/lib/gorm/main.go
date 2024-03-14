@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -19,17 +20,30 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// var result result
-	name := "test3"
-	u := User{Name: name, Email: "test@gmail.com", Cnt: 0}
-	if err := db.FirstOrCreate(&u, "name = ?", name).Error; err != nil {
-		log.Fatal(err)
+	u := []User{}
+	db.Select("users.id", "address.id AS Address__id").
+		Joins("INNER JOIN address ON address.id = users.address_id").
+		Find(&u, "name = ?", "test1")
+	for _, v := range u {
+		fmt.Println(v.Address)
 	}
 }
 
 type User struct {
-	ID    int `gorm:"primaryKey"`
-	Name  string
-	Email string `gorm:"embedded"`
-	Cnt   int
+	ID         int    `gorm:"primaryKey"`
+	Name       string `gorm:"default:abc"`
+	Email      string `gorm:"embedded"`
+	AddressID  int
+	AddressID1 int
+	Address    *Address `gorm:"foreignKey:AddressID"`
+	Address1   *Address `gorm:"foreignKey:AddressID1"`
+}
+
+type Address struct {
+	ID   int
+	City string
+}
+
+func (Address) TableName() string {
+	return "address"
 }
