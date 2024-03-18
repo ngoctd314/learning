@@ -22,6 +22,7 @@ func main() {
 
 	u := []User{}
 	db.Select("users.id", "address.id AS Address__id").
+		Joins("LEFT JOIN address ON address.id = users.address_id").
 		Joins("INNER JOIN address ON address.id = users.address_id").
 		Find(&u, "name = ?", "test1")
 	for _, v := range u {
