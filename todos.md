@@ -17,9 +17,9 @@
 
 |Day|7h-9h|9h-12h|13h-14h|14h-17h|17h-19h30|21h-23h|
 |-|-|-|-|-|-|-|
-|Monday|x|x|x|x|Golang|Kafka|
-|Tuesday|-|x|-|x|-|-|
-|Wednesday|-|x|-|x|-|-|
+|Monday|x|x|x|x|x|x|
+|Tuesday|x|x|x|x|x|x|
+|Wednesday|x|x|Algo|x|-|-|
 |Thursday|-|x|-|x|-|-|
 |Friday|-|x|-|x|-|-|
 |Saturday|-|x|-|x|-|-|

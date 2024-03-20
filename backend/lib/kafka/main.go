@@ -23,9 +23,9 @@ func main() {
 	}
 
 	w := &kafka.Writer{
-		Addr: kafka.TCP("10.110.69.50:9092", "10.110.69.51:9092", "10.110.69.52:9092", "10.110.69.53:9092", "10.110.69.54:9092"),
-		// Topic: "db_slow_query",
-		Topic:     "ecom_slow_query",
+		Addr:  kafka.TCP("10.110.69.50:9092", "10.110.69.51:9092", "10.110.69.52:9092", "10.110.69.53:9092", "10.110.69.54:9092"),
+		Topic: "db_slow_query",
+		// Topic:     "ecom_slow_query",
 		Balancer:  &kafka.Hash{},
 		Transport: sharedTransport,
 	}

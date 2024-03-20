@@ -6,38 +6,36 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-var n int
+var r interface{}
 
-func inc() {
-	n++
-}
+var v0 struct{}
 
-func f(n int) {
-	for i := 0; i < n; i++ {
-		defer inc()
-		inc()
-	}
-}
-
-func g(n int) {
-	for i := 0; i < n; i++ {
-		func() {
-			defer inc()
-			inc()
-		}()
-	}
-}
-
-func Benchmark_f(b *testing.B) {
-	n = 0
+func Benchmark_BoxZeroSize1(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		f(100)
+		r = v0
 	}
 }
 
-func Benchmark_g(b *testing.B) {
-	n = 0
+var a0 [0]int64
+
+func Benchmark_BoxZeroSize2(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		g(100)
+		r = a0
+	}
+}
+
+var b bool
+
+func Benchmark_BoxBool(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		r = b
+	}
+}
+
+var n int8 = -100
+
+func Benchmark_BoxInt8(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		r = n
 	}
 }
