@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 )
 
 func Test_data(t *testing.T) {
@@ -20,6 +21,10 @@ func Test_data(t *testing.T) {
 	data, _ := io.ReadAll(f)
 	ar := strings.Split(string(data), "\n")
 	s := make(map[int]struct{})
+	now := time.Now()
+	defer func() {
+		log.Println("since: ", time.Since(now).Seconds())
+	}()
 	for _, a := range ar {
 		vs := strings.Split(a, " ")
 		for _, v := range vs {

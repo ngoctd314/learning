@@ -20,8 +20,6 @@ func initMongoConn(ctx context.Context) *mongo.Client {
 	return client
 }
 
-func cleanDB(client *mongo.Client) {}
-
 func main() {
 	ctx := context.Background()
 
@@ -44,6 +42,10 @@ func main() {
 	// 		log.Printf("insertRelate error (%v)\n", err)
 	// 	}
 	// }
-	rs := r.countDistinct(ctx, 1, 2)
+	items := []uint32{}
+	for i := 1; i <= lines; i++ {
+		items = append(items, uint32(i))
+	}
+	rs := r.countDistinct(ctx, items...)
 	fmt.Println(rs)
 }

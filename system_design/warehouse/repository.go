@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -14,10 +15,36 @@ type relateItemRepository struct {
 	collection *mongo.Collection
 }
 
-func (r *relateItemRepository) createItem(ctx context.Context, itemID uint32) error {
+// func (r *relateItemRepository) createItem(ctx context.Context, itemID uint32) error {
+// 	document := RelateItem{
+// 		Relate:      make(map[uint32]uint64),
+// 		Coefficient: make([]uint64, 25),
+// 		ItemID:      itemID,
+// 	}
+//
+// 	rs, err := r.collection.InsertOne(ctx, document)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	_ = rs
+//
+// 	return nil
+// }
+
+func (r *relateItemRepository) insertRelate(ctx context.Context, itemID uint32, relateIDs ...uint32) error {
+	relates := make(map[uint32]uint64)
+	co := make([]uint64, chunk+1)
+	for _, relateID := range relateIDs {
+		relateValue, relatePos := byte(relateID%63), relateID/63
+		hashValue, hashPos := byte(relatePos%63), relatePos/63
+
+		relates[relatePos] |= pow2(relateValue)
+		co[hashPos] |= pow2(hashValue)
+
+	}
 	document := RelateItem{
-		Relate:      make(map[uint32]uint64),
-		Coefficient: make([]uint64, 25),
+		Relate:      relates,
+		Coefficient: co,
 		ItemID:      itemID,
 	}
 
@@ -30,7 +57,7 @@ func (r *relateItemRepository) createItem(ctx context.Context, itemID uint32) er
 	return nil
 }
 
-func (r *relateItemRepository) insertRelate(ctx context.Context, itemID uint32, relateID uint32) error {
+func (r *relateItemRepository) updateRelate(ctx context.Context, itemID uint32, relateID uint32) error {
 	relateValue, relatePos := byte(relateID%63), relateID/63
 	hashValue, hashPos := byte(relatePos%63), relatePos/63
 
@@ -84,6 +111,7 @@ func (r *relateItemRepository) countDistinct(ctx context.Context, itemIDs ...uin
 
 	var results []RelateItem
 	for cur.Next(ctx) {
+
 		var elem RelateItem
 		if err := cur.Decode(&elem); err != nil {
 			log.Printf("decode itemID error: (%v)\n", err)
@@ -95,12 +123,17 @@ func (r *relateItemRepository) countDistinct(ctx context.Context, itemIDs ...uin
 		log.Printf("countDistinct cur.Err error: (%v)\n", err)
 	}
 
+	now := time.Now()
+	defer func() {
+		log.Println("since: ", time.Since(now).Seconds())
+	}()
+
 	// hash range
 	var finalResult uint64
 	// trackItemID := make(map[uint32]int)
 	cnt := 0
-	// 24 chunk
-	for i := 0; i <= 24; i++ {
+	// chunk
+	for i := 0; i <= chunk; i++ {
 		var j byte = 0
 		// each chunk from 0 -> 63
 		for j = 0; j < 63; j++ {
