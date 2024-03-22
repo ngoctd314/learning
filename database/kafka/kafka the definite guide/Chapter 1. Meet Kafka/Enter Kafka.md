@@ -28,10 +28,22 @@ Consumers read messages. In other publish/subscribe systems, these clients may b
 
 Consumers work as part of a consumer group, which is one or more consumers that work together to consume a topic. The group ensures that each partition is only consumed by one member. In this way, consumers can horizontally scale to consume topics with a large number of messages. Additionally, if a single consume fails, the remaining members of group will reassign the partitions being consumed to take over for the missing member.
 
+In this way, consumers can horizontally scale to consume topics with a large number of message. Additionally, if a single consumer fails, the remaining members of the group will reassign the partitions being consumed to take over for the missing member. 
+
 ## Broker and Clusters
 
 A single Kafka server is called a broker. The broker receives messages from producers, assigns offsets to them, and writes the messages to storage on disk. It also services consumers, responding of fetch requests for partitions and responding with the messages that have been published.
 
-Kafka brokers are designed to operate as part of a cluster. Within a cluster of brokers, one broker will also function as the cluster controller (elected automatically from the live members of the cluster). The controller is responsible for administrative operations, including assigning partitions to brokers and monitoring for broker failures. A partition is owned by a single broker in the cluster, and than broker is called the leader of the partition. A replicated partition is assigned to addition brokers, called followed of the partition. All producers must connect to the leader in order to publish messages, but consumers may fetch from either the leader or one of the followers.
+Kafka brokers are designed to operate as part of a cluster. Within a cluster of brokers, one broker will also function as the cluster controller (elected automatically from the live members of the cluster). The controller is responsible for administrative operations, including assigning partitions to brokers and monitoring for broker failures. A partition is owned by a single broker in the cluster, and than broker is called the leader of the partition. A replicated partition is assigned to addition brokers, called follower of the partition. All producers must connect to the leader in order to publish messages, but consumers may fetch from either the leader or one of the followers.
 
 A key feature of Apache Kafka is that of retention, which is the durable storage of messages for some period of time. Kafka brokers are configured with a default retention setting by topics, either retaining messages for some period of time (e.g. 7 days) or until the partition reaches a certain size in bytes (e.g. 1GB). Once these limits are reached, messages are expired and deleted. Individual topics can also be configured with their own retention settings so that messages are stored for only as long as they are useful. For example, a tracking topic might be retained for several days, whereas application metrics might be retained for only a few hours.
+
+## Multiple Clusters
+
+As Kafka deployments grow, it is often advantageous to have multiple clusters. There are several reasons why this can be useful:
+
+- Segregation of types of data
+- Isolation for security requirements
+- Multiple datacenters (disaster recovery)
+
+When working with multiple datacenters in particular, it is often required that messages be copied between them. In this way, online applications can have access to user activity at both sites. For example, if a user changes public information in their profile, that change will need to be visible regardless of the datacenter in which search results are displayed. The replication mechanism within the Kafka clusters are designed only to work within a single cluster, not between multiple clusters.
