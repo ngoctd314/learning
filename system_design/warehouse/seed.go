@@ -22,7 +22,7 @@ func genData() {
 	for i := 0; i < lines; i++ {
 		s := make([]string, 0, lenOnLine)
 		for i := 0; i < lenOnLine; i++ {
-			rn := rand.Intn(chunk * 63 * 63)
+			rn := rand.Intn(chunk * chunkLen * chunkLen)
 			s = append(s, strconv.Itoa(rn))
 		}
 		_, err := f.Write([]byte(strings.Join(s, " ") + "\n"))
@@ -53,8 +53,10 @@ func insertData(coll *mongo.Collection) {
 				tmp = append(tmp, uint32(vi))
 			}
 		}
-		if err := r.insertRelate(context.Background(), uint32(i+1), tmp...); err != nil {
-			log.Printf("insertRelate error (%v)\n", err)
+		if len(tmp) > 0 {
+			if err := r.insertRelate(context.Background(), uint32(i+1), tmp...); err != nil {
+				log.Printf("insertRelate error (%v)\n", err)
+			}
 		}
 	}
 }

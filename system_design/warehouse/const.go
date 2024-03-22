@@ -1,8 +1,9 @@
 package main
 
 const (
-	chunk = 20
+	chunk    = 25000
+	chunkLen = 63
 
-	lines     = 10000
+	lines     = 5000
 	lenOnLine = 5000
 )

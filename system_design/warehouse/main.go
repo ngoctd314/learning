@@ -10,7 +10,7 @@ import (
 )
 
 func initMongoConn(ctx context.Context) *mongo.Client {
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://192.168.49.2:30302"))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://192.168.49.2:30107"))
 	if err != nil {
 		log.Fatal(err)
 	}
