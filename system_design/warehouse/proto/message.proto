@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package relate;
+
+option go_package = "./pb";
+
+message ParOrRequest {
+   repeated uint32 ids = 1;
+}
+
+message ParOrResponse {
+   bytes bitmap = 1;
+}
+
+service Worker {
+   rpc ParOr(ParOrRequest) returns (ParOrResponse) {}
+}
