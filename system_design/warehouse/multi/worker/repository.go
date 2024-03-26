@@ -50,7 +50,6 @@ func (r *repository) getOrBitmap(params []any) []byte {
 		n--
 	}
 	wg.Add(n)
-	fmt.Println("len params: ", len(params))
 
 	for i := 0; i < n; i++ {
 		go func(i int) {
@@ -86,6 +85,7 @@ func (r *repository) getOrBitmap(params []any) []byte {
 				listData = append(listData, bitmap)
 			}
 			rows.Close()
+			fmt.Println("len listData", len(listData))
 
 			listBitmap := make([]*roaring.Bitmap, 0, upper-lower)
 			for j := 0; j < len(listData); j++ {

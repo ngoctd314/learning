@@ -35,13 +35,13 @@ func main() {
 	aggregator := NewAggregator(worker)
 
 	s := make(map[uint32]struct{})
-	items, j := uint32(2000), uint32(0)
+	items, j := uint32(10000), uint32(0)
 	for j < items {
 		n := uint32(rand.Intn(1e7))
 		for n == 0 {
 			n = uint32(rand.Intn(1e7))
 		}
-		s[n] = struct{}{}
+		s[j] = struct{}{}
 		j++
 	}
 	paramsInt := make([]uint32, 0, items)

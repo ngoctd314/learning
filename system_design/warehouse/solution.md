@@ -231,6 +231,115 @@ Giải pháp trên có bottleneck khi chỉ có một aggregator. Có thể thê
 
 ![alt](./assets/multi-aggregator.png)
 
+## Các cách tối ưu cho phần lưu trữ database khác
+
+Nhắc lại tính chất của phép OR trên tập ids n phần tử: id1 | id2 ... | idn = (id1 | id2) | (id3 ... | idk) ... | (idk | idn)
+
+Từ tính chất đó, ta có thể chia database thành các cách như sau:
+
+### Partition
+
+Cách đơn giản nhất là partition chia db ban đầu thành k partition, lưu ý là không nên chia quá nhỏ vì query 10K phần tử trong 100M chia khoảng 10 partition là đủ.
+
+### Chia thêm cột
+
+**1. Thiết kế ban đầu**
+
+|Column|Data type|Description|
+|-|-|-|
+|id|int unsigned not null|item id + PRIMARY KEY|
+|bitmap|blob|represent set of related item|
+
+bitmap sẽ chứa thông tin relate của item với id hiện tại, bitmap có khoảng 5000 phần tử (do 1 item relate tới khoảng 5000 items), và range của bitmap từ 1 -> 100M.
+
+Câu count được tính như sau: 
+
+```txt
+count(id1.bitmap | id2.bitmap ... | idn.bitmap)
+```
+
+**2. Chia thêm cột như sau**
+
+|Column|Data type|Description|
+|-|-|-|
+|id|int unsigned not null|item id + PRIMARY KEY|
+|bitmap1|blob|represent set of related item|
+|bitmap2|blob|represent set of related item|
+|bitmap3|blob|represent set of related item|
+|bitmap4|blob|represent set of related item|
+|bitmap5|blob|represent set of related item|
+
+Khi này bitmap1 sẽ chứa thông tin relate item với các item khác nằm trong khoảng 1 -> 20M<br>
+Khi này bitmap2 sẽ chứa thông tin relate item với các item khác nằm trong khoảng 20 -> 40M<br>
+...
+Khi này bitmap5 sẽ chứa thông tin relate item với các item khác nằm trong khoảng 80M -> hết
+
+Câu count được tính như sau: 
+
+```txt
+count(id1.bitmap1 | id2.bitmap1 ... | idn.bitmap1) +
+count(id1.bitmap2 | id2.bitmap2 ... | idn.bitmap2) +
+... +
+count(id1.bitmapn | id2.bitmapn ... | idn.bitmapn)
+```
+
+### Chia thêm bảng
+
+**1. Bảng ban đầu**
+
+|Column|Data type|Description|
+|-|-|-|
+|id|int unsigned not null|item id + PRIMARY KEY|
+|bitmap|blob|represent set of related item|
+
+Với id thuộc [1,100M]
+
+**2. Ta có thể chia thành 5 bảng như sau**
+
++ relate20M table
+
+|Column|Data type|Description|
+|-|-|-|
+|id|int unsigned not null|item id + PRIMARY KEY|
+|bitmap|blob|represent set of related item|
+
+Với id thuộc [1,20M]
+
++ relate40M table
+
+|Column|Data type|Description|
+|-|-|-|
+|id|int unsigned not null|item id + PRIMARY KEY|
+|bitmap|blob|represent set of related item|
+
+Với id thuộc [20M,40M]
+
+...
+
++ relate100M table
+
+|Column|Data type|Description|
+|-|-|-|
+|id|int unsigned not null|item id + PRIMARY KEY|
+|bitmap|blob|represent set of related item|
+
+Với id thuộc [80M, x]
+
+Câu count được tính như sau: 
+
+```txt
+count(
+    (tbl1.id1.bitmap | tbl1.id2.bitmap ... | tbl1.idn.bitmap) |
+    (tbl2.id1.bitmap | tbl2.id2.bitmap ... | tbl2.idn.bitmap) |
+    ... |
+    (tbln.id1.bitmap | tbln.id2.bitmap ... | tbln.idn.bitmap)
+)
+```
+
+### Tách database
+
+Giống như cách chia bảng nhưng mỗi bảng bây giờ sẽ nằm ở một db riêng. Tuy nhiên cách này sẽ phải xử lý distributed transaction trong trường hợp update.
+
 ## Xử lý hot key và bloom-filter
 
 Nếu xuất hiện những item là hot key trong hệ thống thì có thể cache lại, giảm tải cho db. Tuy nhiên vì không gian rất lớn (100M) items, mỗi lần query lại lấy ra thông tin của 10000 items. Nếu lần nào cũng check cache thì lại là bottleneck. Yêu cầu là có một cách nào đó tốn chi chí rất thấp mà để có thể đưa ra quyết định có vào cache để lấy hay không. 

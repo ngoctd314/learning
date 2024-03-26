@@ -35,6 +35,7 @@ func (s *Aggregator) CountDistinct(ctx context.Context, itemIDs []uint32) {
 		if upper > len(itemIDs) {
 			upper = len(itemIDs)
 		}
+		i := i
 
 		go func() {
 			defer wg.Done()
@@ -51,6 +52,7 @@ func (s *Aggregator) CountDistinct(ctx context.Context, itemIDs []uint32) {
 				return
 			}
 
+			fmt.Println("worker ", i)
 			mu.Lock()
 			listBitmap = append(listBitmap, rb)
 			mu.Unlock()
