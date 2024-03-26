@@ -355,6 +355,19 @@ Trong case chắc chắn không thì đưa cho worker xử lý như bình thư�
 
 Còn case có thể có thì kiểm tra cache.
 
+## Tối ưu việc mapping data từ MySQL (blob) -> bitmap
+
+Với kho x có 10K items, mỗi item chứa thông tin relate của 5000 item (khoảng 30KB).
+
+Mỗi lần load 1 record như thế, server phải allocate 1 memory segment gồm ~30K hoặc nhỏ hơn (theo lý thuyết là nhỏ hơn 23K).
+
+Source code hiện tại đang lấy chunk = 100. Mỗi lần lấy như thế thì cần alloc 100*30K = 3MB.
+
+Sau khi chạy xong chunk = 100 ids thì lại giải phóng 3MB đó.
+
+=> Có thể sử dụng pool để giảm tải quá trình alloc.
+
+
 ## Kiểm thử
 
 **1. Để kiểm thử tính chính xác của thuật toán, cần sinh ra một file data.txt với định dạng như đề bài**
@@ -395,3 +408,55 @@ Lệnh này sẽ insert data từ file data.txt vào database.
 ```bash
 ./cmd/count 1,2,3,4
 ```
+
+**6. Setup luồng benchmark**
+
+Trong file env có 3 tham số:
+
+```txt
+INSERT_TIMES=2
+RECORDS_FOR_INSERT=200
+RELATE=5000
+```
+INSERT_TIMES: số lần chạy câu INSERT
+
+RECORDS_FOR_INSERT: số records cho 1 lần INSERT
+
+RELATE: số lượng item liên quan đến 1 item, môt item sẽ là random từ 1 -> 100M, đúng ra chỗ này phải tạo ra 5000 phần tử unique thì mới đúng business. Tuy nhiên rand trong 1e8 (100M) để lấy 5000 phần tử thì cũng rất khó để trùng.
+
+Với thông số trên => insert 2 lần, mỗi lần 200 records => có 400 records trong database.
+
+```go
+for i := 0; i < insertTimesNum; i++ {
+    lRecords := make([]any, recordPerInsertNum)
+    for j := 0; j < recordPerInsertNum; j++ {
+        rb := roaring.New()
+        relateItemList := make([]uint32, relatesNum)
+        for k := 0; k < relatesNum; k++ {
+            relateItemList[k] = uint32(rand.Intn(1e8) + 1)
+        }
+        rb.AddMany(relateItemList)
+        b, err := rb.ToBytes()
+        if err != nil {
+            log.Fatal(err)
+            return
+        }
+        lRecords[j] = b
+    }
+    r.InsertMany(lRecords)
+    log.Printf("complete insert: %d records, each record  is related to %d items\n", recordPerInsertNum, relatesNum)
+}
+```
+
+Cách chạy:
+
+```txt
+./cmd/insert_from_rand
+```
+
+Sau đó chạy câu count để thử tốc độ
+
+```txt
+./cmd/count.go 1,2,3,4
+```
+

@@ -58,6 +58,15 @@ func (r *Repository) Insert(itemID uint32, relate []byte) error {
 	return nil
 }
 
+func (r *Repository) InsertMany(relates []any) {
+	q := fmt.Sprintf("INSERT INTO relate (bitmap) VALUES (?)%s", strings.Repeat(",(?)", len(relates)-1))
+	_, err := r.db.Exec(q, relates...)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+}
+
 func (r *Repository) CountDistinctRelate(params ...any) uint64 {
 	list := make([]*roaring.Bitmap, 0, len(params))
 	wg := sync.WaitGroup{}

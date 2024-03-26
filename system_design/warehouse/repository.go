@@ -18,6 +18,7 @@ type repoV3 struct {
 	db        *sql.DB
 	stmtChunk *sql.Stmt
 	chunk     int
+	debug     bool
 }
 
 func newRepoV3() *repoV3 {
@@ -25,8 +26,8 @@ func newRepoV3() *repoV3 {
 	if err != nil {
 		log.Fatal(err)
 	}
-	db.SetMaxOpenConns(500)
-	db.SetMaxIdleConns(200)
+	// db.SetMaxOpenConns(500)
+	// db.SetMaxIdleConns(200)
 	if pingErr := db.Ping(); pingErr != nil {
 		log.Fatal("ping error", pingErr)
 	}
@@ -41,6 +42,7 @@ func newRepoV3() *repoV3 {
 		db:        db,
 		stmtChunk: stmt,
 		chunk:     chunk,
+		debug:     false,
 	}
 }
 
@@ -109,7 +111,7 @@ func repov3Insert() {
 func repov3Count() {
 	r := newRepoV3()
 	s := make(map[uint32]struct{})
-	items, j := 1000, 0
+	items, j := 10000, 0
 	for j < items {
 		// for i := 1; i <= 100; i++ {
 		n := uint32(rand.Intn(1e7))
@@ -195,7 +197,7 @@ func (r *repoV3) countDistinctRelate(params ...any) int {
 				return
 			}
 
-			ti := time.Now()
+			// ti := time.Now()
 			listData := make([][]byte, 0, upper-lower)
 			for rows.Next() {
 				// var bitmap sql.RawBytes
@@ -207,7 +209,7 @@ func (r *repoV3) countDistinctRelate(params ...any) int {
 				listData = append(listData, bitmap)
 			}
 			rows.Close()
-			fmt.Println("scan: ", time.Since(ti))
+			// fmt.Println("scan: ", time.Since(ti))
 
 			listBitmap := make([]*roaring.Bitmap, 0, upper-lower)
 			// ti1 := time.Now()
@@ -218,7 +220,7 @@ func (r *repoV3) countDistinctRelate(params ...any) int {
 					log.Printf("error occur when ReadFrom bitmap (%v)", err)
 					return
 				}
-
+				// fmt.Println(newrb.ToArray())
 				listBitmap = append(listBitmap, newrb)
 			}
 			// println("FromBuffer ", time.Since(ti1).Seconds(), len(listData[0]))
@@ -232,9 +234,21 @@ func (r *repoV3) countDistinctRelate(params ...any) int {
 
 	ti := time.Now()
 	rs := roaring.ParOr(6, list...)
-	fmt.Println("ParOr", time.Since(ti))
-	fmt.Println("result: ", rs.GetCardinality())
+	fmt.Println("Bitmap OR time", time.Since(ti))
+	fmt.Println("bitmap or result: ", rs.GetCardinality())
 
-	fmt.Println("total time: ", time.Since(totalTime))
+	fmt.Println("total time (included load db time): ", time.Since(totalTime))
+	if r.debug {
+		ti := time.Now()
+		m := make(map[uint32]struct{})
+		for i := range list {
+			for _, v := range list[i].ToArray() {
+				m[v] = struct{}{}
+			}
+		}
+		fmt.Println("debug time handle", time.Since(ti))
+		fmt.Println("debug result  (not include load db time): ", len(m))
+	}
+
 	return 0
 }
