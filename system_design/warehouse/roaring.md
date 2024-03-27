@@ -97,3 +97,67 @@ To decide the best container type, we are motived to minimize storage. In serial
 - A run container is only allowed to exist if it is smaller than either the array container or the bitmap container the could equivalently store the same values. If the run container has cardinality greater than 4096 values, then it must contain no more than [(8192-2)/4] = 2047 runs. If the run container has cardinality no more than 4096, then the number of runs must be less than half the cardinality. 
 
 
+## Logical operators
+
+### Union and intersection
+
+There are many necessary logical operations, but we present primarily the union and intersection. They are most often used, and the most likely operations to cause performance bottlenecks. An important algorithm for out purposes is the galloping (also called exponential intersection) the intersection between two sorted arrays of size c1, c2. It has complexity O(min(c1, c2)log(max c1, c2)). In this approach, we pick the next available integer i from the smaller array and seek an integer at least as big in the larger array, looking first at the next available value, then looking twice as far, and so on, until we find an integer that is not smaller than i.
+
+A galloping search makes repeated random accesses in a container, and it could therefore cause expensive cache misses. However, in our case, the potential problem is mitigated by the fact that all our containers fit in CPU cache.
+
+Intersections between two input Roaring bitmaps start by visiting the keys from both bitmaps, starting from the beginning. If a key is found in both input bitmaps, the corresponding containers are intersected and the result (if non-empty) is added to the output.
+
+Unions between Roaring data structures are handled in the conventional manner: we iterate through the keys in sorted order; if a key is in both input Roaring bitmaps, we merge the two containers, and the result to the output and advance in the two bitmaps. When one bitmap runs out of keys, we append all the remaining content of the other bitmap to the output.
+
+Though we do not use this technique, instead of cloning the containers during unions, we could use a copy-on-write approach whereas a reference to container is stored and used, and a copy is only made if an attempt is made to modify the container further. This approach can be implemented by adding a bit vector containing one bit per container. Initially, this bit is set to 0
+
+We first briefly review the logical operations between bitmap and array containers, referring the reader to Chambi et al. [7] for algorithmic details.
+
+Bitmap vs Bitmap: To compute the intersection between two bitmaps, we first compute the
+cardinality of the result using the bitCount function over the bitwise AND of the
+corresponding pairs of words. If the intersection exceeds 4096, we materialize a bitmap
+container by recomputing the bitwise AND between the words and storing them in a new
+bitmap container. Otherwise, we generate a new array container by, once again, recomputing
+the bitwise ANDs, and iterating over their 1-bits. We find it important to first determine the
+right container type as, otherwise, we would sometimes generate the wrong container and
+then have to convert it—an expensive process. The performance of the intersection operation
+between two bitmaps depends crucially on the performance of the bitCount function.
+A union between two bitmap containers is straightforward: we execute the bitwise OR
+between all pairs of corresponding words. There are 1024 words in each container, so
+1024 bitwise OR operations are needed. At the same time, we compute the cardinality of
+the result using the bitCount function on the generated words
+
+A union between two bitmap containers is straightforward: we execute the bitwise OR
+between all pairs of corresponding words. There are 1024 words in each container, so
+1024 bitwise OR operations are needed. At the same time, we compute the cardinality of
+the result using the bitCount function on the generated words.
+
+Bitmap vs Array: The intersection between an array and a bitmap container can be computed
+quickly: we iterate over the values in the array container, checking the presence of each 16-bit
+integer in the bitmap container and generating a new array container that has as much capacity
+as the input array container. The running time of this operation depends on the cardinality of
+the array container. Unions are also efficient: we create a copy of the bitmap and iterate over
+the array, setting the corresponding bits.
+
+serialize size vs real size
+
++ remove header => optimize disk
+
+Bitmap vs Bitmap: To compute the intersection between two bitmaps, we first compute the cardinality of the result using the bitCount function over the bitwise AND of the corresponding pairs of words. If the intersection exceeds 4096, we materialize a bitmap container by recomputing the bitwise AND between the words and storing them in a new bitmap container. Otherwise, we generate a new array container by, once again, recomputing the bitwise ANDs, and iterating over their 1-bits. We find it important to first determine the right container type as, otherwise, we would sometimes generate the wrong container and then have to convert it-an expensive process. The performance of the intersection operation between two bitmaps depends crucially on the performance of the bitCount function. 
+
+A union between two bitmap containers is straightforward: we execute the bitwise OR between all pairs of corresponding words. There are 1024 words in each container, so 1024 bitwise OR operations are need. At the same time, we compute the cardinality of the result using the bitCount function on the generated words.
+
+Compressed bitmap indexes are used in systems such as Git or Oracle to accelerate queries. They represent
+sets and often support operations such as unions, intersections, differences, and symmetric differences. Several
+important systems such as Elasticsearch, Apache Spark, Netflix’s Atlas, LinkedIn’s Pinot, Metamarkets’
+Druid, Pilosa, Apache Hive, Apache Tez, Microsoft Visual Studio Team Services and Apache Kylin rely
+on a specific type of compressed bitmap index called Roaring. We present an optimized software library
+written in C implementing Roaring bitmaps: CRoaring. It benefits from several algorithms designed for
+the single-instruction-multiple-data (SIMD) instructions available on commodity processors. In particular,
+we present vectorized algorithms to compute the intersection, union, difference and symmetric difference
+between arrays. We benchmark the library against a wide range of competitive alternatives, identifying
+weaknesses and strengths in our software. Our work is available under a liberal open-source license.
+
+## Summary
+
+Compressed bitmap indexes are used in systems such as Git or Oracle to accelerate queries. They represent sets and often support operations such as unions, intersections, differences, and symetric differences. Several important systems such as Elasticsearch, Apache Spark... rely on a specific type of compressed bitmap index called Roaring. It benifits from several algorithms designed for the single-instruction-multiple-data (SIMD) instructions available on commodity processors. In particular, we present vectorized algorithms to compute the intersection, union, difference and symmetric differnce between arrays. 
