@@ -160,4 +160,180 @@ weaknesses and strengths in our software. Our work is available under a liberal 
 
 ## Summary
 
-Compressed bitmap indexes are used in systems such as Git or Oracle to accelerate queries. They represent sets and often support operations such as unions, intersections, differences, and symetric differences. Several important systems such as Elasticsearch, Apache Spark... rely on a specific type of compressed bitmap index called Roaring. It benifits from several algorithms designed for the single-instruction-multiple-data (SIMD) instructions available on commodity processors. In particular, we present vectorized algorithms to compute the intersection, union, difference and symmetric differnce between arrays. 
+Compressed bitmap indexes are used in systems such as Git or Oracle to accelerate queries. They represent sets and often support operations such as unions, intersections, differences, and symetric differences. Several important systems such as Elasticsearch, Apache Spark... rely on a specific type of compressed bitmap index called Roaring. It benifits from several algorithms designed for the single-instruction-multiple-data (SIMD) instructions available on commodity processors. In particular, we present vectorized algorithms to compute the intersection, union, difference and symmetric difference between arrays.
+
+Keywords: bitmap indexes, vectorization; SIMD intructions; database indexes; Jaccard index.
+
+## Introduction
+
+Comtemporary computing hardware offers performance opportunities through improved parallelism, by having more cores and better single-instruction-multiple-data (SIMD) instructions. Meanwhile, software indexes often determine the performance of big-data applications. Efficient indexes not only improve latency and throughput, but they also reduce energy usage.
+
+Indexes are often made of sets of numerical identifiers (stored as integers). For instance, inverted indexes map query terms to document identifiers in search engines, and convertional database indexes map column values to record identifiers. We often need efficient computation of the intersection (A ∩ B), the union (A ∪ B), the difference (A \ B), or the symetric difference ((A \ B)  ∪ (B \ A)) of these sets.
+
+The bitmap (or bitset) is a time-honored strategy to represent sets of integers concisely. Given a universe of n possible integers, we use a vector of n bits to represent any one set. On a 64-bit processor, [n/64] inexpensive bitwise operations suffice to compute set operations between two bitmaps:
+
+- the intersection corresponds to the bitwise AND;
+- the union corresponds to the bitwise OR;
+- the difference corresponds to the bitwise ANDNOT;
+- the symmetric difference corresponds to the bitwise XOR;
+
+Unfortunately, when the range of possible values (n) is too wide, bitmaps can be too large to be practical. For example, it might be impractical to represent the set {1, 2^31} using a bitset. For this reason, we often use compressed bitmaps.
+
+Though there are many ways to compress bitmaps, several systems rely on an approach called Roaring including Elasticsearch. In turn, the systems are in widespread use: Elasticsearch provides the search capabilities of Wikipedia. Additionally, Roaring is use in machine learning, data visualization, in natural language processing, in geographical information systems.
+
+Roaring partitions the space [0, 2^32) into chunks consisting of ranges of 2^16 integers ([0x2^16, 1x2^16), [1x2^16, 2x2^17), ). For a value in the set, its least significant sixteen bits are stored in a container corresponding to its chunk, using one of three possible container types:
+
+- bitset containers made of 2^16 bits or 8kB
+- array containers made up to 4096 sorted 16-bit integers
+- run containers made of a series of sorted <s, l> pairs indicating that all integers in the range [s, s+l] are present.
+
+At a high level, we can view a Roaring bitmap as a list of 16-bit numbers (corresponding to the most-significant 2B) of the values present in the set, each of which is coupled with a reference to a container holding another set of 16-bit numbers corresponding to the least significant 2B of the elements sharing the same prefix.
+
+We dynamically pick the container type to minimize memory usage. For example, when intersecting two bitset containers, we determine whether the result is an array of a bitset container on-the-fly. As we add or remove values, a container's type might change. No bitset container may store fewer than 4097 distinct values; no array container may store more than 4096 distinct values. If a run container has more than 4096 distinct values then it must have no more than 2047 runs, otherwise the number of runs must be less than half of the number of distinct values.
+
+Roaring offers logarithmic-time random access: to check for the presence of a 32-bit integer, we seek the container corresponding to the sixteen most-significant bits using a binary search. If this prefix is not in the list, we know that the integer is not present. If a bitmap container is found, we check the corresponding bit; if an array or run container is found, we use a binary search.
+
+Two main contributions:
+
+- We present several non-trivial algorithm optimizations. In table 1, we show that a collection of algorithms exploiting single-instruction-multiple-data (SIMD) instructions can enhance the performance of a data structure like Roarings in some cases, above and beyond that state-of-the-art optimizing compilers can achieve. To our knowledge, it is the first work to report on the benefits of advanced SIMD-based algorithms for compressed bitmaps.
+
+Though the approach we use to compute array intersections using SIMD instructions in is not new, our work on the computation of the union, difference and symmetric difference of arrays using SIMD instructions might be novel and of general interest.
+
+- We benchmark our C library against a wide range of alternatives in C and C++. Our results provide guidance as to the strengths and weaknesses of our implementation.
+
+inputs: [2^16+1,  2^16+2, 2^16+3, ..2^16 + 99] => run container
+
+inputs: [1,2,4,5,6,7,8,...4096] => bitmap container
+
+## Integer set data structures
+
+The simplest way to represent a set of integers is as a sorted array, leading to an easy implementation. Querying for the presense of a given value can be done in logarithmic time using a binary search. Efficient set operations are already supported in standard libraries. We can compute the intersection, union, difference, and symmetric between two sorted arrays in linear time: O(n1 + n2) where n1 and n2 are the cardinalities of the two arrays. The intersection and difference can also be computed in time O(n1logn2), which is advantageous when one array is small.
+
+|containers|optimization|section|prior work|
+|-|-|-|-|
+|bitset -> array|converting bitsets to arrays|$3.1|-|
+|bitset + array|setting, flipping or resetting the bits of a bitset at indexes specified by an array, with an without cardinality tracking|$3.2|-|
+|bitset|computing the cardinality using a vectorized Harley-Seal algorithm|$4.1.1|[24]|
+|bitset + bitset|computing AND/OR/XOR/ANDNOT between two bitsets with cardinality using a vectorized Harley-Seal algorithm|$4.1.2|[24]|
+|array+array|computing the intersection between two arrays using a vectorized algorithm|$4.2|[22,23]|
+|array+array|computing the union between two arrays using vectorized algorithm|$4.3|-|
+|array+array|computing the difference between two arrays using a vectorized algorithm|$4.4|-|
+|array+array|computing the symmetric difference between two arrays using a vectorized algorithm|$4.5|-|
+
+**Compressed bitset**
+
+A bitset (or bitmap) has both the benefits of the hash set (constant-time random access) and of a sorted array (good locality), but suffers from impractical memory usage when the universe size is too large compared to the cardinality of the sets. So we compressed bitmaps. Though there are alternatives [25], the most popular bitmap compression techniques are based on the word-aligned RLE compression model inherited from Oracle (BBC [26]): WAH [27], Consice [28], EWAH [29], COMPAX [31], VLC [32], VAl-WAH [33], among consecutive bits,. Using W0=8, he uncompressed bitmap 0000000001010000 fillWord(W0)dirtyWord(01010000). Techniques such as BBC, WAH or EWAH use special formats, it may be necessary to read every compressed word to determine whether it indicates a sequence of fill words, or a dirty word. EWAH was found to have superior performance to WAH and Concise [33] in an extensive comparison. A major limitation of formats like BBC, WAH, Concise or EWAH is that random access is slow. A major limitation of formats like BBC, WAH, Consice or EWAH is that random access is slow. That is, to check whether a value is present in a set can take linear time O(n), where n is the compressed size of the bitmap. When intersecting a small set with a more voluminous one, there formats may have suboptimal performance.
+
+Use Roaring for bitmap compresion whenever possible.
+
+**BitMagic**
+
+Mixing container types in one data structure is not unique to Roaring.
+
+The BitMagic library is probably the most closely related data structure [41] with a publicly available implementation. Like Roaring, it is a two-level data structure similar to RIDBit. There are, however, a few differences between Roaring and BitMagic:
+
+- In BitMagic, special pointer values are used to indicate a full (containing 2^16 values) or empty container; Roaring does not need to mark empty containers (they are omitted) and it can use a run container to represent a full container efficiently.
+- Roaring relies on efficient heuristics to generate memory-efficient container. For example, when computing the union between two array containers, we guess whether the output is likely to be more efficiently represented as a bitset container, os opposed to an array. BitMagic does not attempt to optimize the resulting containers: e.g., the intersection of two bitset containers is a bitset container, even when another container type could be more economical.
+
+Roaring keeps a cardinality counter updates for all its bitset containers. BitMagic keeps track of the set cardinality, but not at the level of the bitset containers.
+
+- Roaring uses a key-container array, with one entry per non-empty container; BitMagic's top-level array has [n/2^16] entries to represent a set of values in [0, n). 
+
+Overall, BitMagic is simpler than Roaring, but we expect that is can sometimes use more memory. BitMagic includes the following SIMD-based optimizations on x64 processors with support for the SSE2 and SSE4 instruction sets:
+
+- It uses manually optimized SIMD instructions to compute and AND, OR, XOR and ANDNOT operations between two bitset containers.
+- It uses a mix of SIMD instructions and the dedicated population-count instruction (popcnt) for its optimized functions that compute only the cardinality of the result from AND, OR, XOR and ANDNOT
+- It uses SIMD instructions to negate a bitset quickly.
+
+### FASTER ARRAY-BITSET OPERATIONS WITH BIT-MANIPULATION INSTRUCTION
+
+Like most commodity processors, Intel and AMD processors benefit from bit-manipulation instructions [43]. Optimizing compilers often use them, but not always in an optimal manner.
+
+**3.1. Converting Bitsets To Arrays**
+
+Two useful bit-manipulation instructions are blsi, which sets all the least significant 1-bit to zero (i.e..., x & -x in C)
+
+```go
+func (bc *bitmapContainer) fillArray(container []uint16) {
+	//TODO: rewrite in assembly
+	pos := 0
+	base := 0
+	for k := 0; k < len(bc.bitmap); k++ {
+		bitset := bc.bitmap[k]
+		for bitset != 0 {
+			t := bitset & -bitset
+			container[pos] = uint16((base + int(popcount(t-1))))
+			pos = pos + 1
+			bitset ^= t
+		}
+		base += 64
+	}
+}
+
+func popcount(x uint64) int {
+	// Implementation: Parallel summing of adjacent bits.
+	// See "Hacker's Delight", Chap. 5: Counting Bits.
+	// The following pattern shows the general approach:
+	//
+	//   x = x>>1&(m0&m) + x&(m0&m)
+	//   x = x>>2&(m1&m) + x&(m1&m)
+	//   x = x>>4&(m2&m) + x&(m2&m)
+	//   x = x>>8&(m3&m) + x&(m3&m)
+	//   x = x>>16&(m4&m) + x&(m4&m)
+	//   x = x>>32&(m5&m) + x&(m5&m)
+	//   return int(x)
+	//
+	// Masking (& operations) can be left away when there's no
+	// danger that a field's sum will carry over into the next
+	// field: Since the result cannot be > 64, 8 bits is enough
+	// and we can ignore the masks for the shifts by 8 and up.
+	// Per "Hacker's Delight", the first line can be simplified
+	// more, but it saves at best one instruction, so we leave
+	// it alone for clarity.
+	const m = 1<<64 - 1
+	x = x>>1&(m0&m) + x&(m0&m)
+	x = x>>2&(m1&m) + x&(m1&m)
+	x = (x>>4 + x) & (m2 & m)
+	x += x >> 8
+	x += x >> 16
+	x += x >> 32
+	return int(x) & (1<<7 - 1)
+}
+```
+
+Such code is useful when we need to convert a bitset container to an array container. We can ensure that only a handful of instructions are needed per bit set in the bitset container.
+
+### 3.2 Array-Bitset Aggregates
+
+Roaring has bitset containers, which we implemented as arrays of 64-bit words. Some of the most common operations on bitsets involve getting, setting, flipping or clearing the value of a single bit in one of the words. Sometimes, it is also necessary to determine whether the value of the bit was changed.
+
+```go
+type bitmapContainer struct {
+	cardinality int
+	bitmap      []uint64
+}
+```
+
+We are interested in the following scenario: given a bitset and an array of 16-bit values, we wish to set (or clear or flip) all bits at the indexes corresponding to the 16-bit values, we wish to set (or clear of flip) all bits at the indexes corresponding to the 16-bit values. For example, if the array is made of the values {1,3,7,96,130}, then we might want to set the bits at indexes 1,3,7,96,130 to 1. This operation is equivalently to computing the union between a bitset and an array container.  
+
+- If we do not care about the cardinality, and merely want to set the bit, we can use the simple C expression (w[pos] >> 6 |= UNIT67_C(1) << (pos & 63))
+
+## Vectorized Processing
+
+Modern commodity processors use parallelism to accelerate processing. SIMD instructions offer a particular form of processor parallelism [45] that proves advantageous for processing large volumes of data [46]. Whereas regular intructions operate on a single machine word (e.g., 64 bits), SIMD instructions operate on larger registers (e.g., 256 bits) that can be used to present "vectors" containing several distinct values. For example, a single SIMD instruction can add sixteen 16-bit (16x16) integers in one 32B vector register to the corresponding 16-bit integer in another vector register using a single cycle.
+
+SIMD instructions are ideally suited for operations between bitset containers. When computing the intersection, union, difference or symmetric difference between two words (AND, OR, AND NOT, or XOR) and, optionally, save the result to memory. All of these operations have corresponding SIMD instructions. So, instead of working 64-bit words, we work over larger words (256 bits), dividing the number of instruction (/4) and giving significantly faster processing.
+
+Historically, SIMD instructions have gotten wider and increasingly powerful. The Pentium 4 was limited to 128-bit instructions.
+
+## Vectorized Population Count Over  Bitsets
+
+We can trivially vectorize operations between bitsets. Indeed, it sufficies to compute bitwise operations over vectors instead of machine words. By aggressively unrolling the resulting loop, we can produce highly efficient code. Optimizing compilers can often automatically vectorize such code. It is more difficult, however, to also compute the cardinality of the result efficiently. Ideally, we would like to vectorize simultaneously.
+
+## Vectorized Harley-Seal Population Count Commodity processors have dedicated instructions to count the 1-bits in a word (the "population-count"): popcnt for x64 processors and cnt for the 64-bit RAM architecture.
+
+Processors have dedicated  instructions to count the 1-bits in a word (the "population-count"): popcnt for x64 processors and cnt for the 64-bit ARM architecture. On recent Intel processors, popcnt has a throughput of one instruction per cycle for both 32-bit and 64-bit integers.
+
+## Vectorized Intersections Between Arrays
+
+Because array containers represent integers values as sorted arrays of 16-bit integers, we can put to good use an algorithm based on a vectorized string comparison function 

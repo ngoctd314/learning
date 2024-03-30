@@ -26,12 +26,12 @@ func newRepoV3() *repoV3 {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// db.SetMaxOpenConns(500)
-	// db.SetMaxIdleConns(200)
+	db.SetMaxOpenConns(500)
+	db.SetMaxIdleConns(200)
 	if pingErr := db.Ping(); pingErr != nil {
 		log.Fatal("ping error", pingErr)
 	}
-	chunk := 100
+	chunk := 150
 	q := fmt.Sprintf("SELECT bitmap FROM relate WHERE id IN (?%s)", strings.Repeat(",?", chunk-1))
 	stmt, err := db.Prepare(q)
 	if err != nil {
@@ -133,7 +133,21 @@ func repov3Count() {
 		params = append(params, k)
 	}
 
-	r.countDistinctRelate(params...)
+	wg := sync.WaitGroup{}
+	wg.Add(3)
+	go func() {
+		defer wg.Done()
+		r.countDistinctRelate(params...)
+	}()
+	go func() {
+		defer wg.Done()
+		r.countDistinctRelate(params...)
+	}()
+	go func() {
+		defer wg.Done()
+		r.countDistinctRelate(params...)
+	}()
+	wg.Wait()
 	// r.countDistinctRelate(params...)
 }
 
