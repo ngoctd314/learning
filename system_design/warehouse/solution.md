@@ -460,3 +460,154 @@ Sau đó chạy câu count để thử tốc độ
 ./cmd/count.go 1,2,3,4
 ```
 
+## Roaring
+
+### Cấu trúc dữ liệu
+
+Roaring chia không gian thành các khối 2^16 integers: [0x2^16, 1x2^16), [1x2^16, 2x2^16), [2x2^16, 3x2^16) ... 
+
+Với 100M item => chia thành 1526 khối, mỗi khối 2^16 bits.
+
+Roaring gồm 2 thành phần chính là keys, và containers. Mỗi container là một block, vị trí của container trong block được xác định bởi key tương ứng.
+
+```go
+type roaring struct {
+	keys            []uint16
+	containers      []container
+}
+```
+
+Để thêm phần tử x vào roaring. Thực hiện các bước: 
+
+```txt
++ tính x / 2^16 => xác định vị trí của block (key).
++ tính x % 2^16 => xác định giá trị lưu vào container tương ứng.
+```
+
+Ví dụ tập A: {1, 2, 2^16+1, 2^16+2, 2x2^16+1, 2x2^16+2} biểu diễn theo roaring sẽ cần 3 blocks.
+
+```txt
++ Thêm x = 1 vào roaring => key = 0, container[0] = {1}
++ Thêm x = 2 vào roaring => key = 0, container[0] = {1,2}
++ Thêm x = 2^16+1 vào roaring => key = 1, container[1] = {1}
++ Thêm x = 2^16+2 vào roaring => key = 1, container[1] = {1,2}
++ Thêm x = 2x2^16+1 vào roaring => key = 2, container[2] = {1}
++ Thêm x = 2x2^16+2 vào roaring => key = 2, container[2] = {1,2}
+```
+
+Do đó max của một phần tử trong container là 2^16 - 1, min là 0.
+
+Mỗi container lại có 3 cách biểu diễn: bitset container, array container và run container.
+
+Xét tập S, |S| là lực lượng của tập S. S biểu diễn cho một block gồm 2^16 bits.
+
++ bitmap containers
+
+Nếu |S| > 4096 bitset container sẽ được sử dụng. Bitset container gồm một mảng số nguyên không dấu 64 bit. Bitset được dùng cho trường hợp tập hợp phân bố không đều. Các phần tử tập trung vào một khối.
+
+Với mỗi số nguyên không dấu 64 bits (uint64) ta có thể biểu diễn cho một tập hợp 64 phần tử các số nguyên từ [0, 64).
+
+Do đó bitmap container gồm 2^16 / 64 phần tử (1024 phần tử). Mỗi phần tử là biểu diễn cho sự tồn tại của 64 số nguyên liên tiếp của trong container đó.
+
+```go
+type bitmapContainer struct {
+	bitmap      []uint64
+}
+```
+
+Để thêm phần tử x vào bitset container. Thực hiện các bước: 
+
+```txt
++ tính x / 64 => xác định vị trí của bitmap[i].
++ tính x % 64 => xác định vị trí cần lưu bit 1 trong bitmap[i].
+```
+
+Ví dụ tập A = {1,2,64,65} biểu diễn dưới dạng bitset container B
+
+```txt
++ Thêm 1 vào B => 1 / 64 = 0 => cần set 1 bit vào bitmap[0], bitmap[0] = bitmap[0] | (1 << (1 % 64))
++ Thêm 2 vào B => 2 / 64 = 0 => cần set 1 bit vào bitmap[0], bitmap[0] = bitmap[0] | (1 << (2 % 64))
++ Thêm 64 vào B => 64 / 64 = 1 => cần set 1 bit vào bitmap[1], bitmap[1] = bitmap[1] | (1 << (64 % 64))
+```
+
++ array containers: gồm mảng các số 16-bit integers đã được sắp xếp.
+
+Nếu |S| <= 4096 phần tử array container sẽ được sử dụng.
+
+```go
+type arrayContainer struct {
+	content []uint16
+}
+```
+
+Ví dụ tập A = {64,65, 1, 2} biểu diễn dưới dạng array container B thì chỉ đơn giản là B = [1,2,64,65]
+
++ run containers: dùng để biểu diễn khi các phần tử là các số nguyên liên tiếp
+
+run containers khá giống với việc nén bit dựa trên chiều dài của bit 0, 1 liên tiếp.
+
+
+```go
+type runContainer16 struct {
+	iv []pair<uint16, uint16>
+}
+```
+
+Ví dụ tập A = {1,2,64,65,66, 67} biểu diễn dưới dạng run container B
+
+B = [<1,1>, <64, 3>]
+
+Trong đó phần tử đầu tiên trong cặp là phần tử đầu tiên của dãy liên tiếp, phần tử tiếp theo là số các số liên tiếp.
+
+### Xử lý phép OR
+
+**1. bitmap vs bitmap**
+
+Để thực hiện phép OR trên 2 bitmap containers chỉ cần thực hiện 1024 phép bitwise OR trên 64-bit words tương ứng.
+
+```txt
+input: two bitmaps A and B indexed as arrays of 1024 64-bit integers
+output: a bitmap C representing the union of A and B
+c <- 0
+Let C be indexed as an array of 1024 64-bit integers
+for i ∈ {1,2,...,1024} do
+    Ci <- Ai OR Bi
+return C
+```
+
+Theo phần thống kê thì với phần cứng phổ thông có thể thực hiện 700M 64-bit words trên 1 giây.
+
+**2. bitmap vs array**
+
+Để thực hiện phép OR trên bitmap container và array container thì với mỗi phần tử xi trong array ta thực hiện phép bitwise OR: bitmap[xi] = bitmap[xi] | xi
+
+```txt
+Let C be indexed as an array of 1024 64-bit integers (bitmap container)
+Let B be indexed as an array 16-bit integers (array container)
+for i ∈ {B} do
+    Ci <- Ai OR Bi
+return C
+```
+
+**3. array vs array**
+
+Để thực hiện phép OR trên 2 array (X, Y) thì việc đầu tiên là xác định loại container sẽ sử dụng cho kết quả của phép OR. 
+
+Nếu |X| + |Y| <= 4096 => Là kết qủa của việc merge(X, Y), với X, Y là 2 sorted array.
+
+Nếu |X| + |Y| > 4096 => Thực hiện bitwise OR tương tự như trường hợp của bitmap vs array nhưng. Nhưng bitmap ban đầu là rỗng mà thực hiện trên 2 arrays X, Y.
+
+**Các phép trên run container được bỏ qua trong phần mô tả này vì nó rất nhanh và cũng tương tự như array**
+
+### Optimize_1: Priority Queue
+
+### Optimize_2: CPU instruction
+
++ Hàm popCount
++ SIMD
+
+**Tham khảo**
+
+- https://arxiv.org/pdf/1402.6407.pdf
+- https://arxiv.org/pdf/1603.06549.pdf
+- https://arxiv.org/pdf/1709.07821.pdf

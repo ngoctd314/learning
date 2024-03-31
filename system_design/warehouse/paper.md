@@ -51,6 +51,8 @@ Use Roaring for bitmap compression whenever possible. Do not use other bitmap co
 
 ## Bitmagic
 
+TODO
+
 ## Faster Array-BitSet Operations With Bit-Manipulation instructions
 
 Like most commodity processors, Intel and AMD processors benefit from bit-manipulation instructions. Optimizing compilers often use them, but not always in an optimal manner.
@@ -59,4 +61,21 @@ Like most commodity processors, Intel and AMD processors benefit from bit-manipu
 
 Two useful bit-manipulation instructions are blsi, which sets are all the least significant 1-bit to zero (i.e x & -x in C), and tzcnt which counts the number of trailing zeros. Using the corresponding Intel intrinsics (_blsi_u64 and _mm_tzcnti_64) we can extract the locations of all 1-bits in a 64-bit word (w) to an array (out) efficiently.
 
+```go
+pos = 0
+while (w != 0) {
+    uint64_t temp = _blsi_u64(w); // set all but the lest significant 1-bit to zero
+    out[pos++] = _mm_tzcnti_64(w);
+    w ^= temp;
+}
+```
+
+Such code is useful when we need to convert a bitset container to an array container. We can ensure that only a handful of instructions are needed per bit set is the bitset container. 
+
 ### Array-BitSet Aggregates
+
+TODO
+
+## Vectorized Processing
+
+
