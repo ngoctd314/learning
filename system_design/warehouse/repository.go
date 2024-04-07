@@ -31,7 +31,7 @@ func newRepoV3() *repoV3 {
 	if pingErr := db.Ping(); pingErr != nil {
 		log.Fatal("ping error", pingErr)
 	}
-	chunk := 150
+	chunk := 100
 	q := fmt.Sprintf("SELECT bitmap FROM relate WHERE id IN (?%s)", strings.Repeat(",?", chunk-1))
 	stmt, err := db.Prepare(q)
 	if err != nil {
@@ -111,12 +111,12 @@ func repov3Insert() {
 func repov3Count() {
 	r := newRepoV3()
 	s := make(map[uint32]struct{})
-	items, j := 10000, 0
+	items, j := 5000, 0
 	for j < items {
 		// for i := 1; i <= 100; i++ {
-		n := uint32(rand.Intn(1e7))
+		n := uint32(rand.Intn(1e6))
 		for n == 0 {
-			n = uint32(rand.Intn(1e7))
+			n = uint32(rand.Intn(1e6))
 		}
 		s[n] = struct{}{}
 		j++
@@ -134,19 +134,26 @@ func repov3Count() {
 	}
 
 	wg := sync.WaitGroup{}
-	wg.Add(3)
+	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		r.countDistinctRelate(params...)
 	}()
-	go func() {
-		defer wg.Done()
-		r.countDistinctRelate(params...)
-	}()
-	go func() {
-		defer wg.Done()
-		r.countDistinctRelate(params...)
-	}()
+	// wg.Add(1)
+	// go func() {
+	// 	defer wg.Done()
+	// 	r.countDistinctRelate(params...)
+	// }()
+	// wg.Add(1)
+	// go func() {
+	// 	defer wg.Done()
+	// 	r.countDistinctRelate(params...)
+	// }()
+	// wg.Add(1)
+	// go func() {
+	// 	defer wg.Done()
+	// 	r.countDistinctRelate(params...)
+	// }()
 	wg.Wait()
 	// r.countDistinctRelate(params...)
 }
@@ -211,7 +218,7 @@ func (r *repoV3) countDistinctRelate(params ...any) int {
 				return
 			}
 
-			// ti := time.Now()
+			ti := time.Now()
 			listData := make([][]byte, 0, upper-lower)
 			for rows.Next() {
 				// var bitmap sql.RawBytes
@@ -223,7 +230,7 @@ func (r *repoV3) countDistinctRelate(params ...any) int {
 				listData = append(listData, bitmap)
 			}
 			rows.Close()
-			// fmt.Println("scan: ", time.Since(ti))
+			fmt.Println("scan: ", time.Since(ti))
 
 			listBitmap := make([]*roaring.Bitmap, 0, upper-lower)
 			// ti1 := time.Now()
@@ -247,7 +254,7 @@ func (r *repoV3) countDistinctRelate(params ...any) int {
 	wg.Wait()
 
 	ti := time.Now()
-	rs := roaring.ParOr(6, list...)
+	rs := roaring.ParOr(0, list...)
 	fmt.Println("Bitmap OR time", time.Since(ti))
 	fmt.Println("bitmap or result: ", rs.GetCardinality())
 

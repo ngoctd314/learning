@@ -12,13 +12,13 @@ Cả 2 solution đều đáp ứng được nhu cầu của bài toán
 
 + MySQL, Golang
 
-+ Với cấu hình server có 12 **physical CPUs** khoảng 0.6s, server có 24 **physical CPUS** khoảng 0.3s
++ Với cấu hình server có 6 **physical CPUs** khoảng 0.6s
 
 **Multi instances (horizontal scale)**
 
 + MySQL, Golang, gRPC (hoặc REST)
 
-+ Với cấu hình 5 instances, mỗi instance 6 **physical CPUs** thời gian tính toán khoảng 0.4 s
++ Với cấu hình 5 instances, mỗi instance 6 **physical CPUs** thời gian tính toán khoảng 0.2 s
 
 Vì logic tính toán khá nhiều nên thời gian xử lý phụ thuộc rất nhiều vào CPUs. Cả 2 phương án trên đều có thể giảm thời gian tính toán bằng việc cung cấp thêm CPUs cho mỗi instance. Có thể đạt tới 0.1 - 0.2s nếu bỏ nhiều resource.
 
@@ -188,10 +188,10 @@ có 100M records = (4 + 30000)*1e8 bytes ~ 30e8 KB ~ 30e5 MB ~ 30e2 GB ~ 3 TB.
 
 |Items của kho X|Thời gian thực hiện|< 1s|
 |-|-|-|
-|1000|135.437861 ms|OK|
-|5000|565.390196 ms|OK|
-|8000|875.923163 ms|OK|
-|10000|1.119023969 s|FAIL (>1s)|
+|1000|112.437861 ms|OK|
+|5000|273.981094ms|OK|
+|8000|464.694475ms|OK|
+|10000|608.330203ms|OK|
 
 Để tăng tốc độ xử lý cần chạy trên server có nhiều CPUs hơn (vertical scale). Với khoảng 24 physical cores thì dự kiến đếm distinct 10K items có thể đạt 0.2 => 0.3s. Lý do có con số này là phần code đã apply chia nhỏ câu query theo chunk. Mỗi CPUs sẽ xử lý query 100 ids và thực hiện tính toán. Với 1000 ids chia cho 6 CPUs thời gian trung bình chỉ là 130ms. Lưu ý ở đây yêu cầu physical CPUs. Vì các tác vụ đa phần là tính toán, logical CPUs không có nhiều tác dụng trong xử lý tác vụ liên quan đến tính toán trên CPUs.
 
@@ -355,7 +355,13 @@ Trong case chắc chắn không thì đưa cho worker xử lý như bình thư�
 
 Còn case có thể có thì kiểm tra cache.
 
-## Tối ưu việc mapping data từ MySQL (blob) -> bitmap
+## Tối ưu việc query từ database
+
+### Tối ưu số pages MySQL cần load
+
+Vì mỗi bitmap cần 28KB -> 30KB để lưu trữ, default page size của MySQL là 16KB. Nếu sử dụng default page size này, rất có thể sẽ phải cần đến 3 pages để lưu trữ cho một bitmap. Đề xuất set default page size thành 32KB.
+
+### Tối ưu việc mapping data từ MySQL (blob) -> bitmap
 
 Với kho x có 10K items, mỗi item chứa thông tin relate của 5000 item (khoảng 30KB).
 
@@ -464,7 +470,7 @@ Sau đó chạy câu count để thử tốc độ
 
 ### Cấu trúc dữ liệu
 
-Roaring chia không gian thành các khối 2^16 integers: [0x2^16, 1x2^16), [1x2^16, 2x2^16), [2x2^16, 3x2^16) ... 
+Roaring chia không gian thành các khối 2^16 integers: [0x2^16, 1x2^16), [1x2^16, 2x2^16), [2x2^16, 3x2^16) ... Việc chia nhỏ thành các khối ngoài việc dễ dàng tính toán ở các phép toán AND, OR, cũng đảm bảo mỗi khối sẽ được giữ lưu trên CPU cache, tránh khỏi tình trạng miss cache.
 
 Với 100M item => chia thành 1526 khối, mỗi khối 2^16 bits.
 
@@ -497,13 +503,13 @@ Ví dụ tập A: {1, 2, 2^16+1, 2^16+2, 2x2^16+1, 2x2^16+2} biểu diễn theo 
 
 Do đó max của một phần tử trong container là 2^16 - 1, min là 0.
 
-Mỗi container lại có 3 cách biểu diễn: bitset container, array container và run container.
+Mỗi container lại có 3 cách biểu diễn: bitmap container, array container và run container.
 
 Xét tập S, |S| là lực lượng của tập S. S biểu diễn cho một block gồm 2^16 bits.
 
 + bitmap containers
 
-Nếu |S| > 4096 bitset container sẽ được sử dụng. Bitset container gồm một mảng số nguyên không dấu 64 bit. Bitset được dùng cho trường hợp tập hợp phân bố không đều. Các phần tử tập trung vào một khối.
+Nếu |S| > 4096 bitmap container sẽ được sử dụng. Bitmap container gồm một mảng số nguyên không dấu 64 bit. Bitmap được dùng cho trường hợp tập hợp phân bố không đều. Các phần tử tập trung vào một khối.
 
 Với mỗi số nguyên không dấu 64 bits (uint64) ta có thể biểu diễn cho một tập hợp 64 phần tử các số nguyên từ [0, 64).
 
@@ -515,14 +521,14 @@ type bitmapContainer struct {
 }
 ```
 
-Để thêm phần tử x vào bitset container. Thực hiện các bước: 
+Để thêm phần tử x vào bitmap container. Thực hiện các bước: 
 
 ```txt
 + tính x / 64 => xác định vị trí của bitmap[i].
 + tính x % 64 => xác định vị trí cần lưu bit 1 trong bitmap[i].
 ```
 
-Ví dụ tập A = {1,2,64,65} biểu diễn dưới dạng bitset container B
+Ví dụ tập A = {1,2,64,65} biểu diễn dưới dạng bitmap container B
 
 ```txt
 + Thêm 1 vào B => 1 / 64 = 0 => cần set 1 bit vào bitmap[0], bitmap[0] = bitmap[0] | (1 << (1 % 64))
@@ -568,7 +574,6 @@ Trong đó phần tử đầu tiên trong cặp là phần tử đầu tiên c�
 ```txt
 input: two bitmaps A and B indexed as arrays of 1024 64-bit integers
 output: a bitmap C representing the union of A and B
-c <- 0
 Let C be indexed as an array of 1024 64-bit integers
 for i ∈ {1,2,...,1024} do
     Ci <- Ai OR Bi
@@ -579,14 +584,14 @@ Theo phần thống kê thì với phần cứng phổ thông có thể thực h
 
 **2. bitmap vs array**
 
-Để thực hiện phép OR trên bitmap container và array container thì với mỗi phần tử xi trong array ta thực hiện phép bitwise OR: bitmap[xi] = bitmap[xi] | xi
+Để thực hiện phép OR trên bitmap container và array container thì với mỗi phần tử xi trong array ta thực hiện phép bitwise OR: bitmap[xi / 64] = bitmap[xi / 64] | (xi % 64)
 
 ```txt
-Let C be indexed as an array of 1024 64-bit integers (bitmap container)
+Let A be indexed as an array of 1024 64-bit integers (bitmap container)
 Let B be indexed as an array 16-bit integers (array container)
 for i ∈ {B} do
-    Ci <- Ai OR Bi
-return C
+    Ai <- Ai OR Bi
+return A
 ```
 
 **3. array vs array**
@@ -597,14 +602,85 @@ Nếu |X| + |Y| <= 4096 => Là kết qủa của việc merge(X, Y), với X, Y 
 
 Nếu |X| + |Y| > 4096 => Thực hiện bitwise OR tương tự như trường hợp của bitmap vs array nhưng. Nhưng bitmap ban đầu là rỗng mà thực hiện trên 2 arrays X, Y.
 
-**Các phép trên run container được bỏ qua trong phần mô tả này vì nó rất nhanh và cũng tương tự như array**
+```txt
+Let A be indexed as an array 16-bit integers (array container)
+Let B be indexed as an array 16-bit integers (array container)
+Let C be indexed as an array of 1024 64-bit integers (bitmap container)
+for i ∈ {A} do
+    Ci <- Ci OR Ai
+for i ∈ {A} do
+    Ci <- Ci OR Bi
+return C
+```
+
+**Các phép trên run container được bỏ qua trong phần mô tả này. Vì nó rất nhanh và cũng tương tự như array**
 
 ### Optimize_1: Priority Queue
 
-### Optimize_2: CPU instruction
+Khi thực hiện phép Union trên nhiều bitmaps (trường hợp của bài toán), các đơn giản là thực hiện các phép OR liên tiếp. Union (A1, A2) -> B1, Union(B1, A3), ... Các này có lợi ích là không cần quá nhiều bộ nhớ để lưu trữ vì các phép Union được thực hiện liên tiếp, sau khi Union(A1, A2), A1, A2 sẽ được giải phóng. Tuy nhiên chi phí này cũng không nhiều, Roaring sử dụng priority queue để xử lý (nếu yêu cầu về mặt tốc độ).
 
-+ Hàm popCount
-+ SIMD
+Đầu tiên Roaring sẽ gom hết các containers có cùng key (sử dụng priority queue - min-heap). Nếu một container là dạng bitmap container thì chỉ cần lấy container này làm gốc, từ đó chạy qua hết các container còn lại và set bit-1 tương ứng qua phép OR (giống trường hợp bitmap vs array).
+
+Trong trường hợp nếu số lượng bitmaps đủ lớn, tính trước lực lượng của các containers > 4096 => tạo ra một bitmaps container rỗng, sau đó chạy qua hết các arrays container còn lại để set bit-1 tương ứng thông qua phép OR (cũng là bitmap vs array nhưng bitmap rỗng).
+
+### Optimize_2: Convert container, CPU instruction
+
+**Convert container**
+
+Vì Roaring sử dụng 3 loại container khác nhau: bitmap container, array container, run container. Việc chuyển đổi giữa bitmap và array container xảy ra ở các bước thêm, xóa phần tử trong container. Còn chuyển đổi sang run container sẽ thực hiện ở bước serialize bitmaps.
+
+Bài toán là làm sao chuyển đổi bitmap container -> run container (array container thì chỉ là bài toán dãy con liên tiếp).
+
+Ví dụ với bitmap container Ci = 000111101111001011111011111000001
+
+Sẽ có 6 runs: 1, 11111, 11111, 1, 1111, 1111 (mỗi run là vùng có các số 1 liên tiếp)
+
+Để đếm được trong Ci có 6 run, Roaring thực hiện các bước như sau: 
+
+```txt
+Ci                  = 000111101111001011111011111000001
+Ci << 1             = 001111011110010111110111110000010
+(Ci << 1) ANDNOT Ci = 001000010000010100000100000000010
+bit1Count(001000010000010100000100000000010)
+```
+
+=> run_number = bit1Count((Ci << 1) ANDNOT Ci)
+
+Hàm bit1Count cũng là một hàm được tối ưu sẵn, các ngôn ngữ đều support 1 hàm để thực hiện thao tác này chỉ với ~1 CPU cycle.
+
+Ví dụ với source của Golang
+
+```go
+func OnesCount64(x uint64) int {
+	const m = 1<<64 - 1
+	x = x>>1&(m0&m) + x&(m0&m)
+	x = x>>2&(m1&m) + x&(m1&m)
+	x = (x>>4 + x) & (m2 & m)
+	x += x >> 8
+	x += x >> 16
+	x += x >> 32
+	return int(x) & (1<<7 - 1)
+}
+```
+
+**CPU instruction: SIMD - Single instruction multiple data**
+
+Như tên gọi, SIMD cho phép chỉ với 1 instruction thực hiện được nhiều phép toán. SIMD khác với concurrency, SIMD khai thác tính toán song song trên dữ liệu "data level parallelism". SIMD được ứng dụng nhiều trong các tác vụ liên quan đến xử lý âm thanh.
+
+Ví dụ với bài toán cộng tọa độ: (x1, y1) = (1, 2); (x2, y2) = (3, 4). Tính (x, y) = (x1+x2, y1+y2).
+
+Với thao tác thông thường thì cần 2 instruction CPU
+
+```txt
+x = x1 + x2
+y = y1 + y2
+```
+
+SIMD cho phép thực hiện 2 thao tác này chỉ với 1 instruction.
+
+Trong Roaring, SIMD được áp dụng để xử lý 8 phép bitwise với một instruction (mỗi phép bitwise trên số nguyên 16 bits, vùng chứa thanh ghi là 256 bits = 16 x 8 x 2).
+
+Tuy nhiêu đọc source code thì SIMD mới chỉ đang support cho source C, C++, các source như Go, Java thì vẫn đang dùng single instruction, single data.
 
 **Tham khảo**
 
