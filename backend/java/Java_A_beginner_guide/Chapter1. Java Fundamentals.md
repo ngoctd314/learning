@@ -133,3 +133,30 @@ When Java source code is compiled, each individual class is put into its own out
 Before moving on, it is important to mention that beginning with JDK 11, Java provides a way to run some types of simple programs directly from a source file, without explicitly invoking javac.
 
 ### The First Sample Program Line by Line
+
+Although Example.java is quite short, it includes several key features that are common to all Java programs. Let's closely examine each part of the program. The programs begins with the following lines:
+
+```java
+class Example{
+```
+This line uses the keyword class to declare that a new class is being defined. As mentioned, the class is Java's basic unit of encapsulation. Example is the name of the class.
+
+The next line of code is shown here:
+
+```java
+public static void main(String[] args)
+```
+
+In general, Java applications begin execution by calling main(). The exact meaning of each part of this line cannot be given now, since it involves a detailed understanding  of several other of Java's features. However, since many of the examples in this book will use this line of code.
+
+The **public** keywords is an access modifier. An access modifier determines how other parts of the program can access the members of the class. When a class member is preceded by public, then that member can be accessed by code outside the class in which it is declared. (The opposite of public is private, which prevents a member from being used by code defined outside of its class). In this case, main() must be declared as public, since it must be called by code outside of its class when the program is started. The keyword static allows main() to be called before an object of the class has been created. This is necessary because main() is called by the JVM before any objects are made. The keyword void simply tells the compiler that main() does not return a value. As you will see, methods may also return values.
+
+As stated, main() is the method called when a java application begins. Any information that you need to pass to a method is received by variables specified within the set of parentheses that follow the name of the method. These variables are called parameters. If no parameters are required for a given method, you still need to include the empty parentheses. In main() there is only one parameter, String[] args, which declares a parameter named args. This is an array of objects of type String.
+
+System is a predefined class that provides access to the system, and out is the output stream that is connected to the console. Thus, System.out is an object that encapsulates console output.
+
+Although the Java compiler will compile classes that do not contain a main() method, it has no way to execute them. So, if you had mistyped main, the compiler would still compile your program. However, the Java interpreter would report an error because it would be unable to find the main() method.
+
+## A Second Simple program
+
+
