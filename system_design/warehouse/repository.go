@@ -108,15 +108,24 @@ func repov3Insert() {
 	// 	r.insert(uint32(i+1), b)
 	// }
 }
+
+// 500 số trong 1000 số
+// tính xác suất để lực lượng của tập hợp là 6
+// 500 -> 1000
+// 6
+
+// 1e8
+// 1e8C5000
+// 600000
 func repov3Count() {
 	r := newRepoV3()
 	s := make(map[uint32]struct{})
-	items, j := 5000, 0
+	items, j := 1000, 0
 	for j < items {
 		// for i := 1; i <= 100; i++ {
-		n := uint32(rand.Intn(1e6))
+		n := uint32(rand.Intn(1e7))
 		for n == 0 {
-			n = uint32(rand.Intn(1e6))
+			n = uint32(rand.Intn(1e7))
 		}
 		s[n] = struct{}{}
 		j++
