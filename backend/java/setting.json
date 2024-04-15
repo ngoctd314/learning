@@ -1,0 +1,189 @@
+{
+  "workbench.colorTheme": "Default Light Modern",
+  // "workbench.colorCustomizations": {
+  // 	"statusBar.background": "#191919",
+  // 	"editor.background": "#191919"
+  // },
+  "editor.accessibilitySupport": "off",
+  // tab file
+  // "workbench.editor.showTabs": true,
+  // breadcrumbs
+  "breadcrumbs.enabled": false,
+  // outline
+  // "outline.showFields": false,
+  // "explorer.openEditors.visible": 1,
+  // "workbench.editor.enablePreview": true,
+  // "window.menuBarVisibility": "hidden",
+  // "window.dialogStyle": "custom",
+  // folding
+  // "editor.foldingImportsByDefault": true,
+  // editor
+  "editor.showFoldingControls": "always",
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  "editor.minimap.enabled": false,
+  "editor.scrollbar.verticalScrollbarSize": 4,
+  "editor.scrollbar.horizontal": "hidden",
+  "editor.lineNumbers": "relative",
+  // debug
+  "editor.glyphMargin": true,
+  "editor.folding": true,
+  "editor.fontSize": 20,
+  "editor.lineHeight": 1.2,
+  "editor.fontFamily": "'Fira Code'",
+  "editor.fontWeight": "500",
+  "editor.fontLigatures": true,
+  "editor.formatOnSave": true,
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.smoothScrolling": true,
+  "editor.cursorBlinking": "solid",
+  // explorer
+  "explorer.compactFolders": true,
+  // terminal
+  "terminal.integrated.fontSize": 13,
+  // extension
+  "prettier.useTabs": true,
+  "codesnap.containerPadding": "0em",
+  "codesnap.roundedCorners": false,
+  "glassit.alpha": 255,
+  "errorLens.enabled": true,
+  "errorLens.fontWeight": "600",
+  "errorLens.fontStyleItalic": true,
+  "errorLens.messageBackgroundMode": "none",
+  "errorLens.followCursor": "allLines",
+  "errorLens.messageTemplate": "$severity $message",
+  "errorLens.severityText": [
+    "",
+    "",
+    "",
+    ""
+  ],
+  "errorLens.fontSize": "12",
+  // linting
+  "go.lintTool": "golint",
+  "go.lintOnSave": "file",
+  // "go.lintFlags": ["--fast"],
+  // format
+  "[go]": {
+    "editor.defaultFormatter": "golang.go",
+    "editor.tabSize": 4
+    // "editor.insertSpaces": true
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.tabSize": 2
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2
+  },
+  "[yaml]": {
+    "editor.insertSpaces": true,
+    "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.tabSize": 2
+  },
+  "[proto3]": {
+    "editor.defaultFormatter": "xaver.clang-format"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
+  },
+  "go.testFlags": [
+    "-v"
+  ],
+  "go.toolsManagement.autoUpdate": true,
+  // lsp
+  "gopls": {
+    "ui.semanticTokens": true,
+    "formatting.gofumpt": true
+  },
+  // vi	socketio.Onm
+  "vim.hlsearch": true, // enable hight light search
+  "vim.enableNeovim": true,
+  "vim.neovimPath": "/usr/bin/nvim/bin/nvim",
+  "vim.timeout": 300,
+  // "vim.incsearch": true,
+  // "vim.useCtrlKeys": true,
+  "vim.foldfix": true, // allow vim mode move over fold
+  "vim.easymotion": true,
+  "vim.easymotionMarkerBackgroundColor": "#f44336",
+  "vim.easymotionMarkerForegroundColorOneChar": "#fff",
+  "vim.useSystemClipboard": true,
+  "vim.leader": "<space>",
+  "vim.normalModeKeyBindingsNonRecursive": [
+    {
+      "before": [
+        "s"
+      ], // easymotion
+      "after": [
+        "<leader>",
+        "<leader>",
+        "s"
+      ]
+    },
+    {
+      "before": [
+        "S"
+      ],
+      "commands": [
+        "editor.action.showHover"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "e"
+      ],
+      "commands": [
+        "workbench.action.toggleSidebarVisibility"
+      ]
+    },
+    {
+      "before": [
+        "H"
+      ],
+      "commands": [
+        ":bprevious"
+      ]
+    },
+    {
+      "before": [
+        "L"
+      ],
+      "commands": [
+        ":bnext"
+      ]
+    }
+  ],
+  "vim.visualModeKeyBindingsNonRecursive": [
+    {
+      "before": [
+        "s"
+      ],
+      "after": [
+        "<leader>",
+        "<leader>",
+        "s"
+      ]
+    }
+  ],
+  // others
+  "debug.console.collapseIdenticalLines": false,
+  "explorer.confirmDragAndDrop": false,
+  "git.openRepositoryInParentFolders": "never",
+  "window.titleBarStyle": "custom",
+  "workbench.iconTheme": "material-icon-theme",
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "window.zoomLevel": -1
+}

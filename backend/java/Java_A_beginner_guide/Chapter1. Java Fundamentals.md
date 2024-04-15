@@ -158,5 +158,3 @@ System is a predefined class that provides access to the system, and out is the 
 Although the Java compiler will compile classes that do not contain a main() method, it has no way to execute them. So, if you had mistyped main, the compiler would still compile your program. However, the Java interpreter would report an error because it would be unable to find the main() method.
 
 ## A Second Simple program
-
-

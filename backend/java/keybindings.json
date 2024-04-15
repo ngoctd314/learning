@@ -1,0 +1,144 @@
+// Place your key bindings in this file to override the defaults
+[
+  // navigate
+  {
+    "key": "ctrl+h",
+    "command": "workbench.action.navigateLeft"
+  },
+  {
+    "key": "ctrl+l",
+    "command": "workbench.action.navigateRight"
+  },
+  {
+    "key": "ctrl+j",
+    "command": "workbench.action.navigateDown"
+  },
+  {
+    "key": "ctrl+k",
+    "command": "workbench.action.navigateUp"
+  },
+  // terminal
+  {
+    "key": "ctrl+t",
+    "command": "workbench.action.terminal.toggleTerminal",
+    "when": "terminal.active"
+  },
+  // quick fix
+  // {
+  // 	"key": "q",
+  // 	"command": "keyboard-quickfix.openQuickFix",
+  // 	"when": "editorHasCodeActionsProvider && editorTextFocus && !editorReadonly && vim.active && !inDebugRepl && vim.mode == 'Normal'"
+  // },
+  {
+    "key": "q",
+    "command": "editor.action.quickFix",
+    "when": "editorHasCodeActionsProvider && editorTextFocus && !editorReadonly && vim.active && vim.mode == 'Normal'"
+  },
+  // goto
+  // goto reference
+  // {
+  //   "key": "g r",
+  //   "command": "editor.action.goToReferences",
+  //   "when": "editorHasReferenceProvider && editorTextFocus && !inReferenceSearchEditor && !isInEmbeddedEditor && vim.active && !inDebugRepl && vim.mode == 'Normal'"
+  // },
+  // search
+  {
+    "key": "g s",
+    "command": "search.action.openNewEditor",
+    "when": "editorTextFocus && !inReferenceSearchEditor && vim.active && !inDebugRepl && vim.mode == 'Normal'"
+  },
+  // goto definition
+  {
+    "key": "g d",
+    "command": "editor.action.revealDefinition",
+    "when": "editorTextFocus && editorHasDefinitionProvider && !isInEmbeddedEditor && vim.active && !inDebugRepl && vim.mode == 'Normal'"
+  },
+  // goto next problem
+  {
+    "key": "g e",
+    "command": "editor.action.marker.next",
+    "when": "editorTextFocus && editorHasDefinitionProvider && !isInEmbeddedEditor && vim.active && !inDebugRepl && vim.mode == 'Normal'"
+  },
+  // {
+  //   "key": "g i",
+  //   "command": "editor.action.goToImplementation",
+  //   "when": "editorHasImplementationProvider && editorTextFocus && !isInEmbeddedEditor && vim.active && !inDebugRepl && vim.mode == 'Normal'"
+  // },
+  // explorer
+  {
+    "key": "a",
+    "command": "explorer.newFile",
+    "when": "explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus"
+  },
+  {
+    "key": "shift+a",
+    "command": "explorer.newFolder",
+    "when": "explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !inputFocus"
+  },
+  {
+    "key": "r",
+    "command": "renameFile",
+    "when": "explorerViewletVisible && filesExplorerFocus && !explorerResourceIsRoot && !explorerResourceReadonly && !inputFocus"
+  },
+  // widget navigate
+  {
+    "key": "ctrl+j",
+    "command": "selectNextSuggestion",
+    "when": "suggestWidgetMultipleSuggestions && suggestWidgetVisible && textInputFocus"
+  },
+  {
+    "key": "ctrl+k",
+    "command": "selectPrevSuggestion",
+    "when": "suggestWidgetMultipleSuggestions && suggestWidgetVisible && textInputFocus"
+  },
+  {
+    "key": "ctrl+k",
+    "when": "CodeActionMenuVisible",
+    "command": "focusPreviousCodeAction"
+  },
+  {
+    "key": "ctrl+j",
+    "when": "CodeActionMenuVisible",
+    "command": "focusNextCodeAction"
+  },
+  // esc for vim
+  {
+    "key": "capslock",
+    "command": "extension.vim_escape",
+    "when": "editorTextFocus && vim.active && !inDebugRepl"
+  },
+  // clear terminal
+  {
+    "key": "ctrl+l",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "\u000c"
+    },
+    "when": "terminalFocus"
+  },
+  // focus bookmark explorer
+  {
+    "key": "ctrl+b",
+    "command": "bookmarksExplorer.focus"
+  },
+  // focus outline
+  // {
+  // 	"key": "ctrl+o",
+  // 	"command": "outline.focus"
+  // },
+  {
+    "key": "tab",
+    "command": "workbench.action.quickOpenNavigateNextInFilePicker",
+    "when": "inFilesPicker && inQuickOpen && !inDebugRepl"
+  },
+  {
+    "key": "tab",
+    "command": "selectNextSuggestion",
+    "when": "suggestWidgetMultipleSuggestions && suggestWidgetVisible && textInputFocus"
+  },
+  {
+    "key": "tab",
+    "when": "CodeActionMenuVisible",
+    "command": "focusNextCodeAction"
+  }
+]
