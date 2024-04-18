@@ -1,0 +1,1 @@
+- https://storware.eu/blog/kvm-vs-hyper-v-what-are-the-differences
