@@ -1,0 +1,3 @@
+In computer networking, a bare-metal server is a physical computer server that is used by one consumer, or tenant only. Each server offered for rental is a distinct physical piece of hardware that is a functional server its own. They are not virtual servers running in multiple pieces of shared hardware.
+
+The term is used to distinguish between servers that can host multiple tenants and which use virtualization and cloud hosting. Unlike bare-metal servers, cloud servers are shared between multiple tenants. Each bare metal server may run any amount of work for a user, or have multiple simultaneous users, but they are dedicated entirely to the entity who is renting them.
