@@ -4,7 +4,6 @@ Virtualization is the technology that started a big technology shift toward IT c
 
 ## Linux virtualization and how it all started
 
-// FEAT: xzy
 Virtualization is a concept that creates virtualized resources and maps them to physical resources. This process can be done using specific hardware functionality (partitioning, via some kind of partition controller) or software functionality (hypervisor). So, as an example, if you have a physical PC-based server with 16 cores running a hypervisor, you can easily create one or more virtual machines with two cores each and start them up. Limits regarding how many virtual machines you can start is something that's vendor-based. In any case, hypervisor is going to be go-to guy that's going to try to manage that as efficiently as possible so that all of the virtual machine workloads get as much time on the CPU as possible.  
 
 ```go
@@ -136,16 +135,37 @@ Currently, there are three main open source cloud projects that use Linux Virtua
 
 ## Summary
 
-In this chapter, we covered the basic of virtualization and its different types. Keeping in mind the importance of virtualization in today's large-scale IT world is beneficial as it's good to know how these concepts can be tied together to create a bigger picture
+In this chapter, we covered the basic of virtualization and its different types. Keeping in mind the importance of virtualization in today's large-scale IT world is beneficial as it's good to know how these concepts can be tied together to create a bigger picture - large, virtualized environments and cloud environments. Cloud-based technologies will be convered later in much greater detail.
 
 ## Questions
 
 1. Which types of hypervisors exist?
 
-Type 1 hypervisor, Type 2 hypervisor
+Hypervisors, also known as virtual machine monitors (VMMs), can be broadly categorized into two main types based on their architecture deployment:
+
+Type 1 hypervisor (Bare Metal Hypervisor):
+
+- Type 1 hypervisors run directly on the physical hardware (bare metal) of the host system without the need for a separate underlying os.
+- They have direct access to the physical hardware resources, allowing them to control and manage the allocation of resources to VM
+- Examples of Type 1 hypervisors include VMware vSphere/ESXi, Microsoft Hyper-V (when installed on bare metal), KVM (Kernel-based Virtual Machine), Xen, and Oracle VM server for x86.
+
+Type 2 hypervisor (Hosted Hypervisor):
+
+- Type 2 hypervisors run on top of a host os, utilizing its resources to create and manage virtual machines.
+- They are installed as software applications on the host os, which mean they share resources with other applications runing on the host. 
+- Type 2 hypervisors are often used for development, testing, and desktop virtualization scenarios.
+- Examples of Type 2 hypervisors include VMware Workstation, Oracle VirtualBox, Parallels Desktop, and Microsoft Virtual PC.
+
+These two types of hypervisors offer different trade-offs in terms of performance, resource utilization, management complexity, and use cases. Type 1 hypervisors are typically used in enterprise data centers and cloud environments where performance and resource isolation are critical, while type 2 hypervisors are more commonly used for desktop virtualization and development/testing env where ease of use adn flexibility are prioritized.
 
 2. What are containers?
 
+Containers are a form of lightweight virtualization technology that allows you to package and run applications and their dependencies in isolated environments, known as containers. Unlike traditional virtual machines (VMs), which virtualize the entire os, containers virtualize the os at the application level.
+
 3. What is container-based virtualization?
 
+Docker...
+
 4. What is OpenStack?
+
+Is an open source for build Iaas

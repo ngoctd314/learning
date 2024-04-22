@@ -24,18 +24,9 @@ func newVirtualization(processsType string) virtualization {
 
 }
 
-// TODO: mnp
-// HACK: wanr
-
-// FEAT: mp
-
 func main() {
 	add23(1, 2)
 }
-
-// FEAT: add23
-// FEAT: add23
-// FEAT: add23
 func add23(x, y int) {
 	fmt.Println(x, y)
 }

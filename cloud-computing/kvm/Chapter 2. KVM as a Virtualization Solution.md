@@ -24,11 +24,13 @@ In a virtualized world, we're running a hypervisor (such as KVM), and virtual ma
 
 ![alt](./assets/virtualization-x-application.png)
 
-There are still various scenarios in which the physical approach is going to be needed. For example, there are still thousands of applications on physical servers all over the world because these servers can't be virtualized. These can different reasons why they can't be virtualized. For example, the most common reason is actually the simplest reason - maybe these applications are being run on an OS that's not on the supported OS list run by the virtualization software vendor. That can mean that you can't virtualize that OS/application combination because that OS doesn't support some virtualized hardware.
+There are still various scenarios in which the physical approach is going to be needed. For example, there are still thousands of applications on physical servers all over the world because these servers can't be virtualized. These can different reasons why they can't be virtualized. For example, the most common reason is actually the simplest reason - maybe these applications are being run on an OS that's not on the supported OS list run by the virtualization software vendor. That can mean that you can't virtualize that OS/application combination because that OS doesn't support some virtualized hardware, most commonly a network or a storage adapter. The same general idea applies to the cloud as well moving things to the cloud isn't always the best idea, as we will describe later in this book. 
 
 ### Why is virtualization so important?
 
-A lot of applications that we run today don't scale up well (adding more CPU, memory, or other resources) - they just aren't programmed that way or can't seriously parallelized. That means that if an application can't use all the resources as it disposal, a server is going to have a lot of slack space - and this time, we're not talking about disk slack space; we're actually referring to compute slack space, so slack space at CPU and memory levels. This means that we're underutilizing the capabilities of the server that we paid for - with the intention for it to be used fully, not partially.   
+A lot of applications that we run today don't scale up well (adding more CPU, memory, or other resources) - they just aren't programmed that way or can't seriously parallelized. That means that if an application can't use all the resources as it disposal, a server is going to have a lot of slack space - and this time, we're not talking about disk slack space; we're actually referring to compute slack space, so slack space at CPU and memory levels. This means that we're underutilizing the capabilities of the server that we paid for - with the intention for it to be used fully, not partially.
+
+In conclusion, for PC-based servers, looking from the CPU perspective, switching to multi-core CPUs was an opportune moment to start working toward virtualization as the concept that we know and love today.
 
 ### Hardware requirements for virtualization
 
@@ -46,7 +48,9 @@ Keeping all of this in mind, these are the requirements that we have to comply w
 
 **The possibility to do Single Root Input Output Virtualization (SR/IOV)** 
 
-...
+**The possibility to do PCI passthrough**
+
+**Trusted Platform Module (TPM) support**
 
 ### Software requirements for virtualization
 
@@ -56,20 +60,72 @@ Let's move on to the software aspect of virtualization. To do that, we must cove
 
 Ring 0 is the with the most priviledge and interacts directly with physical hardware, such as the CPU and memory. The resources, such as the CPU and memory. The resources, such as memory, I/O ports, and CPU instructions, are protected via these priviledged rings. Rings 1 and 2 are mostly unused. Most general-purpose systems use only two rings, even if the hardware they run on provides more CPU modes than that. The two main CPU modes are the kernel mode and the user mode, which are related to the way processors are executed. From an OS's point of view, that ring 0 is called kernel mode/supervisor mode and ring 3 is the user mode. As you may have assumed, applications run in ring 3.
 
-OSes such as Linux and Windows use supervisor/kernel and user mode. This mode can do almost thing to the outside world without calling on the kernel or without its help due to its restricted access to memory, CPU and I/O ports. The kernels can run in privileged mode, which means that they can run on ring 0. To perform specilized functions, the user-mode code (all the applications that run in ring 3) must perform a system call to the supervisor mode or even to the kernel space, where the trusted code of the OS will perform the needed task and return the execution back to the userspace.  
+OSes such as Linux and Windows use supervisor/kernel and user mode. This mode can do almost thing to the outside world without calling on the kernel or without its help due to its restricted access to memory, CPU and I/O ports. The kernels can run in privileged mode, which means that they can run on ring 0. To perform specilized functions, the user-mode code (all the applications that run in ring 3) must perform a system call to the supervisor mode or even to the kernel space, where the trusted code of the OS will perform the needed task and return the execution back to the userspace. In short, the OS runs in ring 0 in a normal environment. It needs the most privileged level to do resource managment and provide access to the hardware.
 
 ![alt](./assets/system-call-to-supervisor.png)
 
-The rings above 0 run instruction in a processor mode called unprotected. The hypervisor/VMM needs to access the memory, CPU and I/O devices of the host. Since only the code running in ring 0 is allowed to perform these operations, it needs to run in the most priviledged ring, which is ring 0, and has to be placed next to the kernel. Without specific hardware virtualization support, the hypervisoror VMM runs in ring 0; this basically blocks the virtual machine's OS in ring 0. So, the virtual machine's OS must reside in ring 1. An OS installed in a virtual machine is also expected to access all the resources as it's unaware of the virtualization layer; to achieve this, it has to run in ring 0, similar to the VMM. Due to the fact that only one kernel can run in ring 0 at a time, the guest OSes have to run in another ring with fewer privileges or have to be modified to run in user mode. 
+NOTE: important
+
+The rings above 0 run instruction in a processor mode called unprotected. The hypervisor/Virtual Machine Monitor (VMM) needs to access the memory, CPU, and I/O devices of the host. Since only the code running in ring 0 is allowed to perform these operations, it needs to run in the most privileged ring, which is ring 0, and has to be placed next to the kernel. Without specific hardware virtualization support, the hypervisor runs in ring 0; this basically blocks the virtual machine's OS in ring 0. So, the virtual machine's OS must reside in ring 1. An OS installed in a virtual machine is also expected to access all the resources as it's unaware of the virtualization layer; to achieve this, it has to run in ring 0, similar to the hypervisor. Due to the fact that only one kernel can run in ring 0 at a time, the guest OSes have to run in another ring with fewer privileges or have to be modified to run in user mode.  
 
 This has resulted in the introduction of a couple of virtualization methods called full virtualization and paravirtualization, which we mentioned earlier.
 
-**Full virtualization**
+#### Full virtualization
 
-In full virtualization, privileged instructions are emulated to overcome the limitations that arise from the guest OS running in ring 1 and the VMM running in ring 0. Full virtualization was implemented in first-generation x86 VMMs. It relies on techniques such as binary translation to trap and virtualize the execution of certain sensitive and non-virtualizable instructions.
+- https://youtu.be/CLR0pq9dy4g
 
-**Paravirtualization**
+In full virtualization, privileged instructions are emulated to overcome the limitations that arise from the guest OS running in ring 1 and the VMM running in ring 0. In relies on techniques such as binary translation to trap and virtualize the execution of certain sensitive and non-virtualizable instructions. This being said, in binary translation, some system calls are interpreted and dynamically rewritten. The following diagram depicts how the guest OS accesses the host computer hardware through ring 1 for priviledged instructions and how unprivileged instructions are executed without the involvement of ring 1:
+
+![alt](./assets/binary-translation.png)
+
+With this approach, the critical instructions are descovered (statically or dynamically at runtime) and replaced with traps in the VMM that are to be emulated in software. A binary translation can incur a large performance in comparison to a virtual machine running on natively virtualized architectures. This can be seen in the following diagram:
+
+![alt](./assets/full-virtualization.png)
+
+However, as shown in the preceding diagram, when we use full virtualization, we can use the unmodified guest OSes. This means that we don't have to alter the guest kernel so that it runs on a VMM. When the guest kernel executes priviledged operations, the VMM provides the CPU emulation to handle and modify the protected CPU operations. However, as we mentioned earier, this causes performance overhead compared to the other mode of virtualization, called paravirtualization.
+
+#### Paravirtualization
 
 In paravirtualization, the guest OS needs to be modified to allow those instructions to access ring 0. In other words, the OS needs to be modified to communicate between the VMM/hypervisor and the guest through the backend (hypercalls) path:
 
+![alt](./assets/para-virtualization.png)
+
+Paravirtualization is a technique in which the hypervisor provides an API, and the OS of the guest virtual machine calls that API, which requires host OS modifications. Priviledged instruction calls ere exchanged with the API functions provided by the VMM. In this case, the modified guest OS can run in ring 0.
+
+As you can see, under this technique, the guest kernel is modified to run on the VMM. In other words, the guest kernel knows that it's been virtualized. The priviledged instructions/operations that are supposed to run in ring 0 have been replaced with calls known as hypercalls, which talk to the VMM. These hypercalls invoke the VMM so that it performs the task on behalf of the guest kernel. Since the guest kernel can communicate directly with the VMM via hypercalls, this technique results in greater performance compared to full virtualization. However, this requires a specialized guest kernel that is aware of paravirtualization and comes with needed software support.
+
+The concepts of paravirtualization and full virtualization used to be a common way to do virtualization but not in the best possible, manageable way. That's where hardware-assisted virtualization comes into play, as we will describe in the following section.
+
+#### Hardware-assisted virtualization
+
+Intel and AMD realized that full virtualization and paravirtualization are the major challenges of virtualization on the x86 architecture (since the scope of this book is limited to x86 architectures, we will mainly discuss the evolution of this architecture here) due to the performance overhead and complexity of designing and maintaining the solution. Intel and AMD independently created new processor extensions of the x86 architectures, called Intel VT-x and AMD-V, respectively. Hardware-assisted virtualization is a platform virtualization method designed to efficiently use full virtualization with the hardware capabilities. Various vendors call this technology by differents names, including accelerated virtualization, hardware virtual machine, and native virtualization.
+
+For better support for virtualization, Intel and AMD introduced Virtualization Technology (VT) and Secure Virtualization Machine (SVM), respectively, as extensions of the IA-32 instruction set. These extensions allow the VMM/hypervisor to run a guest OS that expects to run in kernel mode, in lower priviledged rings. Hardware-assisted virtualization not only proposes new instructions but also introduces a new priviledged access level, called ring -1, where hypervisor/VMM can run. Hence, guest virtual machines can run in ring 0. With hardware-assisted virtualization, the OS has direct access to resources without any emulation or OS modification. The hypervisor or VMM can now run at the newly introduced privilege level, ring -1, with the guest OSes running on ring 0. Also, with hardware-assited virtualization, the VMM/hypervisor is relaxed and needs to perform less work compared to the other techniques mentioned, which reduces the performance overhead. This capability to run directly in ring -1 can be described with the following diagram:
+
+![alt](./assets/hardware-assistant-virtualization.png)
+
+In simple terms, this virtualization-aware hardware provides use with support to build the VNM and also ensures the isolation of a guest OS. This help us achieve better performance and avoid the complexity of designing a virtualization solution. Modern virtualization techniques make use of this feature to provide virtualization.
+
+Now that we've covered the hardware and software aspects of virtualization, let's see how all of this applies to KVM as a virtualization technology.
+
 ## The internal workings of libvirt, QEMU, and KVM
+
+The interaction of libvirt, QEMU, and KVM is something that gives us the full virtualization capabilities that are covered in this book. They are the most important pieces in the Linux Virtualization puzzle, as each has a role to play.
+
+### libvirt
+
+When working with KVM, you're most likely to first interface with its main Application Programming Interface (API), called libvirt. But libvirt has other functionalities - it's also a daemon and a management tool for different hypervisors, some of which we mentioned earlier. One of the most common tools used to interface with libvirt is called virt-manager, a  Gnome-based graphical utility that you can use to manage various aspects of your local and remote hypervisors, if you choose. libvirt's CLi utility is called virsh. Keep in mind that you can manage remove hypervisors via libvirt, so you're not restricted to a local hypervisor only. That's why virt-manager has an additional parameter called --connect. libvirt is also part of various other KVM management tools, such as oVirt.
+
+The goal of libvirt library is to provide a common and stable layer for managing virtual machines running on a hypervisor. In short, a management layer, it is responsible fo providing the API that performs management tasks such as virtual machine provision, creation, modification, monitoring, control, migration, and so on. In Linux, you will have noticed that some of the processes are deamonzied. The libvirt process is also daemonized, and it is called libvirtd. As with many other daemon process, libvirtd provides services to its clients upon request. Let's try to understand what exactly happens when a libvirt client such as virsh or virt-manager requests a service from libvirtd. Based on the connection URI by the client, libvirtd opens a connection to the hypervisor. This is how the client's virsh or virt-manager asks libvirtd to start talking to the hypervisor. 
+
+### QEMU
+
+### QEMU - KVM internals
+
+### Data structures
+
+### Threading models in QEMU
+
+### KVM
+
+### Data structures
