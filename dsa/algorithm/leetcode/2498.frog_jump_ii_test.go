@@ -11,13 +11,13 @@ func Test_maxJump(t *testing.T) {
 		args args
 		want int
 	}{
-		// {
-		// 	name: "Test 1",
-		// 	args: args{
-		// 		stones: []int{0, 3, 9},
-		// 	},
-		// 	want: 9,
-		// },
+		{
+			name: "Test 1",
+			args: args{
+				stones: []int{0, 3, 9},
+			},
+			want: 9,
+		},
 		{
 			name: "Test 2",
 			args: args{
