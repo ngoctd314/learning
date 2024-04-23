@@ -11,13 +11,13 @@ func Test_singleNonDuplicate(t *testing.T) {
 		args args
 		want int
 	}{
-		// {
-		// 	name: "Test 1",
-		// 	args: args{
-		// 		nums: []int{1, 1, 2, 3, 3, 4, 4, 8, 8},
-		// 	},
-		// 	want: 2,
-		// },
+		{
+			name: "Test 1",
+			args: args{
+				nums: []int{1, 1, 2, 3, 3, 4, 4, 8, 8},
+			},
+			want: 2,
+		},
 		// {
 		// 	name: "Test 2",
 		// 	args: args{
@@ -25,13 +25,13 @@ func Test_singleNonDuplicate(t *testing.T) {
 		// 	},
 		// 	want: 10,
 		// },
-		{
-			name: "Test 3",
-			args: args{
-				nums: []int{1, 1, 2},
-			},
-			want: 2,
-		},
+		// {
+		// 	name: "Test 3",
+		// 	args: args{
+		// 		nums: []int{1, 1, 2},
+		// 	},
+		// 	want: 2,
+		// },
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
