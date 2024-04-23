@@ -1,28 +1,19 @@
 package leetcode
 
-import "fmt"
-
 func singleNonDuplicate(nums []int) int {
 	lo, hi := 0, len(nums)-1
 	var res int
 	for lo <= hi {
 		mid := (lo + hi) / 2
-		fmt.Println(lo, hi, mid)
-		if (len(nums)-1-mid)%2 == 0 && mid <= len(nums)-2 && nums[mid+1] == nums[mid+2] {
-			hi = mid - 1
-			res = mid
-		} else {
-			lo = mid + 1
-		}
-
-		if (len(nums)-1-mid)%2 == 1 && mid <= len(nums)-1 {
-			if nums[mid] == nums[mid+1] {
-				hi = mid - 1
-				res = mid
-			} else {
-				lo = mid + 1
+		if (mid-lo+1)%2 == 0 {
+			if mid >= 1 {
+				if nums[mid] == nums[mid-1] {
+				}
 			}
 		}
+		// 1 1 2 3 3 4 4 8 8
+		// 0 8
+		// mid = 4
 	}
 
 	return nums[res]

@@ -1,0 +1,1 @@
+In Ubuntu, `bridge-utils` is a package that provides utilities for configuring and managing network bridge interfaces. Network bridging allows you to connect multiple network interfaces together, creating a virtual bridge that behaves like a single network interface. 
