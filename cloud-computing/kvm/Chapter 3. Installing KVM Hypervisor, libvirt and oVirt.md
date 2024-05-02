@@ -173,8 +173,8 @@ virt-install --name=ubuntu_test1 \
 --vcpus=2 \
 --ram=2048 \
 --disk=/var/lib/libvirt/images/ubuntu_test1.qcow2,size=15 \
---cdrom=/var/lib/libvirt/images/ubuntu-20.04.6-live-server-amd64.iso \
---network=default
+--cdrom=/var/lib/libvirt/images/ubuntu-20.04-amd64.iso \
+--network=default \
 --graphics vnc
 ```
 
