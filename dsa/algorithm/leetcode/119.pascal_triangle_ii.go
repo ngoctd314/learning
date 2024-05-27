@@ -1,8 +1,9 @@
 package leetcode
 
-func generate(numRows int) []int {
-	rs := make([][]int, numRows)
-	for i := 1; i <= numRows; i++ {
+func getRow(rowIndex int) []int {
+	rowIndex++
+	rs := make([][]int, rowIndex)
+	for i := 1; i <= rowIndex; i++ {
 		tmp := make([]int, i)
 		tmp[0], tmp[i-1] = 1, 1
 		for j := 1; j < i-1; j++ {
@@ -11,5 +12,5 @@ func generate(numRows int) []int {
 		rs[i-1] = tmp
 	}
 
-	return rs[numRows]
+	return rs[rowIndex-1]
 }
