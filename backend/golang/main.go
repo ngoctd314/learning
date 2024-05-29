@@ -3,28 +3,25 @@ package main
 import (
 	_ "embed"
 	"fmt"
-	"io"
-	"testing"
+	"log"
 )
 
 func main() {
-	stat := func(f func()) int {
-		allocs := testing.AllocsPerRun(100, f)
-		return int(allocs)
-	}
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("recover", r)
+		}
+	}()
+	fn()
+}
 
-	var x = "aaa"
+type something struct {
+	a string
+	b bool
+}
 
-	var n = stat(func() {
-		// 3 allocations
-		fmt.Fprint(io.Discard, x, x, x)
-	})
-	println(n)
-
-	var m = stat(func() {
-		var i interface{} = x // 1 allocation
-		// No allocations
-		fmt.Fprint(io.Discard, i, i, i)
-	})
-	println(m)
+func fn() {
+	fmt.Println("a")
+	log.Fatal("force close")
+	fmt.Println("b")
 }

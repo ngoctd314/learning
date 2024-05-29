@@ -24,9 +24,12 @@ func newVirtualization(processsType string) virtualization {
 
 }
 
-func main() {
-	add23(1, 2)
+type Person struct {
+	Name string
 }
-func add23(x, y int) {
-	fmt.Println(x, y)
+
+func main() {
+	someparam := "a string"
+	fmt.Println("hello motion world")
+	fmt.Println(someparam)
 }
