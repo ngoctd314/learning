@@ -1,0 +1,1 @@
+{"actual_tag":"oneof","error":"Key: 'Person.Role' Error:Field validation for 'Role' failed on the 'oneof' tag","field":"Role","kind":24,"namespace":"Person.Role","param":"admin user","struct_field":"Role","struct_namespace":"Person.Role","tag":"oneof","type":{},"value":"admin1"}

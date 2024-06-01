@@ -1,0 +1,3 @@
+{"actual_tag":"lte","error":"Key: 'Person.Age' Error:Field validation for 'Age' failed on the 'lte' tag","field":"Age","kind":2,"namespace":"Person.Age","param":"130","struct_field":"Age","struct_namespace":"Person.Age","tag":"lte","type":{},"value":300}
+
+{"actual_tag":"oneof","error":"Key: 'Person.Role' Error:Field validation for 'Role' failed on the 'oneof' tag","field":"Role","kind":24,"namespace":"Person.Role","param":"admin user","struct_field":"Role","struct_namespace":"Person.Role","tag":"oneof","type":{},"value":"admin1"}

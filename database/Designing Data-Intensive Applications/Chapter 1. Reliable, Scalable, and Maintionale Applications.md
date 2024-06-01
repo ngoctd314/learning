@@ -72,4 +72,25 @@ The bugs that cause these kinds of software faults often lie dormant for a long 
 
 ### Human Errors
 
+Humans are known to be unreliable.
 
+How do we make our systems reliable, in spite of unreliable humans? The best systems combine several approaches:
+
+- Design systems in a way that minimizes opportunities for error. APIs, and admin interfaces make it easy to do "the right thing" and discourage "the wrong thing". However, if the interfaces are too restrictive people will work around them, negating their benefit, so this is tricky balance to get right.
+- Decouple the places where people make the most mistakes from the places where they can cause failures. In particular, provide fully featured non-production sandbox environments where people can explore and experiment safely, using real data without effecting real users.
+
+...
+
+### How Important Is Reliability?
+
+Reliability is not just for luclear power stations and air traffic control software more mundane applications
+
+## Scalability
+
+Even if a system is working reliably today, that doesn't mean it will necessarily work reliably in the future. One common reason for degradation is increased load: perhaps the system has grown from 10,000 concurrent users to 100,000 concurrent users, or from 1M to 10M. Perhaps it is processing much larger volumes of data than it did before.
+
+Scalability in the term we use to describe a system's ability to cope with increased load. Note, however, that it is not a one-dimensional label that we can attach to a system: it is meaningless to say "X is scalable" or "Y doesn't scale". Rather, discussing scalability means considering questions like "If the system grows in a particular way, what are our options for coping with the growth?" and "How can we add computing resources to handle the addition load?"
+
+### Describing Load
+
+First, we need to succinctly describe the current load on the system; only then can we discuss growth questions (what happens if our load doubles?). Load can be described with a few numbers which we call load parameter.

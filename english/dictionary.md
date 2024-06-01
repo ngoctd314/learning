@@ -1,0 +1,3 @@
+## UH [ʌ]
+
+above, adjust, among, begun, blunder, brother, bubble, budget, but, come, conductor, country, cousin, crumble, crust, cuff, cut, done, double, drug, enough, fumble, fun, function, funding, funny, fuzz, glove, gum, gushed, gust, hunt, husband, jump, love, lucky, lullaby, lumber, lunch, lung, money, month, mother, much, muddle, muffin, mug, mush, mushroom, mustard, nut, other, outrun, oven, plunge, plunk, public, publish, punch, punish, puppy, puzzle, refund, rub, rubbish, rubble, ruffle, runner, rush, Russian, shotgun, shove, shrug, shut, son, spun, struck, structure, struggle, strung, stubbly, stuck, study, stuff, stumble, stump, stunning, sudden, summer, Sunday, thump, tons, trouble, trust, under, undo, untie, up, uphold, upset, utter, won, young
