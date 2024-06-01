@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"net/http"
 	"text/template"
 )
@@ -26,27 +25,7 @@ WebSocket cho phép two-way communication giữa client và web server.
 var addr = flag.String("addr", ":8080", "http service address")
 
 func main() {
-	flag.Parse()
-	log.SetFlags(0)
-	hub := NewHub()
-	go hub.run()
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		serveWs(hub, w, r)
-	})
-	http.HandleFunc("/event", func(w http.ResponseWriter, r *http.Request) {
-		q := r.URL.Query().Get("msg")
-		qrcodeID := r.URL.Query().Get("qrcode_id")
-		hub.event <- &Event{
-			ClientID: qrcodeID,
-			Message:  []byte(q),
-		}
-		w.Write([]byte("publish event success"))
-	})
-	http.HandleFunc("/", home)
 
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.Fatal(err)
-	}
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
