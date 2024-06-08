@@ -707,4 +707,542 @@ Tag include: Ethernet Type, Pri, C, VLAN Identifier (12 bit => 4096 VLAN)
 
 **Outcomes**
 
-- Understand IPv4 address in detail
+- Understand IPv4 address in detail.
+- Notation of IPv4 address.
+
+**IP address**
+
+- An IPv4 address is a 32-bit address that uniquely and universally defines the connection of a device (for example, a computer or a router) to the internet.
+- Two devices on the internet can never have the same address at the same time.
+
+**Classful Addressing (Part 1)**
+
+- Understand various classes of IPv4 Address
+- Identify the class of IP address (Activity)
+
+|Class|First byte|Second byte|Third byte|Fourth byte|
+|-|-|-|-|-|
+|Class A|0xxxxxxx|-|-|-|
+|Class B|10xxxxxx|0|-|-|
+|Class C|110xxxxx|0|0|-|
+|Class D|1110xxxx|-|-|-|
+|Class E|1111xxxx|-|-|-|
+
+**Classful Addressing (Part 2)**
+
+- Recall various classes of IPv4 Address.
+- Understand the purpose of subnet mask.
+- Identify whether the nodes belonging to same network or different network.
+
+**Subnet mask (Slash notation)**
+
+|Class|Subnet Mask (in Decimal)|Subnet mask (in Binary)|Slash Notation|
+|-|-|-|-|
+|A|255.0.0.0|11111111.0.0.0|/8|
+|B|255.255.0.0|1111111.1111111.0.0|/16|
+|C|255.255.255.0|1111111.1111111.11111111.0|/24|
+
+**Classful Addressing (Part 3)**
+
+- Identify whether the nodes belonging to same network or different network with examples.
+
+**Subnet Mask**
+
+- To define the network and host portions of an address, a devices use a separate 32-bit pattern called a subnet mask.
+- The subnet mask does not actually contain the network or host portion of an IPv4 address, it just says where to look for these portions in a given IPv4 address.
+
+### Classful Addressing (Cisco Packet Tracer - Activity)
+
+### IPv4 Unicast, Multicast, Broadcast
+
+- Understand the different ways host can communicate using IPv4 address.
+
+**Unicast transmission**
+
+Unicast Transmission: The process of sending a packet from one host to an individual host.
+
+**Broadcast transmission**
+
+Broadcast Transmission: the process of sending a packet from one host to all hosts in the network.
+
+- Limited Broadcast:
+
+Destination: 255.255.255.255, when a computer sending the broadcast, every one in LAN will be receiving the broadcast, including the default gateway. But the gw will not forward broadcast anymore. Routers do not forward a limited broadcast!
+
+- Directed broadcast:
+
+**Multicast Transmission (class D)**
+
+- Multicast Transmission: The process of sending a packet from one host to a selected group of hosts, possibly in different networks.
+- The Multicast Address range 224.0.0.0 to 239.255.255.255
+- Link local - 224.0.0.0 to 224.0.0.255 (Example: routing information exchanged by routing protocols)
+
+### Classful Addressing
+
+- A host in a class C network has been assigned an IP address 192.168.17.9. Find the number of addresses in the block, the first address, and the last address.
+
+```txt
+Class C Network
+N.N.N.H (255.255.255.0 or /24)
+192.168.17.9
+This network: 192.168.17.0 - 192.168.17.255
+Number of host: 255 - 2 = 253
+First Address: 192.168.17.0 (Network Address)
+Last Address: 192.168.17.255 (Broadcast Address)
+```
+
+### Public and Private IP Addresses
+
+**Outcomes**
+
+- Know about the public and private IP addresses.
+- Know the special use IPv4 addresses.
+
+**Private IP Addresses**
+
+- Early network design, when global end-to-end connectivity was envisioned for communications with all Internet hosts, intended that IP addresses be globally unique. However, it was found that this was not always necessary as private networks developed and public address space needed to be conserved.
+- Computers not connected to the Internet, such as factory machines that communicate only with each other via TCP/IP, need not have globally unique IP addresses. Today, such private networks are widely used and typically connect to the Internet with network address translation (NAT), when needed.
+
+- Host that do not require to access from internet can use private address
+   - 10.0.0.0 to 10.255.255.255 (10.0.0.0/8) 
+   - 172.16.0.0 to 172.31.255.255 (172.16.0.0/12)
+   - 192.168.0.0 to 192.168.255.255 (192.168.0.0/16)
+
+- The aforementioned are the three non-overlapping ranges of IPv4 addresses for private networks are reserved.
+
+- Loopback address: 127.0.0.1 a specical address that hosts use to direct traffic to themselves (addresses 127.0.0.0 to 127.255.255.255 are reserved).
+- Link-local address: 168.254.0.0 to 169.254.255.255 (192.254.0.0/16) address can be automatically assigned to the localhost.
+
+**In va nutshell**
+
+Private IP address is used to communicate within the same network. Using private IP data or information can be sent or received within the same network.
+
+Public IP address is used to communicate outside the network. Public IP address is basically assigned by the ISP.
+
+### Classless Addressing (Part 1)
+
+**Outcomes**
+
+Upon the completion of this session, the learn will be able to
+
+- Know the drawbacks of classful addressing
+- Understand the need for classless addressing
+
+**Drawbacks of classful addressing**
+
+- **Lack of internal address flexibility:** Big organizations are assigned large "monolithic" blocks of addresses that don't match well structure of their underlying internal networks.
+- **Inefficient Use of Address Space**
+
+### Classless Addressing (Part 2)
+
+**Outcomes**
+
+- Understand the need for classless addressing.
+- Identify valid and invalid subnet mask.
+
+**Classless Addressing**
+
+- Formal name is Classless Inter-Domain Routing (CIDR).
+- Created a new set of standards that allowed server providers to allocate IPv4 addresses on any address bit boundary (prefix length) instead of only by a class A, B, C address.
+- Classless addressing is possible with the help of subnetting.
+
+### Subnetting
+
+**Outcomes**
+
+Upon the completion of this session, the learner will be able to
+
+- Understand subnetting.
+- Know the procedure to subnet a network.
+
+**Subnetting**
+
+- A subnetwork or subnet is a logical subdivision of an IP network
+- The practice of dividing a network into two or more networks is called subnetting.
+- Computes that belong to a subnet are addressed with an identical most-signicant bit-group in their IP addresses.
+
+A class C network without sub-netting:
+
+Network (192.168.14.0) -> hosts: 192.168.14.1 -> 192.168.14.254
+
+Network (192.168.14.0) 
++ Sub-net 1: 192.168.14.0 -> hosts: 192.168.14.1 -> 192.168.14.126
++ Sub-net 2: 192.168.14.128 -> hosts: 192.168.14.192 -> 129.168.14.254
+
+**Subnetting - 5 Steps**
+
+1. Identify the class of the IP address and note the Default Subnet Mask.
+2. Convert the Default Subnet Mask into Binary.
+3. Note the number of hosts required per subnet and find the Subnet Generator (SG) and octet application.
+4. Generate the new subnet mask.
+5. Use the SG and generate the network ranges (subnets) in the appropriate octent position.
+
+### Subnetting (Solved Problem 1)
+
+**Outcomes**
+
+Upon the completion of this session, the learner will be able to
+
+- Subnet the given network based on the host requirement. 
+
+**Question**
+
+Subnet the IP address 216.21.5.0 into 30 hosts in each subnet.
+
+1. Class C - Default Subnet Mask: 255.255.255
+2. 11111111.11111111.1111111.00000000
+3. No.of hosts/subnet: 30 (11110) - 5 bits, SG: 32, Octen Position 4
+11111111.11111111.11111111.11100000
+4. Net subnet mask: 255.255.255.224 or /27
+5. Network Ranges (Subnets)
+
+216.21.5.0 - 216.21.5.31
+216.21.5.32 - 216.21.5.63
+...
+
+### Subnetting (Solved problem 2)
+
+**Outcomes**
+
+- Subnet the given network based on host requirements.
+- Find the number of networks (Subnets)
+- Find the number of hosts per network (Subnet).
+
+### VxLAN
+
+#### VxLAN | Part 1 - How VxLAN works
+
+VxLAN helps simplify the underlying network and reduces the need for spanning-tree, trunking, and stretching VLANs. Virtual Machines can move between hosts on different VLANs, all without the need to fiddle with different IP addresses.
+
+**VNI's and VLANs**
+
+Every VLAN has a VLAN ID. This ID is added to a frame to keep traffic unique. The VLAN ID is 12-bits long, allowing around 4095 unique VLANs.
+
+VxLAN is quite similar. Each VxLAN segment also has an identifier, called VNI is 24-bits long, which gives us around 16M segments. It is enough to give VLAN some sort of interiority complex.
+
+Just as with VLANs, traffic in one VNI, traffic in one VNI is kept separate from every other VNI. If you want to mix the traffic, you need to use a router. You may think though, "4000 VLANs should be enough for anybody".
+
+**Overlay and underlay**
+
+VxLAN creates virtual networks on top of the existing infrastructure. This makes an overlay technology. The infrastructure it runs on is called the underlay. The underlay network is all layer-3. All ports in the underlay are routed, so there is no need for trunking or spanning-tree. Dynamic routing
+
+VxLAN itself is the overlay network. Each VNI is a separate virtual network that runs over the underlay. Each of these VNI's are called a bridge domain.
+
+**VTEP and encapsulation**
+
+Switches and routers that participate in VxLAN has a special interface called a VTEP. The VTEP provides the connection between the overlay and the underlay. Each VTEP has an IP address in the underlay network. It also has one or more VNI's.
+
+To deliver traffic from one host to another, a source and destination VTEP will create a stateless tunnel. These tunnels exist only long enough to deliver the VxLAN frame.
+
+When a frame for a remote host reaches a switch, the frame is encapsulated in IP and UDP headers.
+
+The switch then forwards the traffic over the underlay. But how does the switch know which destination VTEP to send the traffic to? How does it even find the other VTEPS? We'll investigate these questions and more in part 4 of this series.
+
+**Hosts and Gateway**
+
+VxLAN can be supported on hardware or software. An advantage of this is that it can run on a hypervisor like ESX or Hyper-V. This is the host-based method. The vSwitch on the host has a VTEP, which encapsulates traffic from VM's before it touches any physical switches. The physical switches just see IP traffic and are unaware of VxLAN. The advantage of this is simplified physical network, which can simply focus on transport. The VTEPs could also be on physical switches or routers. An example of this is configuring VxLAN on a Nexus switch. This is called a VxLAN gateway. The VMs send traffic, and the vSwitches pass the traffic as normal. When the traffic arrives on the physical switch, the VTEP encapsulates the frames. The advantage is that VxLAN may be implemented in hardware, improving performance. Not all platforms support VxLAN in hardware.
+
+#### VxLAN | Part 2 - Header Format and Encapsulation
+
+VxLAN creates virtual segments, called VNI's. VNI's run on the top of layer-3 network. VxLAN switches use a special interface called VTEP. This bridges VNIs to the layer-3 network. When traffic comes in, the VTEP encapsulates (UDP + IP) the traffic, and sends it to a destination VTEP where it is decapsulated.
+
+**Encapsulation**
+
+We start with an ordinary ethernet frame that a host would send. We call this the inner MAC frame. This includes data, MAC address information and other ethernet fields. It also may have a VLAN tag included.
+
+VTEP -> IP underlay -> VTEP
+
+In our example, traffic will stay within the VNI, so there is no routing required.
+
+The host sends the frame to the switch. The switch adds a VxLAN header, which contains the VNI. The VTEP now adds several additional headers preserving the inner frame. VxLAN uses UDP for transport.
+
+UDP | VxLAN | Frame
+
+IP | UDP | VxLAN | Frame
+
+Ethernet | IP | UDP | VxLAN | Frame
+
+As normal, the source and destination MAC addresses change with each device they pass through. When the traffic arrives at the destination VTEP, the headers are removed, leaving the original frame, which can now be delivered to the host.
+
+**VxLAN header**
+
+There are four parts to the VxLAN header. 
+
++ 8 bits are reserved for future use. This is set to zero, and ignored by the receiving VTEP.
++ VNI 24-bits; the VxLAN ID
++ Reserved 24-bits
++ Flags: 8-bits, Bit-3 shows VNI is valid.
+
+So, there's a lot of unused space in the VxLAN header. It will be very interesting to see how this is used in future.
+
+VxLAN: 8 bytes, UDP: 8 bytes, IP: 20 bytes (IPv4), 40 bytes (IPv6), Ethernet: 18 bytes.
+
+#### VxLAN | Part 3 - Spine Leaf Topology
+
+#### VxLAN | Part 4 - Address learning
+
+We know that VxLAN is an overlay technology. It creates tunnels over an IP underlay network. The ingress VTEP encapsulates the traffic and sends it to the egress VTEP. The egress VTEP decapsulates the traffic, so it can be delivered to its ultimate destination. But have you wondered, how does the ingress VTEP find the egress VTEP? There could be many VTEPs. How deos the switch find the right one? Also, how does it learn that the destination MAC address are?
+
+There's two ways to approach address learning. The first is called Data Plane Learning. This is the traditional method for learning about addresses. It's similar to traditional ethernet in many ways. The other is control plane learning, which is a newer and more sophisticated approach. This method uses BGP to share MAC address information. This is similar to the way BGP learns and shares routes.
+
+**BUM traffic**
+
+BUM is actually an acronym, which stands for Broadcast, Unknown unicast, and Multicast. Collectively, these are traffic types that need special handling. Simply put, it's any traffic that goes to more than one destination. ARP is an example of BUM traffic. 
+
+There are two possible ways that VxLAN can handle BUM traffic. These are Multicast and Head and replication.
+
+Multicast is probably the most common solution. Each VNI is mapped to a single multicast group.
+
+|VNI|Mcast group|
+|-|-|
+|1701|224.0.17.1|
+|9000100|244.0.0.100|
+|16, 4457|224.0.44.57|
+
+Each multicast group may map to one or more VNI's. 
+
+When a VTEP comes online, it uses IGMP to join the multicast groups for the VNI's that is uses. If there is a VNI that the VTEP does not use, it does not need to join that.
+
+When a VTEP needs to send BUM traffic, it will send it only to the relevant multicast group. This is one method of VTEP discovery.
+
+Head end replication  is an alternatiev to multicast. But, only it is only available if you use BGP EVPN. When BUM traffic arrives, the VTEP creates several unicast packets and sends one to each remote VTEP that supports the VNI, and certainly doesn't scale as well. However, it's much simpler if you don't have to multicast infrastructure.
+
+**Data plane learning**
+
+In the early days, VxLAN relied on data plane learning. This is also known as flood and learn, and is very similar to regular ethernet.
+
+VxLAN Data plane learing is very similar. It's a little better, as flooding only occurs to multicast group members. However, data plane learning has a serious limitation. This is no built in support for routing. It is only used for 'bridging' devices at layer-2. To reach the outside world, you will need an external router as your gateway.
+
+If you want to route between VNI's you also need an external router, which will cause traffic to hairpin.
+
+From a security perspective, keep in mind that VTEPs are not authenticated. There's nothing built-in to prevent a rogue VTEP in the network. In most cases, control plane learning is recommended. Data plane learning is still worth investigating, as its simpler to understand.
+
+**Control plane learning**
+
+Control plane learning means that switches learn MAC addresses before they're needed. This works in the same way as a routing protocol. Switches peer with each other using BGP, and share the addresses that they know about.
+
+## VLAN VXLAN
+
+### What is VXLAN?
+
+VXLAN, or Virtual Extensible LAN, is a network virtualization technology widely used on large Layer 2 networks. VXLAN establishes a logical tunnel between the source and destination network devices, through which it uses MAC-in-UDP encapsulation for packets.
+
+Source <-tunnel-> Destination.
+
+Specifically, it encapsulates original Ethernet frames sent by VM into UDP packets. It then encapsulates the UDP packets with the IP header and Ethernet header of the physical network as outer headers, enabling these packets to be routed across the network like common IP packets. This frees VMs on the Layer 2 network from the structural limitations of the layer 2 and layer 3 networks.
+
+### Why do we need VXLAN?
+
+Why do we need VXLAN? Under the trend of server virtualization, dynamic VM migration occurs, which requires IP address and MAC address to remain unchanged before and after migration. Server virtualization also leads to a sharp increase in the number of tenants, **which network needs to effectively isolate.** 
+
+**Dynamic VM Migration**
+
+Traditional server virtualization works by virtualizing a physical server into multiple servers knowns as VMs. Server virtualization is an effective way of improving server efficiency while reducing energy consumption and operational costs. Such advantages account for its wide use.
+
+Since server virtualization was widely adopted dynamic VM migration has become increasingly common. To ensure service continuity during the migration of a VM, the VM's IP address and running status (for example, the TCP session status) must remain unchanged. Therefore, VMs can only be migrated in the same Layer 2 domain.
+
+As shown in the following figure, the traditional three-layer network architecture limits the dynamic VM migration scope. VMs can only migrate within a limited scope, greatly restriction application.
+
+Traditional three-layer network architecture limiting the dynamic VM migration scope.
+
+To enable smooth VM migration over a large scope or even between regions, all involved servers must be deployed in a large Layer 2 domain.
+
+A Layer 2 switch can support Layer 2 communication between servers connected to the switch. When a server is migrated from one port of the Layer 2 switch to another port, the IP address of the server can remain unchanged. This meets the requirements for dynamic VM migration. It is this concept that inspired the design of VXLAN.
+
+VXLAN provides a methodology for creating a virtual tunnel on the IP network to transparently forward user data when communication is required between a source and destination node on the IP network. Any two nodes can communicate through VXLAN tunnel, regardless of the underlying network structure and other details. For servers, VXLAN virtualizes the entire infrastructure network into a large "Layer 2 virtual switch", with all servers connecting to this switch. Servers do not need to be aware of how data is forwarded within this large switch.
+
+VXLAN virtualizing the entire infrastructure network into a large "Layer 2 virtual switch"
+
+Similar to how a physical server behaves when switched from one port to another port of a physical switch, a VM also does not need to changes its IP address when it is migrated from one port of the "Layer 2 virtual switch" to another port.
+
+**Sharp Increase in Tenants Raises Demand for Network Isolation**
+
+According to standards, a traditional VLAN network supports a maximum of about 4000 VLANs. After server virtualization, a physical server hosts multiple VMs, and each of which has an independent IP address and MAC address. This equivalent to the number of servers being multiplied. For example, public clouds or other large virtualized cloud data centers needto accommodate tens of thousands of tenants or even more. In this case, VLAN cannot meet these requirements.
+
+How does VXLAN meet these requirements? VXLAN adds 24-bit VXLAN network identifier (VNI) that is equivalent to a VLAN ID to a VXLAN header. Theoretically, a maximum of 16M VXLAN segments are supported, meeting the requirements for identification and isolation of vast quantities of tenants. 
+
+### What are the differences between VXLAN and VLAN?
+
+VLAN is a traditional network isolation technology. According to standards, a VLAN network supports a maximum of about 4000 VLANs, failing to meet the requirement for tenant isolation on a large Layer 2 network. In addition, each VLAN is a mall an fixed Layer 2 domain, and as such is not suitable for large-scale dynamic VM migration.
+
+VLAN overcomes these shortfalls of VLAN. In terms of scale, VXLAN uses the 24-bit VNI field to identify up to 16M tenants, far higher than that supported by VLAN (about 4000 tenants). And in terms of flexible migration, VXLAN establishes a virtual tunnel between "Layer 2 switch" (large Layer 2 network) to meed the requirement for large-scale dynamic VM migration.
+
+Although VXLAN is an extension to VLAN, VXLAN is quite different from VLAN in terms of virtula tunnel establishment.
+
+The following describes what the VXLAN packet looks like.
+
++ 14 bytes Outer MAC Header: 
+
+```txt
+{
+    "Dst.MAC Addr": 48,
+    "Src.MAC Addr": 48,
+    "VLAN Type": 16,
+    "VLANID Tag": 16,
+    "Ethernet Type": 16
+}
+```
+
++ 20 bytes Outer IP Header: 
+
+```txt
+{
+    "IP header Misc Data": 72,
+    "Protocol": 8,
+    "Header Checksum": 16,
+    "Outer Src.IP": 32,
+    "Outer Dst.IP": 32
+}
+```
+
++ UDP Header
+
+```txt
+{
+    "UDP Src.Port": 16,
+    "UDP Dst.Port = VXLAN Port": 16,
+    "UDP Length": 16,
+    "Checksum": 16
+}
+```
+
++ VXLAN
+
+```txt
+{
+    "VXLAN Flags": 8,
+    "Reserved": 24,
+    "VNI": 24,
+    "Reserved": 8
+}
+```
+
+VXLAN packet format (outer IPv4 header used as an example)
+
+As shown in the preceding figure, a VXLAN tunnel endpoint (VTEP) encapsulates the following headers into the original Ethernet frame (original L2 frame) sent by a VM:
+
+- VXLAN header
+A VXLAN header (8 bytes) contains a 24-bit VNI field, which is used to define different tenants on the VXLAN network. It also contains a VXLAN Flags field (8 bits, set to 00001000) and two reserved fields (24 bits and 8 bits).
+
+- UDP header
+The VXLAN header and the original Ethernet frame are used as UDP data. In the UDP header, the dst port number (VXLAN Port) is fixed 4789, and the source port number (UDP Src.Port) is calculated using a hash algorithm based on the original Ethernet frame.
+
+- Outer IP header
+
+In the outer IP header, the source IP address (Outer Src.IP) is the IP address of the VTEP connected to the source VM, and the destination IP address (Outer Dst.IP) is the IP address of the VTEP connected to the destination VM.
+
+- Outer MAC header
+
+The outer MAC header is also called the outer Ethernet header. In this header, the source MAC address (Src. MAC Addr), it the MAC address of the VTEP connected to the source VM, and the destination MAC address (Dst. MAC address) is the MAC address of the next hop along the path to the destination VTEP.
+
+### How Does VXLAN Work?
+
+This section describes how a VXLAN tunnel is establised to help better understand how VXLAN works.
+
+**VTEP and VNI in VXLAN**
+
+Before understanding how a VXLAN tunnel is established, it is important to be familiar with the common concepts in the VXLAN network model. The following figure shows two servers communicating through a VXLAN network. A VXLAN tunnel is established between two top of rack (TOR) switches to encapsulate the original data frames sent by the source server into VXLAN packets, thereby enabling the original data frames to be transmitted on the bearer network (such as an IP network). When the VXLAN packets arrive at the TOR switch connected to the destination server, the TOR switch decapsulates these packets into the original frames before finally forwarding these frames to the destination server.
+
+![alt](./assets/tor.png)
+
+VXLAN networks introduce some new elements, such as VTEPs and VNIs. What are their functions? The following introduces these new elements.
+
+**What Is a VTEP?**
+
+A VTEP is an edge device on a VXLAN network and the start or endpoint of a VXLAN tunnel. The source VTEP encapsulates the original data frames sent by the source server into VXLAN packets and transmits them to the destination VTEP on the IP network. The destination VTEP then decapsulates the VXLAN packets into the original data frames and forwards the frames to the destination server. 
+
+**What is a VNI?**
+
+A VNI is a user identifier similar to VLAN ID. A VNI identifies a tenant. VMs with different VNIs cannot communicate at Layer 2.
+
+VNIs can be classified into Layer 2 VNIs and Layer 3 VNIs, which have different functions. A Layer 2 VNI is a common VNI used for intra-subnet VXLAN packet forwarding, whereas a Layer 3 VNI is bound to a VPN instance for inter-subnet VXLAN packet forwarding.
+
+**VXLAN Gateway**
+
+Similar to in VLANs, hosts with different VNIs or those on VXLAN and non-VXLAN networks should be unable to directly communicate with each other. To meet these communication requirements, VXLAN introduces VXLAN gateways. VXLAN gateways are classified into Layer 2 gateways and Layer 3 gateways. A Layer 2 VXLAN gateway connects terminals to a VXLAN network and enables intra-subnet communication on a VXLAN network. A Layer 3 VXLAN gateway enables inter-subnet communication on a VXLAN network as well as external network access.
+
+Layer 3 VXLAN gateways can be further categorized into centralized and distributed gateways.
+
+**Centralized VXLAN Gateway**
+
+In centralized VXLAN gateway networking, the Layer 3 gateway is deployed only one device. All traffic sent across subnets is forwarded through this Layer gateway, implementing centralized traffic management.
+
+![alt](./assets/vxlan-L2-L3.png)
+
+Centralized VXLAN gateway networking
+
+Centralized VXLAN gateway deployment has the following advantages and disadvantages:
+
+- Advantages: Inter-subnet traffic can be centrally managed, and gateway deployment and management are simplified.
+- Disadvantages:
+    - Forwarding paths are not optimal. Inter-subnet Layer 3 traffic with the same Layer 2 gateway must be transmitted to centralized Layer 3 gateway for forwarding
+    - The ARP entry specification is a bottleneck. ARP entries must be generated for all terminals attached to the Layer 3 gateway. Howver, the Layer 3 gateway can have only a limited number of ARP entries configured, impeding network expansion.
+
+**Distributed VXLAN Gateway**
+
+Deploying distributed VXLAN gateways addresses the problems that arise as a result of centralized VXLAN gateway networking. In the spine-leaf networking, leaf nodes function as VTEPs to established VXLAN tunnels and each can be used as a Layer 3 VXLAN gateway (also a Layer 2 VXLAN gateway). Spine nodes are unaware of the VXLAN tunnels and only forward VXLAN packets between leaf nodes. In the following figure, Server1 and Server2 are on different subnets but connect to the same leaf node.
+
+...
+
+### Which VTEPs Need to Establish VXLAN Tunnels?
+
+The large Layer 2 network overcomes physical boundaries, allowing VMs on the same large Layer 2 network to communicate with each other. VXLAN tunnels must be established between all VTEPs on the same large Layer 2 network. Assuming that VMs connected to VTEP_1, VTEP_2, and VTEP_3 require large Layer 2 communication on the network shown in the following figure, then VTEP_1, VTEP_2,and VTEP_3 need to establish VXLAN tunnels with each other. 
+
+![alt](./assets/vtep-tunnel.png)
+
+**VXLAN Tunnel Establishment**
+
+A VXLAN tunnel is identifier by a pair of VTEP IP addresses. During VXLAN tunnel establishment, the local and remote VTEPs attempt to obtain each other's IP addresses.
+
+As long as the VTEP IP addresses are reachable to each other at Layer 3, a VXLAN tunnel can be established.
+
+VXLAN tunnels can be established in either static or dynamic mode.
+
+### What is Virtual Local Area Network (VLAN)
+
+Virtual Local Area Network (VLAN) technology logically divides a physical LAN into multiple broadcast domains, each of which is called a VLAN.
+
+Each VLAN functions as a separate broadcast domain, with devices in the same VLAN able to directly communicate with one another, while those in different VLANs cannot. As a result, broadcast packets are confined within a single VLAN. 
+
+**Why Do We Need VLAN**
+
+Early Ethernet allows data communication over shared media through Carrier Sense Multiple Access/Collision Detection (CSMA/CD). When an Ethernet network has a large number of hosts, collision becomes a serious problem and can lead to broadcast storms. This degrades network performance or even causes a complete breakdown. Using layer 2 devices to connect LANs can restrict data transmission within a LAN. However, this resolves only the conflicts.
+
+This is where VLAN technology comes in. VLAN technology allows a physical LAN to be divided into multiple logical LANs. Each VLAN functions as a separate broadcast domain, with hosts in the same VLAN able to directly communicate with one another, while those in different VLANs cannot. As a result, broadcast packets are confined within a single VLAN. The following figure shows an example.
+
+**- Confines each broadcast domain to a single VLAN**
+
+This conserves bandwidth and improves network processing capabilities.
+
+**- Enhances LAN security**
+
+Frames in different VLANs are separately transmitted, so that hosts in a VLAN cannot directly communicate with those in another VLAN.
+
+**Improves network robustness**
+
+A fault in one VLAN does not affect hosts in another VLAN.
+
+**Allows for flexible virtual groups**
+
+VLAN technology allows hosts in different geographical locations to be added to different groups, simplifying network construction and maintenance.
+
+#### VLAN vs Subnet
+
+A network can be divided into multiple subnets to conserve IP address space and support flexible IP addressing.
+
+Similar to a VLAN, a subnet can also isolate hosts. Hosts in different subnets cannot communicate with each other. The following figure shows the comparison between VLANs and subnets.
+
+**Difference**
+
+- VLAN:
+    - It is used to divide Layer 2 networks.
+    - Uses in different VLANs can communicate with each other after VLANIF interfaces are configured for routing.
+    - A maximum of 4094 VLANs can be divided and the number of devices in a VLAN is not limited.
+    - A maximum of 4094 VLANs can be divided, and the number of devices in a VLANs is not limited.
+
+- Subnet
+    - It is used to divide Layer 3 networks.
+    - Users on different subnets can communicate with each other as long as they have reachable routes.
+    - The total number of subnets affects the maximum number of devices in each subnet.
+
+#### VLAN Tag and VLAN ID
