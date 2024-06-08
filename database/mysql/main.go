@@ -2,39 +2,95 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
+	"log/slog"
 	"runtime"
+	"sync"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
 var (
-	conn *sqlx.DB
+	conn *sql.DB
 	ctx  = context.Background()
 )
 
 func init() {
 	var err error
-	// conn, err = sql.Open()
-	conn, err = sqlx.Open("mysql", "root:secret@(192.168.49.2:30300)/learn_lock?parseTime=true")
+	conn, err = sql.Open("mysql", "root:secret@(192.168.49.2:30300)/learn_lock?parseTime=true")
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-type cart struct {
-	id             int    `db:"id"`
-	cartID         string `db:"cart_id"`
-	cartType       int    `db:"cart_type"`
-	noHoldPackages int    `db:"no_hold_packages"`
-	codID          int    `db:"cod_id"`
-}
-
 func main() {
-	fmt.Println(string('a' + 12))
+	waitForInsert := make(chan struct{}, 1)
+	waitForSelect := make(chan struct{}, 1)
+	waitForInsertCommit := make(chan struct{}, 1)
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+
+		tx, _ := conn.BeginTx(ctx, &sql.TxOptions{
+			Isolation: sql.LevelReadCommitted,
+		})
+		<-waitForSelect
+		{
+			rs, _ := tx.Exec("INSERT INTO persons (name) VALUES (?)", "test3")
+			slog.Info("exec: INSERT persons test1", "results", rs)
+
+			rs, _ = tx.Exec("INSERT INTO persons (name) VALUES (?)", "test4")
+			slog.Info("exec: INSERT persons test2", "results", rs)
+		}
+		waitForInsert <- struct{}{}
+		<-waitForSelect
+		tx.Commit()
+		waitForInsertCommit <- struct{}{}
+		slog.Info("COMMIT INSERT")
+	}()
+	go func() {
+		defer wg.Done()
+
+		tx, _ := conn.BeginTx(ctx, &sql.TxOptions{
+			Isolation: sql.LevelRepeatableRead,
+		})
+		{
+			rows, _ := tx.Query("SELECT name FROM persons WHERE id >=1")
+			for rows.Next() {
+				var name string
+				_ = rows.Scan(&name)
+				slog.Info("result 1: SELECT name", "value", name)
+			}
+		}
+		waitForSelect <- struct{}{}
+
+		<-waitForInsert
+		{
+			rows, _ := tx.Query("SELECT name FROM persons WHERE id >=1")
+			for rows.Next() {
+				var name string
+				_ = rows.Scan(&name)
+				slog.Info("result 1: SELECT name", "value", name)
+			}
+		}
+		waitForSelect <- struct{}{}
+		<-waitForInsertCommit
+		{
+			rows, _ := tx.Query("SELECT name FROM persons WHERE id >=1")
+			for rows.Next() {
+				var name string
+				_ = rows.Scan(&name)
+				slog.Info("result 2: SELECT name", "value", name)
+			}
+		}
+		tx.Commit()
+		slog.Info("COMMIT SELECT")
+	}()
+	wg.Wait()
 }
 
 func printAlloc() {
