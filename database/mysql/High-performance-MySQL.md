@@ -234,10 +234,24 @@ REPEATABLE READ solves the problems that READ UNCOMMITTED allows. It guarantees 
 
 REPEATABLE READ is MySQL's default transaction isolation level.
 
-```go
-```
+#### SERIALIZABLE
+
+The highest level of isolation, SERIALIZABLE, solves the phantom read problem by forcing transactions to be ordered so that they can't possibly conflict. In a nutshell, SERIALIZABLE, places a lock on every row it reads. At this level, a lot of timeouts and lock contention can occur. We've rarely seen people use this isolation level, but your application's needs might force you to accept the decreased concurrency in favor of the data stability that results.
+
+|Isolation level|Dirty reads possible|Non-repeatable reads possible|Phantom reads possible|Locking reads|Locking writes|
+|-|-|-|-|-|-|
+|READ UNCOMMITTED|Yes|Yes|Yes|No|Yes|
+|READ COMMITTED|No|Yes|Yes|No|Yes|
+|REPEATABLE READ|NO|No|Yes|No|Yes|
+|SERIALIZABLE|No|No|No|Yes|Yes|
 
 ### Deadlocks
+
+A deadlock is when two or more transactions are mutually holding are requesting locks on the same resources, creating a cycle of dependencies. Deadlocks occur when transactions try to lock resources in a different order. They can happen whenever multiple transactions lock the same resources. 
+
+To combat this problem, database systems implement various forms of deadlock detection and timeouts. The more sophisticated systems, such as the InnoDB storage engine, will notice circular dependencies and return an error instantly. This can be a good thing - otherwise, deadlocks would manifest themselves as very slow queries. Others will give up after the query exceeds a lock wait timeout, which is always good. The way InnoDB currently handles deadlocks is to roll back the transaction that has fewest exclusive row locks.
+
+Deadlocks cannot be broken without rolling back one of the transactions, either partially or wholly. They are a fact of life in transactional systems, and your applications should be designed to handle them.
 
 ### Transaction Logging
 
