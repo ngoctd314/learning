@@ -245,6 +245,93 @@ The highest level of isolation, SERIALIZABLE, solves the phantom read problem by
 |REPEATABLE READ|NO|No|Yes|No|Yes|
 |SERIALIZABLE|No|No|No|Yes|Yes|
 
+```go
+func main() {
+	db.Exec("DROP TABLE IF EXISTS test")
+	db.Exec("CREATE TABLE test (id int auto_increment primary key, a int)")
+	db.Exec("INSERT INTO test (id, a) VALUES (1, 0)")
+
+	txA, _ := db.BeginTx(context.Background(), &sql.TxOptions{Isolation: sql.LevelSerializable})
+
+	row := txA.QueryRow("SELECT a from test WHERE id = 1")
+	var a int
+	row.Scan(&a)
+	fmt.Printf("txA: a: %d\n", a)
+	txA.Exec("UPDATE test SET a = 1 WHERE id = 1 ")
+
+	txB, _ := db.BeginTx(context.Background(), &sql.TxOptions{Isolation: sql.LevelReadUncommitted})
+	row = txB.QueryRow("SELECT a from test WHERE id = 1")
+	row.Scan(&a)
+	fmt.Printf("txB: a: %d\n", a)
+	txB.Commit()
+
+	txA.Commit()
+}
+```
+
+```txt
+txA: a: 0
+txB: a: 1
+```
+
+```go
+func main() {
+	db.Exec("DROP TABLE IF EXISTS test")
+	db.Exec("CREATE TABLE test (id int auto_increment primary key, a int)")
+	db.Exec("INSERT INTO test (id, a) VALUES (1, 0)")
+
+	txA, _ := db.BeginTx(context.Background(), &sql.TxOptions{Isolation: sql.LevelSerializable})
+
+	row := txA.QueryRow("SELECT a from test WHERE id = 1")
+	var a int
+	row.Scan(&a)
+	fmt.Printf("txA: a: %d\n", a)
+	txA.Exec("UPDATE test SET a = 1 WHERE id = 1 ")
+
+	txB, _ := db.BeginTx(context.Background(), &sql.TxOptions{Isolation: sql.LevelReadCommitted})
+	row = txB.QueryRow("SELECT a from test WHERE id = 1")
+	row.Scan(&a)
+	fmt.Printf("txB: a: %d\n", a)
+	txB.Commit()
+
+	txA.Commit()
+}
+```
+
+```txt
+txA: a: 0
+txB: a: 0
+```
+
+```go
+func main() {
+	db.Exec("DROP TABLE IF EXISTS test")
+	db.Exec("CREATE TABLE test (id int auto_increment primary key, a int)")
+	db.Exec("INSERT INTO test (id, a) VALUES (1, 0)")
+
+	txA, _ := db.BeginTx(context.Background(), &sql.TxOptions{Isolation: sql.LevelReadUncommitted})
+
+	row := txA.QueryRow("SELECT a from test WHERE id = 1")
+	var a int
+	row.Scan(&a)
+	fmt.Printf("txA: a: %d\n", a)
+	txA.Exec("UPDATE test SET a = 1 WHERE id = 1 ")
+
+	txB, _ := db.BeginTx(context.Background(), &sql.TxOptions{Isolation: sql.LevelSerializable})
+	row = txB.QueryRow("SELECT a from test WHERE id = 1")
+	row.Scan(&a)
+	fmt.Printf("txB: a: %d\n", a)
+	txB.Commit()
+
+	txA.Commit()
+}
+```
+
+```txt
+txA: a: 0
+Deadlock
+```
+
 ### Deadlocks
 
 A deadlock is when two or more transactions are mutually holding are requesting locks on the same resources, creating a cycle of dependencies. Deadlocks occur when transactions try to lock resources in a different order. They can happen whenever multiple transactions lock the same resources. 

@@ -6,9 +6,14 @@ import (
 	"fmt"
 	"log"
 	"runtime"
+	"sync"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var (
@@ -25,25 +30,47 @@ func init() {
 }
 
 func main() {
-	db.Exec("DROP TABLE IF EXISTS isolations")
-	db.Exec("CREATE TABLE isolations (id int auto_increment primary key, network_status int, volume_status int)")
-	db.Exec("INSERT INTO isolations (id, network_status, volume_status) VALUES (1, 0, 0)")
+	db, _ := gorm.Open(mysql.Open("root:secret@(192.168.49.2:30300)/learn_mysql?parseTime=true"), &gorm.Config{Logger: logger.Default.LogMode(logger.Info)})
+	db.Exec("DROP TABLE IF EXISTS test1")
+	db.Exec("DROP TABLE IF EXISTS test2")
+	db.Exec("DROP TABLE IF EXISTS test3")
+	db.Exec("CREATE TABLE test1 (id int auto_increment primary key, name varchar(255))")
+	db.Exec("CREATE TABLE test2 (id int auto_increment primary key, name varchar(255))")
+	db.Exec("CREATE TABLE test3 (id int auto_increment primary key, name varchar(255))")
+	db.Exec("INSERT INTO test1 (name) VALUES ('name1.0'),('name1.1'),('name1.2')")
+	db.Exec("INSERT INTO test2 (name) VALUES ('name2.0'),('name2.1'),('name2.2')")
+	db.Exec("INSERT INTO test3 (name) VALUES ('name3.0'),('name3.1'),('name3.2')")
 
-	txA, _ := db.BeginTx(context.Background(), &sql.TxOptions{Isolation: sql.LevelRepeatableRead})
-	txA.Exec("UPDATE isolations SET network_status = 1 WHERE id = 1")
+	now := time.Now()
 
-	txB, _ := db.BeginTx(context.Background(), &sql.TxOptions{Isolation: sql.LevelRepeatableRead})
-	txB.Exec("UPDATE isolations SET network_status = 1 WHERE id = 1")
-	txB.Commit()
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		tx := db.WithContext(context.Background())
+		tx = tx.Begin()
+		fmt.Println(48)
+		tx.Exec("SELECT * FROM test1 WHERE id = 1 FOR UPDATE")
+		time.Sleep(time.Second * 2)
+		tx.Exec("UPDATE test1 SET name = 'name1.0' WHERE id = 1")
+		fmt.Println(52)
+		tx.Commit()
+	}()
+	go func() {
+		time.Sleep(time.Millisecond * 100)
+		defer wg.Done()
+		tx := db.WithContext(context.Background())
+		tx = tx.Begin()
+		fmt.Println(58)
+		tx.Exec("SELECT * FROM test1 WHERE id = 1 FOR UPDATE")
+		fmt.Println(60)
+		// time.Sleep(time.Second)
+		// tx.Exec("UPDATE test1 SET name = 'name1.0' WHERE id = 1")
+		tx.Commit()
+	}()
 
-	row := txA.QueryRow("SELECT network_status, volume_status FROM isolations WHERE id = 1")
-	var networkStatus, volumeStatus int
-	row.Scan(&networkStatus, &volumeStatus)
-	log.Printf("txA: network %d, volume: %d", networkStatus, volumeStatus)
-
-	txA.Exec("UPDATE isolations SET network_status = 1 WHERE id = 1")
-
-	txA.Commit()
+	wg.Wait()
+	fmt.Printf("since %dms", time.Since(now).Milliseconds())
 }
 
 func readItems(tx *sql.Tx) {
