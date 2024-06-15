@@ -1,13 +1,11 @@
 package main
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"log"
+	"mysql/gsql"
 	"runtime"
-	"sync"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
@@ -16,61 +14,78 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-var (
-	db  *sql.DB
-	ctx = context.Background()
-)
+// `User` belongs to `Company`, `CompanyID` is the foreign key
+// User -> Order => foreignKey = ref model field, references: current model field
+type User struct {
+	ID       int
+	Username string
+	// Order    Order `gorm:"foreignKey:UserID;references:ID"`
+	Orders []Order `gorm:"foreignKey:UserID;references:ID"`
+}
 
-func init() {
-	var err error
-	db, err = sql.Open("mysql", "root:secret@(192.168.49.2:30300)/learn_mysql?parseTime=true")
-	if err != nil {
-		log.Fatal(err)
-	}
+func (User) TableName() string {
+	return "users"
+}
+
+type Order struct {
+	ID        int
+	UserID    uint
+	Price     int
+	AddressID int
+	Address   Address `gorm:"foreignKey:ID;references:AddressID"`
+}
+
+func (Order) TableName() string {
+	return "orders"
+}
+
+type Address struct {
+	ID   int
+	Name string
+}
+
+func (Address) TableName() string {
+	return "addresses"
 }
 
 func main() {
 	db, _ := gorm.Open(mysql.Open("root:secret@(192.168.49.2:30300)/learn_mysql?parseTime=true"), &gorm.Config{Logger: logger.Default.LogMode(logger.Info)})
-	db.Exec("DROP TABLE IF EXISTS test1")
-	db.Exec("DROP TABLE IF EXISTS test2")
-	db.Exec("DROP TABLE IF EXISTS test3")
-	db.Exec("CREATE TABLE test1 (id int auto_increment primary key, name varchar(255))")
-	db.Exec("CREATE TABLE test2 (id int auto_increment primary key, name varchar(255))")
-	db.Exec("CREATE TABLE test3 (id int auto_increment primary key, name varchar(255))")
-	db.Exec("INSERT INTO test1 (name) VALUES ('name1.0'),('name1.1'),('name1.2')")
-	db.Exec("INSERT INTO test2 (name) VALUES ('name2.0'),('name2.1'),('name2.2')")
-	db.Exec("INSERT INTO test3 (name) VALUES ('name3.0'),('name3.1'),('name3.2')")
+	db.Exec("DROP TABLE IF EXISTS users")
+	db.Exec("CREATE TABLE users (id int auto_increment primary key, username varchar(255))")
+	db.Exec("INSERT INTO users (username) VALUES ('test1')")
 
-	now := time.Now()
+	db.Exec("DROP TABLE IF EXISTS orders")
+	db.Exec("CREATE TABLE orders (id int auto_increment primary key, user_id int, price int, address_id int)")
+	db.Exec("INSERT INTO orders (user_id, price, address_id) VALUES (1, 1, 1), (1,2,1)")
 
-	wg := sync.WaitGroup{}
-	wg.Add(2)
-	go func() {
-		defer wg.Done()
-		tx := db.WithContext(context.Background())
-		tx = tx.Begin()
-		fmt.Println(48)
-		tx.Exec("SELECT * FROM test1 WHERE id = 1 FOR UPDATE")
-		time.Sleep(time.Second * 2)
-		tx.Exec("UPDATE test1 SET name = 'name1.0' WHERE id = 1")
-		fmt.Println(52)
-		tx.Commit()
-	}()
-	go func() {
-		time.Sleep(time.Millisecond * 100)
-		defer wg.Done()
-		tx := db.WithContext(context.Background())
-		tx = tx.Begin()
-		fmt.Println(58)
-		tx.Exec("SELECT * FROM test1 WHERE id = 1 FOR UPDATE")
-		fmt.Println(60)
-		// time.Sleep(time.Second)
-		// tx.Exec("UPDATE test1 SET name = 'name1.0' WHERE id = 1")
-		tx.Commit()
-	}()
+	db.Exec("DROP TABLE IF EXISTS addresses")
+	db.Exec("CREATE TABLE addresses (id int auto_increment primary key, name varchar(255))")
+	db.Exec("INSERT INTO addresses (name) VALUES ('address-1')")
+	db.Exec("INSERT INTO addresses (name) VALUES ('address-2')")
+	db.Exec("INSERT INTO addresses (name) VALUES ('address-3')")
+	db.Exec("INSERT INTO addresses (name) VALUES ('address-4')")
+	db.Exec("INSERT INTO addresses (name) VALUES ('address-5')")
 
-	wg.Wait()
-	fmt.Printf("since %dms", time.Since(now).Milliseconds())
+	// SELECT `users`.`id`,`users`.`name`,`users`.`age`,`Company`.`id` AS `Company__id`,`Company`.`name` AS `Company__name` FROM `users` LEFT JOIN `companies` AS `Company` ON `users`.`company_id` = `Company`.`id` AND `Company`.`alive` = true;
+	var users []User
+	// db.Model(User{}).Select("*").Joins("LEFT JOIN orders ON orders.user_id = users.id").Scan(&users).Scan(users.Orders)
+	// db.Preload()
+
+	// [0.283ms] [rows:1] SELECT * FROM `orders` WHERE id=1 AND `orders`.`user_id` = 1
+	// db.Preload("Orders", func(tx *gorm.DB) *gorm.DB {
+	// 	return tx.Where("id=?", 1)
+	// }).Find(&users)
+	// [0.125ms] [rows:1] SELECT * FROM `orders` WHERE `orders`.`user_id` = 1 AND `orders`.`id` = 1
+
+	// db.Preload("Orders.Address").Preload("Orders", func(tx *gorm.DB) *gorm.DB { return tx.Select("price", "address_id", "user_id") }).Omit("username").Where("id=?", 1).Limit(1).Find(&users)
+	condOrder := gsql.Equal("id", 1)
+	builder := gsql.NewBuilder(gsql.WithPreload("Orders.Address", nil), gsql.WithPreload("Orders", condOrder))
+	tx := db.Omit("username").Where("id=?", 1).Limit(1)
+	tx = builder.Build(tx)
+	tx.Find(&users)
+
+	// db.Joins("Order", db.Select("price").Where(Order{ID: 1})).Find(&users)
+	fmt.Println(users)
 }
 
 func readItems(tx *sql.Tx) {
