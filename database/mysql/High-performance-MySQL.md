@@ -342,11 +342,57 @@ Deadlocks cannot be broken without rolling back one of the transactions, either 
 
 ### Transaction Logging
 
+Transaction logging helps make transactions more efficient. Instead of updating the tables on disk each time a change occurs, the storage engine can change it in-memory copy of the data. This is very fast. The storage engine can then write a record of the change to the transaction log, which is on disk and therefor durable. This is also a relatively fast operation, because appending log events involves sequential I/O in one small area of the disk instead of random I/O in many places. Then, a some later time, a process can update the table on disk. Thus, most storage engines that use this technique (known as write-ahead logging) and up writing the changes to disk twice.
+
+If there's crash after the update is written to the transaction log but before the changes are made to the idea itself, the storage engine can still recover the changes upon restart. The recovery method varies between storage engines.
+
 ### Transaction In MySQL
+
+#### AUTO COMMIT
+
+MySQL  operates in AUTOCOMMIT mode by default. This means that unless you've explicitly begun a transaction, it automatically executes each query in a separate transaction. You can enable or disable AUTOCOMMIT for the current connection by setting a variable
+
+```sh
+SHOW VARIABLES LIKE 'AUTOCOMMIT':
+SET AUTOCOMMIT = 1;
+```
+
+When you run with AUTOCOMMIT = 0, you are always in a transaction, until you issue a COMMIT or ROLLBACK. MySQL then starts a new transaction immediately.
+
+#### Mixing storage engine in transactions
+
+#### Implicit and explicit locking
+
+InnoDB uses a two-phase locking protocol. It can accquire locks at any time during a transaction, but it does not release them until a COMMIT or ROLLBACK. It releases all the lock at the same time. The locking mechanisms described earlier are all implicit. InnoDB handles locks automatically, according to your isolation level.
+
+However, InnoDB also supports explicit locking which the SQL standard does not mention at all:
+
+```sql
+SELECT ... FOR UPDATE
+SELECT ... LOCK IN SHARE MODE
+```
+
+MySQL also supports the LOCK TABLES and UNLOCK TABLES commands, which are implemented in the server, not in the storage engines. These have their uses, but they are not a substitute for transactions.
 
 ## Multiversion Concurrency Control
 
+Most of MySQL's transaction storage engine don't use a simple row-locking mechanism. Instead, they use row-level locking in conjunction with a technique for increasing concurrency known as multiversion concurrency control (MVCC). MVCC is not unique to MySQL.
+
+You can think of MVCC as a twist on row-level locking; it avoids the need for locking at all in many cases and can have much lower overhead. Depending on how it is implemented, it can allow nonlocking reads, while locking only the necessary rows during write operations.
+
+MVCC works by keeping a snapshot of the data as it existed at some point in time. This means transactions can see a consistent view of the data, no matter how long they run. It also means different transactions can see different data in the same tables at the same time! If you've never experienced this before, it might be confusing, but it will become easier to understand with familiarity.
+
+InnoDB implements MVCC by storing with each row two traditional, hidden values that record when the row was created and when it was expired (or deleted). Rather than storing the actual times at which these events occurred, the row stores the system version number at the time each event occurred. This is a number that increments each time a transaction begins. 
+
+TODO: again
+
 ## MySQL's Storage Engines
+
+### The InnoDB Engine
+
+InnoDB is the default transactional storage engine for MySQL and the most important and broadly useful engine overall. It was designed for processing many short-lived transactions that usually complete rather than being rolled back.
+
+### InnoDB overview
 
 ## A MySQL Timeline
 
